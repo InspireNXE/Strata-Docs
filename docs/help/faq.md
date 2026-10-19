@@ -16,7 +16,7 @@ No. Strata takes ideas from MalisisCore (a retained component tree, anchors, can
 
 ### What license?
 
-MIT.
+The Apache License, Version 2.0. You can use Strata in any project, open or closed, and change it without publishing your changes. Strata's own files keep its license and notices, and changed files must say they were changed.
 
 ## Writing screens
 

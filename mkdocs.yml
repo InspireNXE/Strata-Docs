@@ -4,7 +4,7 @@ site_url: https://inspirenxe.github.io/Strata/
 repo_url: https://github.com/InspireNXE/Strata-Docs
 repo_name: InspireNXE/Strata-Docs
 edit_uri: edit/main/docs/
-copyright: Copyright InspireNXE. Released under the MIT License.
+copyright: Copyright InspireNXE. Released under the Apache License, Version 2.0.
 
 docs_dir: docs
 strict: true
