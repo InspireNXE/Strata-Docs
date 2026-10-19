@@ -18,6 +18,15 @@ A record of how a span of text looks:
 TextStyle heading = TextStyle.DEFAULT.withColor(0xFFFFD54F).withBold(true).withShadow(true);
 ```
 
+`merge` takes the properties you name from another style and keeps the rest. Naming them is what lets a merge turn bold or a shadow off as well as on, since `false` is a value like any other:
+
+```java
+// The theme's style with the accent's color and weight; the theme's shadow stays
+TextStyle accent = themeStyle.merge(heading, TextStyle.Property.COLOR, TextStyle.Property.BOLD);
+```
+
+Merging every property gives the other style, and merging none gives a style equal to this one.
+
 Engines draw what they can:
 
 | Style | Swing |
