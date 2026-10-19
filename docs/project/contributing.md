@@ -12,8 +12,6 @@ This compiles every module, runs every test, and runs Javadoc with every doclint
 
 | Command | Does |
 |---|---|
-| `./gradlew :sandbox:run` | Opens the demo screen in a window |
-| `./gradlew :sandbox:run --args="--snapshot out.png"` | Renders the demo screen to a PNG, without a display |
 | `./gradlew javadoc` | Builds each module's Javadoc into its `build/docs/javadoc` |
 | `./gradlew publishToMavenLocal` | Publishes every module to your local Maven repository |
 
@@ -24,7 +22,7 @@ This compiles every module, runs every test, and runs Javadoc with every doclint
 | `api` | What developers compile against: interfaces, values and extension points |
 | `spi` | What engine adapters implement and drive, plus the contract test fixtures |
 | `core` | The implementation |
-| `canvas-swing`, `sandbox` | The Java2D adapter, and a demo written against the API only |
+| `canvas-swing` | The Java2D adapter |
 | `build-logic` | The `strata-java` and `strata-documented` convention plugins |
 
 ## Rules worth knowing before you change code

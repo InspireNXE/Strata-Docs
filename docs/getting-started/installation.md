@@ -61,14 +61,14 @@ Strata is a plain Java library. To show screens on an engine other than Swing, d
 
 ## Trying it without a project
 
-The repository's sandbox opens a demo screen in a window:
+The Strata-Gallery repository, checked out beside Strata, opens every control in a window:
 
 ```bash
-./gradlew :sandbox:run
+./gradlew :gallery:run
 ```
 
-On a machine without a display, render one frame to a PNG instead:
+On a machine without a display, render every page to PNGs instead:
 
 ```bash
-./gradlew :sandbox:run --args="--snapshot sandbox.png"
+./gradlew :gallery:run --args="--snapshot gallery"
 ```

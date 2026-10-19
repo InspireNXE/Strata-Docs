@@ -63,15 +63,15 @@ Tints multiply each channel of the image, and tinted copies are cached per sprit
 --8<-- "swing/SwingExamples.java:snapshot"
 ```
 
-Any pixel the screen does not draw stays transparent. The screen's `closed()` runs before `render` returns, and a theme missing a required key throws `ThemeException`. Set `-Djava.awt.headless=true` on build servers. Strata's own Swing tests and the sandbox's `--snapshot` option use it.
+Any pixel the screen does not draw stays transparent. The screen's `closed()` runs before `render` returns, and a theme missing a required key throws `ThemeException`. Set `-Djava.awt.headless=true` on build servers. Strata's own Swing tests and the gallery's `--snapshot` option use it.
 
 Snapshots are a good way to test layouts: render a screen and compare pixels, or check that it renders at all with each of your themes.
 
-## The sandbox
+## The gallery
 
-The repository's `sandbox` module is a demo screen written against the API only:
+The Strata-Gallery repository runs on this adapter. It gives every control a page, written against the API only, with a log of the events the control fires:
 
 ```bash
-./gradlew :sandbox:run
-./gradlew :sandbox:run --args="--snapshot sandbox.png"
+./gradlew :gallery:run
+./gradlew :gallery:run --args="--snapshot gallery"
 ```
