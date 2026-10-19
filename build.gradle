@@ -3,11 +3,16 @@
 tasks.register('siteJavadoc', Sync) {
     group = 'documentation'
     description = 'Builds the Javadoc of every Strata library and copies it into docs/javadoc for the documentation site.'
-    ['api', 'spi', 'core', 'canvas-swing'].each { name ->
+    ['api', 'spi', 'core'].each { name ->
         dependsOn(gradle.includedBuild('Strata').task(":${name}:javadoc"))
         from(file("../Strata/${name}/build/docs/javadoc")) {
             into(name)
         }
+    }
+    // The Swing adapter's Javadoc comes from the Strata-Swing checkout
+    dependsOn(gradle.includedBuild('Strata-Swing').task(':canvas-swing:javadoc'))
+    from(file('../Strata-Swing/canvas-swing/build/docs/javadoc')) {
+        into('canvas-swing')
     }
     into(layout.projectDirectory.dir('docs/javadoc'))
 }

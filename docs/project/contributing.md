@@ -22,8 +22,9 @@ This compiles every module, runs every test, and runs Javadoc with every doclint
 | `api` | What developers compile against: interfaces, values and extension points |
 | `spi` | What engine adapters implement and drive, plus the contract test fixtures |
 | `core` | The implementation |
-| `canvas-swing` | The Java2D adapter |
 | `build-logic` | The `strata-java` and `strata-documented` convention plugins |
+
+The adapters, the gallery and these docs live in sibling repositories that build against a Strata checkout beside them: Strata-Swing (the Java2D/Swing adapter, `canvas-swing`), Strata-Minecraft, Strata-Gallery and Strata-Docs.
 
 ## Rules worth knowing before you change code
 
