@@ -66,6 +66,7 @@ A style set with `Label.setStyle` overrides the key.
 | `textbox.text` | `TextBox.STYLE_TEXT` | text style | no | `TextStyle.DEFAULT` |
 | `textbox.text.disabled` | `TextBox.STYLE_TEXT_DISABLED` | text style | no | `textbox.text` |
 | `textbox.text.readonly` | `TextBox.STYLE_TEXT_READ_ONLY` | text style | no | `textbox.text.disabled` |
+| `textbox.placeholder` | `TextBox.STYLE_PLACEHOLDER` | text style | no | `textbox.text.disabled` |
 | `textbox.selection` | `TextBox.STYLE_SELECTION` | paint | no | `0x806A9FFF`, translucent blue |
 | `textbox.caret` | `TextBox.STYLE_CARET` | paint | no | `0xFFE0E0E0`, light gray |
 | `textbox.suggestions` | `TextBox.STYLE_SUGGESTIONS` | paint | no | `combobox.popup` |
@@ -99,6 +100,7 @@ A standard scroll bar reads the `scroll.*` keys above (`ScrollBar.STYLE_TRACK`, 
 
 | Key | Constant | Kind | Required | Fallback |
 |---|---|---|---|---|
+| `list.background` | `ListView.STYLE_BACKGROUND` | paint | no | Nothing |
 | `list.row.selected` | `ListView.STYLE_ROW_SELECTED` | paint | yes | |
 | `list.row` | `ListView.STYLE_ROW` | paint | no | Nothing |
 | `list.row.hovered` | `ListView.STYLE_ROW_HOVERED` | paint | no | `list.row` |
@@ -139,6 +141,7 @@ The open list also uses the `ListView` and `ScrollPanel` keys.
 | `tab.selected` | `TabBar.STYLE_SELECTED` | paint | yes | |
 | `tab.hovered` | `TabBar.STYLE_HOVERED` | paint | no | `tab.normal` |
 | `tab.disabled` | `TabBar.STYLE_DISABLED` | paint | no | `tab.normal` |
+| `tab.selected.disabled` | `TabBar.STYLE_SELECTED_DISABLED` | paint | no | `tab.disabled` |
 | `tab.text` | `TabBar.STYLE_TEXT` | text style | no | `TextStyle.DEFAULT` |
 | `tab.text.selected` | `TabBar.STYLE_TEXT_SELECTED` | text style | no | `tab.text` |
 | `tab.text.disabled` | `TabBar.STYLE_TEXT_DISABLED` | text style | no | `tab.text` |
@@ -298,7 +301,7 @@ A dual list's rows also use the `ListView` and `ScrollPanel` keys and its button
 | `slider.thumb` | solid `0xFF5A5E66` |
 | `slider.thumb.hovered` | solid `0xFF6A9FFF` |
 | `slider.thumb.disabled` | solid `0xFF3A3A3A` |
-| `slider.text` | `0xFFF0F0F0` |
+| `slider.text` | `0xFFF0F0F0` with shadow |
 | `slider.text.disabled` | `0xFF707070` |
 | `textbox.normal` | solid `0xFF1B1C1F` |
 | `textbox.focused` | solid `0xFF24262A` |
@@ -307,6 +310,7 @@ A dual list's rows also use the `ListView` and `ScrollPanel` keys and its button
 | `textbox.caret` | solid `0xFFE0E0E0` |
 | `textbox.text` | `0xFFE0E0E0` |
 | `textbox.text.disabled` | `0xFF707070` |
+| `textbox.placeholder` | `0xFF7A7F87` |
 | `textbox.text.readonly` | `0xFFC5C5C5` |
 | `scroll.thumb` | solid `0xFF5A5E66` |
 | `scroll.thumb.hovered` | solid `0xFF7A7F88` |
@@ -316,6 +320,7 @@ A dual list's rows also use the `ListView` and `ScrollPanel` keys and its button
 | `scroll.slim.thumb` | solid `0xFF8A8F98` |
 | `scroll.slim.thumb.hovered` | solid `0xFFE0E0E0` |
 | `scroll.slim.thumb.disabled` | solid `0xFF3A3A3A` |
+| `list.background` | solid `0xFF18191C` |
 | `list.row` | solid `0xFF1F2024` |
 | `list.row.hovered` | solid `0xFF2E3136` |
 | `list.row.selected` | solid `0xFF3A4D6E` |
@@ -337,6 +342,7 @@ A dual list's rows also use the `ListView` and `ScrollPanel` keys and its button
 | `tab.hovered` | solid `0xFF3C3F44` |
 | `tab.selected` | solid `0xFF3A4D6E` |
 | `tab.disabled` | solid `0xFF1B1C1F` |
+| `tab.selected.disabled` | solid `0xFF2A3140` |
 | `tab.text` | `0xFFA0A0A0` |
 | `tab.text.selected` | `0xFFFFFFFF` |
 | `tab.text.disabled` | `0xFF606060` |

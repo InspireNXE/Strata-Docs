@@ -262,7 +262,7 @@ It is focusable and tabbable and shows the hand cursor. A horizontal slider want
 | `slider.thumb` | yes | The thumb |
 | `slider.thumb.hovered` | yes | The thumb while the slider is hovered, focused or pressed |
 | `slider.thumb.disabled` | no | Falls back to `slider.thumb` |
-| `slider.text`, `slider.text.disabled` | no | The label |
+| `slider.text`, `slider.text.disabled` | no | The label, drawn over the thumb as well as the track. The flat theme gives it a shadow so it stays readable on both. |
 
 ## The controls together
 
@@ -285,6 +285,7 @@ name.setAlignment(HorizontalAlignment.STRETCH, VerticalAlignment.TOP);
 |---|---|---|
 | `setText(text)` | empty | Removes line breaks, cuts to the length limit and puts the caret at the end. Fires `EDITED` if the text changed, but no `EDIT` request. |
 | `setMaxLength(n)` | `Integer.MAX_VALUE` | Counted in code points. Longer text is cut at once, which fires `EDITED`. Negative throws. |
+| `setPlaceholder(text)` | none | A hint drawn in `textbox.placeholder` while the box is empty, focused or not. It is never part of `text()`, and password mode does not mask it. |
 | `setPassword(boolean)` | off | Draws every code point as the mask character and disables copy and cut. `text()` still returns the real text. |
 | `setMaskCodePoint(cp)` | `'*'` | The mask character |
 | `setTextPadding(Insets)` | 4 left and right, 5 top and bottom | Space between the text and the edges |
@@ -351,6 +352,7 @@ The caret is one unit wide and blinks every half second on the host's clock. It 
 | `textbox.text` | no | Text style. Falls back to the default text style. |
 | `textbox.text.disabled` | no | Text when disabled. Falls back to `textbox.text`. |
 | `textbox.text.readonly` | no | Text when read-only. Falls back to `textbox.text.disabled`. |
+| `textbox.placeholder` | no | The placeholder. Falls back to `textbox.text.disabled`. |
 | `textbox.selection` | no | Behind selected text. Falls back to translucent blue. |
 | `textbox.caret` | no | The caret. Falls back to light gray. |
 | `textbox.suggestions` | no | Behind the suggestion list. Falls back to `combobox.popup`. |
@@ -457,6 +459,8 @@ A press on a row selects it, unless something in the cell consumed the press. A 
 
 Build each cell fresh from its item, and keep nothing in it that must survive scrolling: a row that scrolls out is dropped and rebuilt when it comes back.
 
+`ui.cellLabel(text)` makes the label the default cells use: `ComponentFactory.CELL_PADDING` (4 units) of margin on each side, vertically centered, and cut short with an ellipsis. Use it in your own cell factories so text rows line up with tables and the built-in lists. The `list.background` key paints the list's whole area behind its rows, so an empty list shows its placeholder on it.
+
 ### Rows of controls
 
 A cell can be any component, controls included, so a list of option rows needs nothing more than a cell factory. Each cell is content of the list, so the controls in it behave as they do anywhere else, and their events pass the list: one handler around the list hears every row.
@@ -471,6 +475,7 @@ A cell can be any component, controls included, so a list of option rows needs n
 
 | Key | Required | Used for |
 |---|---|---|
+| `list.background` | no | The list's whole area, behind its rows. Nothing if missing. |
 | `list.row.selected` | yes | The selected row |
 | `list.row` | no | Every other row. Nothing if missing. |
 | `list.row.hovered` | no | The row under the pointer. Falls back to `list.row`. |
@@ -586,12 +591,13 @@ TabBar sides = factory.tabBar()
 
 A change to a tab shows in its bar at once, and a tab belongs to one bar at a time.
 
-Tabs share the width equally. A click selects an enabled tab, and Left and Right do while the bar has focus. A disabled tab still shows its tooltip.
+Tabs share the width equally. A click selects an enabled tab, and Left and Right do while the bar has focus. A disabled tab still shows its tooltip. Disabling the whole bar draws every tab disabled, and the selected tab keeps a distinct `tab.selected.disabled` look.
 
 | Key | Required | Used for |
 |---|---|---|
 | `tab.normal`, `tab.selected` | yes | Unselected and selected tabs |
 | `tab.hovered`, `tab.disabled` | no | Fall back to `tab.normal` |
+| `tab.selected.disabled` | no | The selected tab when it or the bar is disabled. Falls back to `tab.disabled`. |
 | `tab.text`, `tab.text.selected`, `tab.text.disabled` | no | Tab text |
 
 | Event | Kind | Fires |

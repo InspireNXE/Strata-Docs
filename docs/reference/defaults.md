@@ -81,6 +81,7 @@ Every number Strata picks for you.
 | | Minimum size | 20 by 20 |
 | | Maximum length | `Integer.MAX_VALUE` code points |
 | | Mask character | `*` |
+| | Placeholder | none |
 | | Caret width | 1 unit |
 | | Caret blink | every 500 ms |
 | | Cursor | `TEXT` |
