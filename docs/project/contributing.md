@@ -8,7 +8,7 @@ You need JDK 25. The Gradle wrapper does the rest.
 ./gradlew build
 ```
 
-This compiles every module, runs every test, runs Javadoc with every doclint check, and compiles and tests the documentation examples. It fails on any Javadoc warning, including a missing comment.
+This compiles every module, runs every test, and runs Javadoc with every doclint check. It fails on any Javadoc warning, including a missing comment. The documentation lives in its own repository, Strata-Docs, which builds its examples against this one; see [The documentation site](#the-documentation-site).
 
 | Command | Does |
 |---|---|
@@ -25,7 +25,6 @@ This compiles every module, runs every test, runs Javadoc with every doclint che
 | `spi` | What engine adapters implement and drive, plus the contract test fixtures |
 | `core` | The implementation |
 | `canvas-swing`, `sandbox` | The Java2D adapter, and a demo written against the API only |
-| `docs-examples` | The code this site shows, compiled and tested |
 | `build-logic` | The `strata-java` and `strata-documented` convention plugins |
 
 ## Rules worth knowing before you change code
@@ -52,21 +51,21 @@ Strata follows Wintergreen's style: 4-space indents, K&R braces, `final` on para
 
 ## The documentation site
 
-The site is built with [MkDocs](https://www.mkdocs.org/) and the [Material theme](https://squidfunk.github.io/mkdocs-material/) from the Markdown in `docs/`, and published to GitHub Pages by `.github/workflows/docs.yml` on every push to `main`.
+The site is built with [MkDocs](https://www.mkdocs.org/) and the [Material theme](https://squidfunk.github.io/mkdocs-material/) from the Markdown in `docs/`, and published to GitHub Pages by `.github/workflows/docs.yml` on every push to `main`. It lives in the Strata-Docs repository, which expects the Strata checkout next to it (`../Strata`) and builds against it. `DESIGN.md` and `ROADMAP.md` stay in Strata under `docs/`, and the site adds them from there.
 
 ### Building it locally
 
 ```bash
 pip install -r docs/requirements.txt
 ./gradlew siteJavadoc
-mkdocs serve
+python -m mkdocs serve
 ```
 
-`mkdocs serve` serves the site at `http://127.0.0.1:8000` and rebuilds on every change. `siteJavadoc` copies each library's Javadoc into `docs/javadoc`, which is ignored by Git, so the Javadoc links work. The build is strict: a broken link or a missing snippet fails it.
+`mkdocs serve` serves the site at `http://127.0.0.1:8000` and rebuilds on every change. `siteJavadoc` builds each library's Javadoc in Strata and copies it into `docs/javadoc`, which is ignored by Git, so the Javadoc links work. The build is strict: a broken link or a missing snippet fails it.
 
 ### Code on the site
 
-Java code on the site is not written in the Markdown. It lives in the `docs-examples` project, which the main build compiles and tests, and pages include it by section:
+Java code on the site is not written in the Markdown. It lives in the `docs-examples` project of Strata-Docs, which `./gradlew build` there compiles and tests against Strata, and pages include it by section:
 
 ```markdown
     ```java

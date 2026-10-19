@@ -1,13 +1,17 @@
 site_name: Strata
 site_description: An engine-agnostic GUI library for Java games, with a Swing adapter.
 site_url: https://inspirenxe.github.io/Strata/
-repo_url: https://github.com/InspireNXE/Strata
-repo_name: InspireNXE/Strata
+repo_url: https://github.com/InspireNXE/Strata-Docs
+repo_name: InspireNXE/Strata-Docs
 edit_uri: edit/main/docs/
 copyright: Copyright InspireNXE. Released under the MIT License.
 
 docs_dir: docs
 strict: true
+
+# Adds DESIGN.md and ROADMAP.md from the Strata checkout beside this one
+hooks:
+  - hooks.py
 
 theme:
   name: material
@@ -79,7 +83,7 @@ validation:
     absolute_links: info
     unrecognized_links: info
 
-# docs/javadoc is copied in by `./gradlew siteJavadoc` and served as static files. Its legal/*.md notices stay
+# docs/javadoc is built from the Strata checkout and copied in by `./gradlew siteJavadoc` and served as static files. Its legal/*.md notices stay
 # published but out of the navigation.
 exclude_docs: |
   requirements.txt

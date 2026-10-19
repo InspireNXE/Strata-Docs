@@ -1,0 +1,13 @@
+// The Javadoc of every Strata library, copied into docs/javadoc so the site can link to docs/javadoc/<project>/.
+// The Javadoc is built by the Strata checkout this build includes (../Strata), so run it after changing Strata's API.
+tasks.register('siteJavadoc', Sync) {
+    group = 'documentation'
+    description = 'Builds the Javadoc of every Strata library and copies it into docs/javadoc for the documentation site.'
+    ['api', 'spi', 'core', 'canvas-swing'].each { name ->
+        dependsOn(gradle.includedBuild('Strata').task(":${name}:javadoc"))
+        from(file("../Strata/${name}/build/docs/javadoc")) {
+            into(name)
+        }
+    }
+    into(layout.projectDirectory.dir('docs/javadoc'))
+}

@@ -95,4 +95,4 @@ Strata needs JDK 25. Set `JAVA_HOME` to a JDK 25 installation, or let Gradle's t
 
 ### The documentation site fails to build
 
-`mkdocs build` is strict. A link to a missing page, or a snippet that names a missing file or section, fails it. Run `./gradlew siteJavadoc` first so the Javadoc links resolve. See [Contributing](../project/contributing.md#the-documentation-site).
+`python -m mkdocs build` is strict. A link to a missing page, or a snippet that names a missing file or section, fails it. Run `./gradlew siteJavadoc` first so the Javadoc links resolve. See [Contributing](../project/contributing.md#the-documentation-site).
