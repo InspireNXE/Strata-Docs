@@ -1,6 +1,10 @@
-package org.inspirenxe.strata.examples.widgets;
+package org.inspirenxe.strata.examples.controls;
 
 import org.inspirenxe.strata.api.ComponentFactory;
+import org.inspirenxe.strata.api.control.button.CheckBox;
+import org.inspirenxe.strata.api.control.display.Image;
+import org.inspirenxe.strata.api.control.display.Label;
+import org.inspirenxe.strata.api.control.field.Slider;
 import org.inspirenxe.strata.api.layout.Anchor;
 import org.inspirenxe.strata.api.layout.HorizontalAlignment;
 import org.inspirenxe.strata.api.layout.Orientation;
@@ -9,17 +13,13 @@ import org.inspirenxe.strata.api.layout.VerticalAlignment;
 import org.inspirenxe.strata.api.screen.Screen;
 import org.inspirenxe.strata.api.theme.Paint;
 import org.inspirenxe.strata.api.theme.SpriteId;
-import org.inspirenxe.strata.api.widget.CheckBox;
-import org.inspirenxe.strata.api.widget.Image;
-import org.inspirenxe.strata.api.widget.Label;
-import org.inspirenxe.strata.api.widget.Slider;
 
 /**
- * The widgets guide's examples for images, check boxes and sliders.
+ * The controls guide's examples for images, check boxes and sliders.
  */
-public final class WidgetExamples {
+public final class ControlExamples {
 
-    private WidgetExamples() {
+    private ControlExamples() {
     }
 
     /**
@@ -108,7 +108,7 @@ public final class WidgetExamples {
     }
 
     /**
-     * A settings panel with every new widget.
+     * A settings panel with every new control.
      *
      * @return the screen
      */

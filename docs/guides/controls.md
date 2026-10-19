@@ -1,6 +1,6 @@
-# Widgets
+# Controls
 
-Strata's built-in widgets are interfaces in `org.inspirenxe.strata.api.widget`, made by the factory. The first six (`Label`, `Image`, `Button`, `CheckBox`, `Slider` and `TextBox`) each have a matching behavior interface for [decorating](extending.md#decorate-a-built-in-with-a-behavior) them. The newer ones (`ListView`, `ComboBox`, `Window`, `MessageBox`, `TabBar`, `ProgressBar`, `Separator`, `RadioButton`, `ToggleSwitch`, `Spinner`, `TextArea`, `TableView`, `TreeView`, `Menu`, `MenuBar`, `Expander`, `SplitPane` and `SlotGrid`) do not have one yet. Their theme keys are listed on each widget below and in the [theme key reference](../reference/theme-keys.md). Scrolling is a container, [`ScrollPanel`](layout.md#scrollpanel), and popups, dialogs and tooltips are in [Overlays and tooltips](overlays.md).
+Strata's built-in controls are interfaces in the subpackages of `org.inspirenxe.strata.api.control`, made by the factory: `display` (`Label`, `Image`, `ProgressBar`, `Separator`), `button` (`Button`, `CheckBox`, `RadioButton`, `RadioGroup`, `ToggleSwitch`), `field` (`TextBox`, `TextArea`, `Spinner`, `Slider`), `collection` (`ListView`, `ComboBox`, `TableView`, `TreeView`, `SlotGrid`), `menu` (`Menu`, `MenuBar`), `pane` (`TabBar`, `Expander`, `SplitPane`) and `window` (`Window`, `MessageBox`). The first six (`Label`, `Image`, `Button`, `CheckBox`, `Slider` and `TextBox`) each have a matching behavior interface for [decorating](extending.md#decorate-a-built-in-with-a-behavior) them. The newer ones (`ListView`, `ComboBox`, `Window`, `MessageBox`, `TabBar`, `ProgressBar`, `Separator`, `RadioButton`, `ToggleSwitch`, `Spinner`, `TextArea`, `TableView`, `TreeView`, `Menu`, `MenuBar`, `Expander`, `SplitPane` and `SlotGrid`) do not have one yet. Their theme keys are listed on each control below and in the [theme key reference](../reference/theme-keys.md). Scrolling is a container, [`ScrollPanel`](layout.md#scrollpanel), and popups, dialogs and tooltips are in [Overlays and tooltips](overlays.md).
 
 ## Label
 
@@ -41,7 +41,7 @@ A label is not focusable and has no default behavior for input, so clicks and ke
 A sprite drawn at a size you choose, such as an icon or a picture.
 
 ```java
---8<-- "widgets/WidgetExamples.java:image"
+--8<-- "controls/ControlExamples.java:image"
 ```
 
 | Method | Default | Notes |
@@ -99,7 +99,7 @@ To veto a press, cancel its `CLICK` in a `BEFORE` handler. To react to other but
 A box that is checked or not, with a caption to its right.
 
 ```java
---8<-- "widgets/WidgetExamples.java:checkbox"
+--8<-- "controls/ControlExamples.java:checkbox"
 ```
 
 | Method | Default | Notes |
@@ -127,7 +127,7 @@ Themes built from images can draw the check mark into the checked faces and leav
 A horizontal slider that picks a number from a range.
 
 ```java
---8<-- "widgets/WidgetExamples.java:slider"
+--8<-- "controls/ControlExamples.java:slider"
 ```
 
 | Method | Default | Notes |
@@ -144,7 +144,7 @@ Listeners run only when the value actually changes, so setting the same value tw
 Whole numbers come from a step of 1:
 
 ```java
---8<-- "widgets/WidgetExamples.java:integers"
+--8<-- "controls/ControlExamples.java:integers"
 ```
 
 Input:
@@ -167,9 +167,9 @@ It is focusable and tabbable, shows the hand cursor, and wants 150 by 20 units. 
 
 There is no vertical slider yet.
 
-## The widgets together
+## The controls together
 
-![Check boxes, a disabled check box and two sliders](../assets/images/widgets-controls.png)
+![Check boxes, a disabled check box and two sliders](../assets/images/controls-basic.png)
 
 ## TextBox
 
@@ -365,7 +365,7 @@ Dragging the title bar moves the window, through its [offset](layout.md#offset),
 A window with a message and a row of buttons, opened as a [dialog](overlays.md#dialogs).
 
 ```java
---8<-- "widgets/OverlayExamples.java:message-box"
+--8<-- "overlays/OverlayExamples.java:message-box"
 ```
 
 The buttons come in sets: `OK`, `OK_CANCEL`, `YES_NO`, `YES_NO_CANCEL` and `CLOSE`. The first one is focused when the dialog opens. A button, the close button or Escape reports one `Result` to the listeners and closes the dialog; the close button and Escape report No or Cancel. `setButtonText(result, caption)` translates a caption, and `window()` gives the window for its title or size. The message wraps at 280 units.
@@ -622,6 +622,6 @@ There is one slot per item, null items being empty slots, in rows of `setColumns
 | `slot.hovered` | no | Over the slot under the pointer. Nothing if missing. |
 | `slot.selected` | no | Over the selected slot. Falls back to `slot.hovered`. |
 
-## Widgets that do not exist yet
+## Controls that do not exist yet
 
 There is no vertical slider, multiple selection in lists, tables and trees, or editable table cell. You can build them on `CustomComponent`, or on `CustomComposite` for one made of other components; the [extending guide](extending.md) builds a switch. [Status and limitations](../help/status.md) lists what is planned.

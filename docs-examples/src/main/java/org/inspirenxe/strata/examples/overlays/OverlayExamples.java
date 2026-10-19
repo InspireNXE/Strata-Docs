@@ -1,23 +1,23 @@
-package org.inspirenxe.strata.examples.widgets;
+package org.inspirenxe.strata.examples.overlays;
 
 import org.inspirenxe.strata.api.ComponentFactory;
 import org.inspirenxe.strata.api.component.Tooltip;
+import org.inspirenxe.strata.api.control.button.Button;
+import org.inspirenxe.strata.api.control.display.Label;
+import org.inspirenxe.strata.api.control.field.TextBox;
+import org.inspirenxe.strata.api.control.window.MessageBox;
+import org.inspirenxe.strata.api.control.window.Window;
 import org.inspirenxe.strata.api.event.EventTypes;
 import org.inspirenxe.strata.api.layout.AnchorPanel;
 import org.inspirenxe.strata.api.overlay.Overlay;
 import org.inspirenxe.strata.api.text.TextSpan;
 import org.inspirenxe.strata.api.text.TextStyle;
 import org.inspirenxe.strata.api.theme.Paint;
-import org.inspirenxe.strata.api.widget.Button;
-import org.inspirenxe.strata.api.widget.Label;
-import org.inspirenxe.strata.api.widget.MessageBox;
-import org.inspirenxe.strata.api.widget.TextBox;
-import org.inspirenxe.strata.api.widget.Window;
 
 import java.util.List;
 
 /**
- * The overlays guide's examples, and the message box in the widgets guide.
+ * The overlays guide's examples, and the message box in the controls guide.
  */
 public final class OverlayExamples {
 
