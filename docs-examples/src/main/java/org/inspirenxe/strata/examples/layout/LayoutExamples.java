@@ -132,12 +132,19 @@ public final class LayoutExamples {
                     .setPadding(4);
             shell.setAnchor(Anchor.FILL);
 
-            final Label sidebar = factory.label("Sidebar (weight 1)");
-            sidebar.setBackground(INSET).setAnchor(Anchor.FILL);
-            final Label main = factory.label("Main (weight 2)");
-            main.setBackground(INSET).setAnchor(Anchor.FILL);
-            final Label status = factory.label("Status bar (fixed 16)");
-            status.setBackground(PANEL).setAnchor(Anchor.FILL);
+            // Only containers have a background, so each area is a panel holding its label
+            final AnchorPanel sidebar = factory.anchorPanel()
+                    .setBackground(INSET)
+                    .add(factory.label("Sidebar (weight 1)"));
+            sidebar.setAnchor(Anchor.FILL);
+            final AnchorPanel main = factory.anchorPanel()
+                    .setBackground(INSET)
+                    .add(factory.label("Main (weight 2)"));
+            main.setAnchor(Anchor.FILL);
+            final AnchorPanel status = factory.anchorPanel()
+                    .setBackground(PANEL)
+                    .add(factory.label("Status bar (fixed 16)"));
+            status.setAnchor(Anchor.FILL);
 
             shell.add(sidebar, 0, 0).add(main, 0, 1).add(status, 1, 0, 1, 2);
             // --8<-- [end:weighted]
@@ -241,7 +248,7 @@ public final class LayoutExamples {
     public static Screen marginAndPadding() {
         return factory -> {
             // --8<-- [start:spacing]
-            final Label inner = factory.label("Label with a margin of 10");
+            final AnchorPanel inner = factory.anchorPanel().add(factory.label("Panel with a margin of 10"));
             inner.setMargin(10).setBackground(INSET);
 
             final StackPanel outer = factory.stackPanel()

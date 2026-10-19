@@ -139,6 +139,8 @@ Fire requests only for what the user does, and reports after every change, whoev
 
 Every `Component` method is `final` on `CustomComponent` and delegates to Strata's half of the component, its peer, so your component takes part in layout, focus, hit testing and events like any other. Return `this.self()` from your own setters to keep chaining typed.
 
+`CustomComponent` also has the methods of `Focusable`, `HasCursor` and `HasTooltip`. They take effect once your interface extends the matching one, as `ToggleSwitch` does above, and Strata ignores them otherwise. Declaring `Focusable` makes the component focusable and tabbable from the start. Hover, press, offset, theme, background and border are `protected`, for your own drawing and layout code.
+
 ### Painting
 
 The `Painter` a component draws with:

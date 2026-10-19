@@ -425,7 +425,7 @@ amount.onEvent(TextInput.EDIT, event -> {
 });
 ```
 
-React to each change: `TextInput.EDITED`. React only when the user leaves the field: handle `FOCUS_LOST`.
+React to each change: `TextInput.EDITED`. React only when the user leaves the field: handle `Focusable.FOCUS_LOST`.
 
 ## ListView
 

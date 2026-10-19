@@ -51,8 +51,7 @@ public final class ToggleSwitchImpl extends CustomComponent<ToggleSwitch> implem
         this.knob = Paint.NONE;
         this.textStyle = TextStyle.DEFAULT;
         this.span = new TextSpan(text, this.textStyle);
-        this.setFocusable(true);
-        this.setTabbable(true);
+        // Declaring Focusable made it focusable and tabbable already; HasCursor makes this cursor take effect
         this.setCursor(CursorKind.HAND);
     }
 

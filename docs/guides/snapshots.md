@@ -57,7 +57,7 @@ Snapshots are shallow. A snapshot of a panel holds the panel's own state and not
 | Group | Fields |
 |---|---|
 | Identity | `component()` (the live component), `id` |
-| Flags | `visible`, `enabled`, `focusable`, `tabbable`, `tabIndex`, `cursor`, `hovered`, `pressed`, `focused` |
+| Flags | `visible`, `enabled`, `hovered`, `pressed`, `focused` |
 | Layout inputs | `margin`, `minWidth`, `maxWidth`, `minHeight`, `maxHeight`, `horizontalAlignment`, `verticalAlignment`, `background` |
 | Layout results | `bounds`, `desiredWidth`, `desiredHeight` |
 | Kind-specific | `state()`, or `state(Class)` for a typed `Optional` |

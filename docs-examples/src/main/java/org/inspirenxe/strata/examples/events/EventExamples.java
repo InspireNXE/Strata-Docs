@@ -87,13 +87,13 @@ public final class EventExamples {
         final Label selected = factory.label("Pick a color");
         final StackPanel palette = factory.stackPanel().setSpacing(2);
         for (final String color : new String[] {"Red", "Green", "Blue"}) {
-            palette.add(factory.label(color).setId(color));
+            palette.add(factory.label(color));
         }
         // Labels have no click behavior, so their clicks bubble up to the panel.
         // target() is the label that was clicked; current() is the panel running this handler.
         palette.onEvent(InputEvents.CLICK, event -> {
-            if (event.target() != palette) {
-                selected.setText("Picked " + event.target().id());
+            if (event.target() instanceof final Label label) {
+                selected.setText("Picked " + label.text());
                 event.consume();
             }
         });
@@ -172,8 +172,11 @@ public final class EventExamples {
             final AbsolutePanel board = factory.absolutePanel();
             board.setAnchor(Anchor.FILL);
 
-            final Label handle = factory.label("Drag me");
-            handle.setBackground(Paint.solid(0xFF3A3D43)).setMinSize(60, 20);
+            // Only containers have a background, so the handle is a panel with a label in it
+            final AnchorPanel handle = factory.anchorPanel()
+                    .setBackground(Paint.solid(0xFF3A3D43))
+                    .add(factory.label("Drag me").setAnchor(Anchor.CENTER));
+            handle.setMinSize(60, 20);
             final float[] position = {20f, 20f};
             board.add(handle, position[0], position[1]);
 

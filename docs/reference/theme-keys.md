@@ -268,7 +268,7 @@ A dual list's rows also use the `ListView` and `ScrollPanel` keys and its button
 
 ## Image and panels
 
-`Image` and the four plain panels read no keys. Give them a background with `setBackground` and a border with `setBorder`.
+`Image` and the four plain panels read no keys. Give a panel a background with `setBackground` and a border with `setBorder`, and put an image in a panel to frame it.
 
 ## Values in the built-in themes
 

@@ -30,11 +30,11 @@ A change that affects size, such as new label text, a new child or a different m
 
 Containers add padding (`Insets.NONE` by default): space inside their edges that children stay out of.
 
-Every component also has a border (`setBorder(Border.of(argb, width))`, a width per side with `new Border(argb, insets)`). It draws along the inside of the bounds, over the background, and takes no space in layout, so give a container padding at least as wide as its border.
+Every container also has a border (`setBorder(Border.of(argb, width))`, a width per side with `new Border(argb, insets)`). It draws along the inside of the bounds, over the background, and takes no space in layout, so give a container padding at least as wide as its border.
 
 ### Offset
 
-`setOffset(dx, dy)` moves a component, and everything inside it, from where its parent's layout puts it. Siblings and the parent's size do not change, and the move needs no new measure. Use it for small nudges and for dragging; a [window](controls.md#window) moves by its offset when its title bar is dragged.
+A window's `setOffset(dx, dy)` moves it, and everything inside it, from where its parent's layout puts it. Siblings and the parent's size do not change, and the move needs no new measure. A [window](controls.md#window) moves by its offset when its title bar is dragged.
 
 ### How a component's size is decided
 
@@ -71,7 +71,7 @@ Alignment is a request to the parent. Each container decides how big a slot to g
 
 ### Margin and padding
 
-![A label with a margin inside a padded panel](../assets/images/layout-spacing.png)
+![A panel with a margin inside a padded panel](../assets/images/layout-spacing.png)
 
 ```java
 --8<-- "layout/LayoutExamples.java:spacing"

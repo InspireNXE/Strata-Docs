@@ -32,7 +32,7 @@ Themes are immutable. `toBuilder()` starts a builder holding all of a theme's ke
 
 ![A light theme built from nothing](../assets/images/theme-light.png)
 
-Labels and panels have no backgrounds in any theme. Set those per component with `setBackground`.
+Labels and panels have no backgrounds in any theme. Give a panel one with `setBackground`, and put a label in a panel to give it one.
 
 ## Required and optional keys
 

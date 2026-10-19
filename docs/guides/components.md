@@ -51,9 +51,8 @@ Setters inherited from `Component` return the specific type: `setEnabled` on a `
 A component is attached while it is in a tree that a host is showing. `isAttached()` tells you. Some things only happen while attached:
 
 - Hover, focus and press state change only while attached.
-- `theme()` is `null` until the component is first attached.
 - `requestFocus()` fails on a detached component.
-- Custom components receive event hooks only while attached.
+- Custom components receive event hooks and their theme only while attached.
 
 Adding a child to an attached container attaches the child, and the child's theme hook runs before the next layout.
 
@@ -65,28 +64,37 @@ Removing a component does not remove its event handlers. Close the subscriptions
 |---|---|---|
 | `setVisible(false)` | visible | Not drawn, cannot be hovered or focused, takes no space in layout, and its bounds become empty |
 | `setEnabled(false)` | enabled | Still drawn (built-in controls draw a disabled look) and still takes space, but gets no pointer or keyboard input and cannot be focused |
-| `setFocusable(true)` | buttons, check boxes, sliders and text boxes only | Can take keyboard focus by a click or `requestFocus()` |
-| `setTabbable(true)` | buttons, check boxes, sliders and text boxes only | Tab and Shift+Tab stop here. Only matters if it is also focusable. |
-| `setTabIndex(n)` | 0 | Tab visits lower indexes first, then tree order among equal indexes. Negative values are allowed. |
 
 Hiding or disabling a component also hides or disables everything inside it, and clears focus if the focused component is inside.
 
 !!! note "Disabled components pass the pointer to their ancestors"
     The pointer cannot hit a disabled or hidden component or anything inside it. A click on a disabled button therefore lands on the nearest enabled ancestor under the pointer, usually the panel behind it. If that ancestor has a click handler, it runs.
 
-Read-only state:
+## What only some components have
 
-| Method | True when |
-|---|---|
-| `isHovered()` | The pointer is over this component and it is the deepest one there. Its ancestors are not hovered. |
-| `isPressed()` | A mouse button went down on it and has not come up yet, even if the pointer has moved away |
-| `isFocused()` | It has keyboard focus. At most one component per host does. |
+`Component` holds only what every component needs: the tree, visibility, enabled state and layout. The rest comes from smaller interfaces that a component has when they fit it.
 
-## Ids
+| Interface | Gives | Who has it |
+|---|---|---|
+| `Focusable` | Keyboard focus and tab order | Buttons, cycle buttons, check boxes, radio buttons, toggle switches, sliders, text boxes, text areas, combo boxes, lists, menus, expanders and tab bars. Scroll bars and scroll panels have it too, turned off until you call `setFocusable(true)`. |
+| `HasCursor` | `setCursor` | Every container, and every control except separators and busy indicators |
+| `HasTooltip` | `setTooltip` | Every container, and every control except separators and busy indicators |
+| `Container` | Children, padding, background and border | Panels, windows |
 
-`setId(String)` attaches a free-form name used only for debugging, in `toString()` and in event handlers. Ids need not be unique, and Strata never looks components up by id.
+A custom component gets any of the first three by declaring the interface; see [Extending](extending.md).
 
-## Cursors
+### Focus
+
+| Method | Default | Effect |
+|---|---|---|
+| `setFocusable(false)` | focusable | Refuses keyboard focus by a click or `requestFocus()` |
+| `setTabbable(false)` | tabbable | Tab and Shift+Tab skip it. It can still be focused by a click. |
+| `setTabIndex(n)` | 0 | Tab visits lower indexes first, then tree order among equal indexes. Negative values are allowed. |
+| `isFocused()` | | True while it has keyboard focus. At most one component per host does. |
+
+Hover and press state belong to a control's own drawing code, so they are not public. Listen for `POINTER_ENTER`, `POINTER_EXIT`, `POINTER_PRESS` and `POINTER_RELEASE` to follow them from outside.
+
+### Cursors
 
 `setCursor(CursorKind)` picks the mouse cursor shown while the pointer is over the component. A component with no cursor of its own uses its nearest ancestor's, and the default is `ARROW`. Buttons, check boxes and sliders show `HAND`, and text boxes show `TEXT`.
 
@@ -101,9 +109,19 @@ Read-only state:
 
 Engines without a shape show the closest one they have. Swing has no "not allowed" cursor and shows the default arrow.
 
-## Backgrounds
+### Backgrounds and borders
 
-`setBackground(Paint)` draws a paint over the component's bounds before anything else of the component. It never changes layout. The default is `Paint.NONE`. Backgrounds are set per component; themes do not set them. See [Paints](theming.md#paints).
+`setBackground(Paint)` and `setBorder(Border)` are on containers. A background is drawn over the container's bounds before anything else of it, and a border along the inside of its edges, and neither changes layout. Both are `NONE` by default, and themes do not set them. See [Paints](theming.md#paints).
+
+Controls take their looks from the theme. To put a control on a colored or bordered area, put it in a panel and give the panel the background:
+
+```java
+AnchorPanel framed = factory.anchorPanel()
+        .setBackground(Paint.solid(0xD7000000))
+        .setBorder(Border.of(0xB9FFFFFF, 1))
+        .setPadding(1)
+        .add(list.setAnchor(Anchor.FILL));
+```
 
 ## Reading geometry
 
@@ -120,4 +138,4 @@ Bounds are updated by layout, which runs before the next frame. Right after you 
 
 - Call components only from the engine's UI thread.
 - Setters take effect on the next frame. Changes that affect size schedule a layout; you never call layout or repaint.
-- `invalidateLayout()` exists for custom components whose content changes size. Built-in setters call it for you.
+- Custom components call their protected `invalidateLayout()` when their content changes size. Setters call it for you.

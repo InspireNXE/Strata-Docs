@@ -2,6 +2,9 @@ package org.inspirenxe.strata.examples.extending;
 
 // --8<-- [start:interface]
 import org.inspirenxe.strata.api.component.Component;
+import org.inspirenxe.strata.api.component.Focusable;
+import org.inspirenxe.strata.api.component.HasCursor;
+import org.inspirenxe.strata.api.component.HasTooltip;
 import org.inspirenxe.strata.api.event.EventType;
 import org.inspirenxe.strata.api.event.control.ValueEvent;
 import org.inspirenxe.strata.api.event.control.ValueRequestEvent;
@@ -9,7 +12,8 @@ import org.inspirenxe.strata.api.event.control.ValueRequestEvent;
 /**
  * An on/off switch with a caption to its right: a track with a knob that sits left when off and right when on.
  */
-public interface ToggleSwitch extends Component<ToggleSwitch> {
+public interface ToggleSwitch extends Component<ToggleSwitch>, Focusable<ToggleSwitch>, HasCursor<ToggleSwitch>,
+        HasTooltip<ToggleSwitch> {
     /** Style key for the track when off (paint, required). */
     String STYLE_TRACK = "examplemod.switch.track";
     /** Style key for the track when on (paint, required). */
