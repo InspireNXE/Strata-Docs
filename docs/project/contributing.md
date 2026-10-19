@@ -50,7 +50,7 @@ Strata follows Wintergreen's style: 4-space indents, K&R braces, `final` on para
 
 ## The documentation site
 
-The site is built with [MkDocs](https://www.mkdocs.org/) and the [Material theme](https://squidfunk.github.io/mkdocs-material/) from the Markdown in `docs/`, and published to GitHub Pages by `.github/workflows/docs.yml` on every push to `main`. It lives in the Strata-Docs repository, which expects the Strata checkout next to it (`../Strata`) and builds against it. `DESIGN.md` and `ROADMAP.md` stay in Strata under `docs/`, and the site adds them from there.
+The site is built with [MkDocs](https://www.mkdocs.org/) and the [Material theme](https://squidfunk.github.io/mkdocs-material/) from the Markdown in `docs/`, and published to GitHub Pages by `.github/workflows/docs.yml` on every push to `main`. It lives in the Strata-Docs repository, which expects the Strata checkout next to it (`../Strata`) and builds against it. `design-implemented.md`, `design-pending.md` and `ROADMAP.md` stay in Strata under `docs/`, and the site adds them from there.
 
 ### Building it locally
 

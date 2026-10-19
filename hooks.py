@@ -1,6 +1,6 @@
 """Publishes Strata's engineering documents on the Project pages without copying them.
 
-DESIGN.md and ROADMAP.md stay in the Strata repository, next to the code the design-first workflow changes. The
+The design documents and the roadmap stay in the Strata repository, next to the code the design-first workflow changes. The
 site build adds them from the Strata checkout beside this one, or from the folder in STRATA_DIR.
 """
 import os
@@ -8,7 +8,7 @@ from pathlib import Path
 
 from mkdocs.structure.files import File
 
-DOCUMENTS = ('DESIGN.md', 'ROADMAP.md')
+DOCUMENTS = ('design-implemented.md', 'design-pending.md', 'ROADMAP.md')
 
 
 def on_files(files, config):

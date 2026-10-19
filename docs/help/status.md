@@ -33,7 +33,7 @@ Publishing to Maven and depending on Strata from a separate project have not bee
 
 ## Open design questions
 
-These are recorded in the [design document](../DESIGN.md#8-decisions-and-open-questions):
+These are recorded in the [pending design](../design-pending.md#open-questions):
 
 - A platform shortcut modifier: Command on macOS, Control elsewhere.
 - Whether `ListView`, `TableView` and `TreeView` need multiple selection.
