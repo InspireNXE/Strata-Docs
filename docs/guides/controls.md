@@ -290,6 +290,7 @@ name.setAlignment(HorizontalAlignment.STRETCH, VerticalAlignment.TOP);
 | `setMaskCodePoint(cp)` | `'*'` | The mask character |
 | `setTextPadding(Insets)` | 4 left and right, 5 top and bottom | Space between the text and the edges |
 | `setReadOnly(boolean)` | off | The box still focuses, selects and copies, but does not edit, and shows no caret. Its text uses `textbox.text.readonly`. |
+| `setHighlighter(h)` | none | Draws parts of the text in their own styles, for syntax coloring, highlighted matches or colored input. See [Styled text in fields](text.md#styled-text-in-fields). |
 | `setSelectAllOnFocus(boolean)` | off | Gaining focus selects everything, so typing replaces it. |
 
 ### Reading and selecting
@@ -753,6 +754,7 @@ It edits like a [`TextBox`](#textbox), with a filter, a length limit, read-only 
 |---|---|---|
 | `setWrap(boolean)` | on | Long lines break after the last space that fits. Off, rows are lines and the view scrolls sideways. |
 | `setVisibleLines(n)` | 4 | How many lines the desired height holds |
+| `setHighlighter(h)` | none | Draws parts of the text in their own styles, measured in those styles, on every row. See [Styled text in fields](text.md#styled-text-in-fields). |
 | `setTextPadding(insets)` | 4 on each side | Space between the edge and the text |
 
 The area asks for 160 units of width. Text taller than the view scrolls with the wheel (three lines a notch) and a scroll bar, and follows the caret. It reads the `textbox.*` keys, so it matches the text boxes around it, and the `scroll.*` keys for its bar.

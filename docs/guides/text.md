@@ -11,6 +11,7 @@ A record of how a span of text looks:
 | `color` | `0xFFFFFFFF`, opaque white. Alpha 0 draws nothing. |
 | `bold`, `italic`, `underline`, `strikethrough` | off |
 | `shadow` | off. A darker copy one unit down and to the right. |
+| `monospace` | off. The engine's monospaced font, where every character has the same width, for code and columns. An engine without one uses its normal font; its platform reports `Capabilities.monospaceFont` false. |
 
 `with` methods return modified copies:
 
@@ -35,6 +36,7 @@ Engines draw what they can:
 | Italic | An italic font derived from the base font |
 | Underline, strikethrough | Drawn by the adapter |
 | Shadow | Drawn by the adapter |
+| Monospace | The logical Monospaced font at the base font's size |
 
 Other adapters use the engine's own text styles where it has them.
 
@@ -86,6 +88,21 @@ protected void paint(Painter painter, Rect bounds) {
 ## Mixed styles
 
 A label made with `setSpans` draws its spans one after another, each in its own style, and wraps them by the same rules, so a piece of a span keeps the span's style on any line. Use it for text like a white item name followed by a gray count, or a gold price followed by `/ea`. `setTextScale` draws a label larger or smaller, and `TextOverflow.ELLIPSIS` ends a line that does not fit with `...`, in the style of the last character kept. See [Label](controls.md#label).
+
+## Styled text in fields
+
+`TextBox` and `TextArea` draw their text in one style from the theme, unless they have a highlighter. A `TextHighlighter` gets the field's whole text and the style the field would draw it in, and returns `StyleRun`s: ranges of the text, each with its own style. The field draws each run in its style and measures each in its own style, so the caret and the selection line up with styled text.
+
+```java
+--8<-- "controls/ControlExamples.java:highlighter"
+```
+
+- Derive each run's style from `base`, with the `with` methods or `merge`, so highlighted text keeps what the theme gives the field, such as the vanilla theme's shadow.
+- Return runs in order and not overlapping. A run that breaks that, or runs past the end of the text, is ignored, and text no run covers draws in `base`.
+- The field calls the highlighter when its text or its base style changes, from code or the user, and never while painting. Keep it a quick, pure function of its arguments.
+- A disabled field ignores the runs and draws in its disabled style. A read-only field keeps them, and a password box ignores them. Runs do not change the line height.
+
+Strata ships no highlighters. The [gallery](https://github.com/InspireNXE/Strata-Gallery) has a small Java one, `JavaHighlighter`, as sample code: it colors keywords, strings, comments, numbers and annotations, and makes the whole text monospaced so indentation lines up.
 
 Wrapping is part of the label, not a public utility. A custom component that needs wrapped text can measure and break the text itself, or contain a wrapping label.
 

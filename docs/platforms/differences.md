@@ -10,6 +10,7 @@ Strata hides most engine differences, but the SPI leaves some decisions to each 
 | Rounding | Rounding to the engine's pixel grid, as long as drawing and clipping agree | None. Java2D draws fractional coordinates. |
 | Font and text widths | Any font, with whole or fractional widths | An AWT font, Dialog 9 by default, with fractional widths |
 | Line height | Whatever the font reports | The AWT font's height |
+| Monospaced text | A monospaced font, or the normal font when the engine has none (`Capabilities.monospaceFont`) | Monospaced |
 | Modifiers with pointer moves, scrolls and characters | `NONE` when the engine does not report them | Reported |
 | Modifiers with button presses and keys | Reported | Reported |
 | Key repeat | Reported by the engine, or made by the host for navigation and delete keys | Held keys repeat at the system rate |

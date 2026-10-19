@@ -39,7 +39,7 @@ Use the panel on the Swing event dispatch thread only, the same as any Swing com
 --8<-- "swing/SwingExamples.java:font"
 ```
 
-`SwingTextMetrics.defaults()` is the logical Dialog font at 9 units. Widths are fractional advance widths with antialiasing and fractional metrics on, the same settings the panel draws with. The line height is the font's height. Underline, strikethrough and the shadow are drawn by the adapter and do not change widths.
+`SwingTextMetrics.defaults()` is the logical Dialog font at 9 units, with the logical Monospaced font at the same size for monospaced styles. Widths are the advances of a `TextLayout` with antialiasing and fractional metrics on, and the canvas draws that same layout, so text measures exactly as wide as it draws and spans side by side meet. The line height is the font's height. Underline, strikethrough and the shadow are drawn by the adapter and do not change widths.
 
 Other adapters use other fonts with other widths. Layouts built on measured text adapt; layouts that assume widths will not.
 

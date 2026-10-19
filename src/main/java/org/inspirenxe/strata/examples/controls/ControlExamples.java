@@ -26,16 +26,22 @@ import org.inspirenxe.strata.api.control.collection.ListView;
 import org.inspirenxe.strata.api.control.display.Image;
 import org.inspirenxe.strata.api.control.display.Label;
 import org.inspirenxe.strata.api.control.field.Slider;
+import org.inspirenxe.strata.api.control.field.TextBox;
 import org.inspirenxe.strata.api.layout.Anchor;
 import org.inspirenxe.strata.api.layout.HorizontalAlignment;
 import org.inspirenxe.strata.api.layout.Orientation;
 import org.inspirenxe.strata.api.layout.StackPanel;
 import org.inspirenxe.strata.api.layout.VerticalAlignment;
 import org.inspirenxe.strata.api.screen.Screen;
+import org.inspirenxe.strata.api.text.StyleRun;
+import org.inspirenxe.strata.api.text.TextHighlighter;
 import org.inspirenxe.strata.api.theme.Paint;
 import org.inspirenxe.strata.api.theme.SpriteId;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The controls guide's examples for images, check boxes, sliders and rows of controls in a list.
@@ -115,6 +121,30 @@ public final class ControlExamples {
         volume.setAlignment(HorizontalAlignment.STRETCH, VerticalAlignment.TOP);
         // --8<-- [end:slider]
         return volume;
+    }
+
+    /**
+     * A text box that marks every mention of a person, as a highlighter.
+     *
+     * @param factory the factory
+     * @return the box
+     */
+    static TextBox mentions(final ComponentFactory factory) {
+        // --8<-- [start:highlighter]
+        // Every @name is drawn bold and blue, keeping the rest of the box's style from the theme
+        final TextHighlighter mentions = (text, base) -> {
+            final List<StyleRun> runs = new ArrayList<>();
+            final Matcher matcher = Pattern.compile("@\\w+").matcher(text);
+            while (matcher.find()) {
+                runs.add(new StyleRun(matcher.start(), matcher.end(), base.withColor(0xFF61AFEF).withBold(true)));
+            }
+            return runs;
+        };
+        final TextBox message = factory.textBox()
+                .setPlaceholder("Say something")
+                .setHighlighter(mentions);
+        // --8<-- [end:highlighter]
+        return message;
     }
 
     static Slider integerSlider(final ComponentFactory factory, final Settings settings) {

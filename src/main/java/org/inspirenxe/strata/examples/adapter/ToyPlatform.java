@@ -33,7 +33,7 @@ import java.util.Optional;
  */
 public final class ToyPlatform implements Platform {
     // Constant for the platform's life, as the SPI requires
-    private static final Capabilities CAPABILITIES = new Capabilities(false);
+    private static final Capabilities CAPABILITIES = new Capabilities(false, false);
 
     private final TextMetrics metrics = new MonospaceTextMetrics();
     private final Clipboard clipboard = new Clipboard() {

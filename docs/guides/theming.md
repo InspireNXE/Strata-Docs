@@ -95,7 +95,7 @@ Some engines store the slicing with the image and ignore `border`. Keep the two 
 
 ## Text styles
 
-A `TextStyle` sets color, bold, italic, underline, strikethrough and a shadow. Themes map text keys to styles; labels can also take one directly. See [Text](text.md).
+A `TextStyle` sets color, bold, italic, underline, strikethrough, a shadow and the monospaced font. Themes map text keys to styles; labels can also take one directly. See [Text](text.md).
 
 ## Per-component overrides
 
@@ -147,7 +147,7 @@ A theme file sets only the keys it changes. Where the files live depends on the 
 | Sprite | `{ "sprite": "ns:path" }`, with an optional `"tint"` color |
 | Nine-slice | `{ "nine_slice": "ns:path", "border": ... }`, with an optional `"tint"`. The border is one number, `[horizontal, vertical]` or `[left, top, right, bottom]` |
 | Gradient | `{ "gradient": [top, bottom] }` |
-| Text style | Any of `color`, `bold`, `italic`, `underline`, `strikethrough` and `shadow`. Fields you leave out keep the inherited style for that key |
+| Text style | Any of `color`, `bold`, `italic`, `underline`, `strikethrough`, `shadow` and `monospace`. Fields you leave out keep the inherited style for that key |
 
 A misspelled member, a bad color or broken JSON makes the whole file invalid. The engine logs it and skips that file, and the other packs still apply.
 
