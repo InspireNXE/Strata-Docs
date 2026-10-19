@@ -72,6 +72,6 @@ Snapshots are a good way to test layouts: render a screen and compare pixels, or
 The Strata-Gallery repository runs on this adapter. It gives every control a page, written against the API only, with a log of the events the control fires:
 
 ```bash
-./gradlew :gallery:run
-./gradlew :gallery:run --args="--snapshot gallery"
+./gradlew run
+./gradlew run --args="--snapshot gallery"
 ```

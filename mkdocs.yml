@@ -65,10 +65,10 @@ markdown_extensions:
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.snippets:
-      # Java examples come from the docs-examples project, which the build compiles and tests
+      # Java examples come from src, which the Gradle build compiles and tests
       base_path:
-        - docs-examples/src/main/java/org/inspirenxe/strata/examples
-        - docs-examples/src/test/java/org/inspirenxe/strata/examples
+        - src/main/java/org/inspirenxe/strata/examples
+        - src/test/java/org/inspirenxe/strata/examples
         - .
       check_paths: true
       dedent_subsections: true

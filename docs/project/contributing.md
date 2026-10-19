@@ -64,7 +64,7 @@ python -m mkdocs serve
 
 ### Code on the site
 
-Java code on the site is not written in the Markdown. It lives in the `docs-examples` project of Strata-Docs, which `./gradlew build` there compiles and tests against Strata, and pages include it by section:
+Java code on the site is not written in the Markdown. It lives in the `src` folder of Strata-Docs, which `./gradlew build` there compiles and tests against Strata, and pages include it by section:
 
 ```markdown
     ```java
@@ -72,7 +72,7 @@ Java code on the site is not written in the Markdown. It lives in the `docs-exam
     ```
 ```
 
-The path is relative to `docs-examples/src/main/java/org/inspirenxe/strata/examples` (or the matching test directory). The section is marked in the Java file with comments:
+The path is relative to `src/main/java/org/inspirenxe/strata/examples` (or the matching test directory). The section is marked in the Java file with comments:
 
 ```java
 // --8<-- [start:grid]
@@ -80,14 +80,14 @@ final GridPanel form = factory.gridPanel();
 // --8<-- [end:grid]
 ```
 
-So an API change that breaks an example breaks the build, and the site can never show code that does not compile. Short fragments that only name a method may stay inline in the Markdown; anything a reader might copy belongs in `docs-examples`.
+So an API change that breaks an example breaks the build, and the site can never show code that does not compile. Short fragments that only name a method may stay inline in the Markdown; anything a reader might copy belongs in `src`.
 
 ### Images
 
 The screenshots in `docs/assets/images` are rendered from the example screens by the Swing adapter. After changing an example, or anything that changes how things draw, render them again:
 
 ```bash
-./gradlew :docs-examples:renderDocImages
+./gradlew renderDocImages
 ```
 
 `RenderDocImages` lists which screen goes to which image.
