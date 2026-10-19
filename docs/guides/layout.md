@@ -79,7 +79,7 @@ Alignment is a request to the parent. Each container decides how big a slot to g
 
 A container's background covers its padding, but a child's margin belongs to the child and is never painted by it. Insets can be negative: a negative margin lets a component overlap its neighbors, and layout clamps any size that would go below zero.
 
-`Insets.of(all)` sets every side, `Insets.of(horizontal, vertical)` sets left and right to one value and top and bottom to another, and the record constructor `new Insets(left, top, right, bottom)` sets each side.
+`Insets.of(all)` sets every side, `Insets.of(horizontal, vertical)` sets left and right to one value and top and bottom to another, and the record constructor `new Insets(left, top, right, bottom)` sets each side. `setMargin`, `setPadding` and `setTextPadding` take the same numbers directly, so `setPadding(8)`, `setMargin(12, 0)` and `setPadding(3, 0, 0, 0)` need no `Insets` at all.
 
 ### Size limits in practice
 

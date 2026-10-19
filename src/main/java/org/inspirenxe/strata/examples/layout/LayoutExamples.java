@@ -18,7 +18,6 @@ package org.inspirenxe.strata.examples.layout;
 import org.inspirenxe.strata.api.control.button.Button;
 import org.inspirenxe.strata.api.control.display.Label;
 import org.inspirenxe.strata.api.control.field.TextBox;
-import org.inspirenxe.strata.api.geometry.Insets;
 import org.inspirenxe.strata.api.layout.AbsolutePanel;
 import org.inspirenxe.strata.api.layout.Anchor;
 import org.inspirenxe.strata.api.layout.AnchorPanel;
@@ -267,7 +266,7 @@ public final class LayoutExamples {
             inner.setMargin(10).setBackground(INSET);
 
             final StackPanel outer = factory.stackPanel()
-                    .setPadding(Insets.of(20, 6))
+                    .setPadding(20, 6)
                     .add(inner);
             // The background covers the padding, but not the child's margin
             outer.setBackground(PANEL);

@@ -109,7 +109,7 @@ Button save = factory.button("Save").onEvent(Button.PRESSED, event -> this.save(
 |---|---|
 | `setText(text)` | One line. A new layout runs. |
 | `press()` | Presses it from code: fires `PRESSED` but no `PRESS` request. Does nothing while disabled. |
-| `setTextPadding(Insets)` | Space between the caption and the edges. 8 left and right, 5 top and bottom by default; 2 on every side for an icon with no caption; none for a link. |
+| `setTextPadding(Insets)`, `setTextPadding(all)`, `setTextPadding(h, v)`, `setTextPadding(l, t, r, b)` | Space between the caption and the edges. 8 left and right, 5 top and bottom by default; 2 on every side for an icon with no caption; none for a link. |
 | `setIcon(SpriteId)`, `setIcon(Visual)` | Shows an icon before the caption. A visual is drawn at its natural size. |
 | `setIconSize(width, height)` | The size the icon is drawn at, 16 by 16 by default. Strata cannot ask an engine for a sprite's size, so the caller gives it. |
 | `clearIcon()` | Removes the icon. |
@@ -288,7 +288,7 @@ name.setAlignment(HorizontalAlignment.STRETCH, VerticalAlignment.TOP);
 | `setPlaceholder(text)` | none | A hint drawn in `textbox.placeholder` while the box is empty, focused or not. It is never part of `text()`, and password mode does not mask it. |
 | `setPassword(boolean)` | off | Draws every code point as the mask character and disables copy and cut. `text()` still returns the real text. |
 | `setMaskCodePoint(cp)` | `'*'` | The mask character |
-| `setTextPadding(Insets)` | 4 left and right, 5 top and bottom | Space between the text and the edges |
+| `setTextPadding(Insets)` and its number forms | 4 left and right, 5 top and bottom | Space between the text and the edges |
 | `setReadOnly(boolean)` | off | The box still focuses, selects and copies, but does not edit, and shows no caret. Its text uses `textbox.text.readonly`. |
 | `setHighlighter(h)` | none | Draws parts of the text in their own styles, for syntax coloring, highlighted matches or colored input. See [Styled text in fields](text.md#styled-text-in-fields). |
 | `setSelectAllOnFocus(boolean)` | off | Gaining focus selects everything, so typing replaces it. |
