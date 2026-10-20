@@ -16,7 +16,9 @@ Controls that do the same kind of thing share small interfaces called attributes
 | `Stepped` | `value` | `Ranged` plus `step()`, `setStep` | | `Slider`, `Spinner` |
 | `ItemSource` | `item` | `items()`, `setItems`, `refresh()`, `setKeyFunction` | | `ListView`, `TableView`, `TreeView`, `ComboBox`, `GridView`, `CycleButton` |
 | `CellSource` | `item` | `setCellFactory` | | `ListView`, `TreeView`, `GridView` |
-| `SingleSelection` | `item` | `selectedIndex()`, `selected()`, `select(index)`, `selectItem(item)`, `clearSelection()` | `SELECT`, `SELECTED` | the collections, `CycleButton`, `TabBar`, `MenuBar`, `RadioGroup` |
+| `Selection` | `item` | `selectedIndex()`, `selected()`, `select(index)`, `selectItem(item)`, `clearSelection()`: the current entry | `SELECT`, `SELECTED` | every control below that selects |
+| `SingleSelection` | `item` | `Selection` and nothing more: the control only ever selects one entry | | `ComboBox`, `GridView`, `CycleButton`, `TabBar`, `MenuBar`, `RadioGroup` |
+| `MultiSelection` | `item` | `Selection` plus `setSelectionMode`, `selectedIndexes()`, `selectedItems()`, `selectIndexes`, `selectAll()` | `SELECT_MANY`, `SELECTED_MANY` | `ListView`, `TableView`, `TreeView` |
 | `Activatable` | `item` | `setActivateOnClick` | `ACTIVATE`, `ACTIVATED` | `ListView`, `TableView`, `TreeView`, `GridView` |
 | `RowView` | `item` | row height and spacing, the placeholder, scrolling, `setDeselectable` | | `ListView`, `TableView`, `TreeView` |
 | `Closable` | `popup` | `close()` | `CLOSE`, `CLOSED` | `Window`, `Overlay`, and through `Openable` the others |
@@ -29,7 +31,7 @@ An attribute owns its events, so `Toggle.TOGGLED` fires for a check box, a switc
 settings.onEvent(Toggle.TOGGLED, event -> save());
 
 // Refresh the buttons whenever any list, table, tree, combo box or grid in the form changes selection
-form.onEvent(SingleSelection.SELECTED, event -> updateButtons());
+form.onEvent(Selection.SELECTED, event -> updateButtons());
 ```
 
 The event's `control()` is typed as the attribute, such as `Toggle<?>`, and `target()` is the component that fired it. An event fires only where it means something: a progress bar has no user input, so it reports `Ranged.CHANGED` but never asks with `Ranged.CHANGE`. Each control's section below says which events it fires and when. Events that only one control has, such as `Button.PRESSED` or `TableView.SORTED`, stay constants on that control.
@@ -164,7 +166,7 @@ A button that steps through a list of values, one on each click, and shows the c
 ```java
 CycleButton<Difficulty> difficulty = factory.<Difficulty>cycleButton("Difficulty")
         .setItems(List.of(Difficulty.values()))
-        .onEvent(SingleSelection.SELECTED, event -> this.apply());
+        .onEvent(Selection.SELECTED, event -> this.apply());
 ```
 
 | Method | Default | Notes |
@@ -172,15 +174,15 @@ CycleButton<Difficulty> difficulty = factory.<Difficulty>cycleButton("Difficulty
 | `setText(label)` | empty | The text before the value (`HasText`). With no label only the value shows, and with no value only the label. |
 | `setValueLabelFunction(function)` | `String::valueOf` | Turns a value into its text. |
 | `setItems(list)` | none | The values (`ItemSource`). The selection stays on the item with the same key, or moves to the first item. |
-| `select(index)`, `selectItem(item)` | the first item | Chooses a value from code (`SingleSelection`). |
+| `select(index)`, `selectItem(item)` | the first item | Chooses a value from code (`Selection`). |
 | `cycle(steps)` | | Moves the selection from code, wrapping at the ends. One step forward from nothing selects the first item. |
 
 A left click, or Enter or Space while focused, selects the next value, and the first one after the last. A right click, or Shift with any of those, selects the previous one. A disabled button, or one with fewer than two values, ignores them. The button asks for the label plus its widest value, so cycling never changes its size, and it is focusable, tabbable and at least 20 by 20 units. It draws with the `button.*` keys of [`Button`](#button).
 
 | Event | Kind | Fires |
 |---|---|---|
-| `SingleSelection.SELECT` | Pre | When the user steps to another value, with the index about to be selected. Cancel to keep the value, or set another index (-1 clears). |
-| `SingleSelection.SELECTED` | Post | After the selection changed from any source, with the index and the previous index |
+| `Selection.SELECT` | Pre | When the user steps to another value, with the index about to be selected. Cancel to keep the value, or set another index (-1 clears). |
+| `Selection.SELECTED` | Post | After the selection changed from any source, with the index and the previous index |
 
 ## CheckBox
 
@@ -442,7 +444,7 @@ ListView<Listing> listings = factory.<Listing>listView(listing -> factory.label(
         .setRowHeight(24)
         .setKeyFunction(Listing::record)
         .setPlaceholder("No results found.")
-        .onEvent(SingleSelection.SELECTED, event -> updateButtons())
+        .onEvent(Selection.SELECTED, event -> updateButtons())
         .onEvent(Activatable.ACTIVATED, event -> buy(listings.items().get(event.value()), 1));
 listings.setItems(fromServer);
 ```
@@ -454,12 +456,21 @@ listings.setItems(fromServer);
 | `setRowHeight(h)`, `setRowSpacing(s)` | 20, 0 | Every row has the same height |
 | `select(index)`, `selectItem(item)` | nothing selected | Selecting scrolls the row into view. -1 clears. |
 | `setDeselectable(boolean)` | off | A press on the selected row deselects it |
+| `setSelectionMode(SelectionMode)` | `SINGLE` | `MULTIPLE` lets the user select several rows; see below |
+| `selectIndexes(indexes)`, `selectAll()` | | Replace the selected set from code. More than one index in `SINGLE` mode throws. `selectAll()` does nothing in `SINGLE` mode. |
 | `setActivateOnClick(boolean)` | off | A single click activates, as in a drop-down, instead of a double click |
 | `setPlaceholder(text)` | none | Shown in the middle while there are no items |
 | `refresh()` | | Rebuilds the rows in view from the same items |
 | `setScrollY(y)`, `scrollToIndex(i)` | | Scroll by code |
 
 A press on a row selects it, unless something in the cell consumed the press. A double click or Enter activates the selected item. While focused, Up, Down, Page Up, Page Down, Home and End move the selection. The wheel scrolls one row per notch, and the scroll bar works as in a [`ScrollPanel`](layout.md#scrollpanel). Rows sit inside the list's border widths, so a bordered list keeps its rows off the border.
+
+In `MULTIPLE` mode, a press selects one row, Control and a press adds or removes one, Shift and a press selects the range from the anchor, Shift and the arrow keys extend it, and Control+A selects every row. `selectedIndexes()` and `selectedItems()` are the set in order; `selectedIndex()` is the current row, the one the keys move from. The user's changes ask `MultiSelection.SELECT_MANY` with the set they would leave, and every change of the set reports `MultiSelection.SELECTED_MANY`, followed by `Selection.SELECTED` when the current row moved too. `setItems` keeps the selected items it finds by key. Tables and trees work the same way; collapsing a tree branch drops its hidden rows from the set.
+
+```java
+list.setSelectionMode(SelectionMode.MULTIPLE)
+        .onEvent(MultiSelection.SELECTED_MANY, event -> remove.setEnabled(!event.value().isEmpty()));
+```
 
 Build each cell fresh from its item, and keep nothing in it that must survive scrolling: a row that scrolls out is dropped and rebuilt when it comes back.
 
@@ -474,7 +485,7 @@ A cell can be any component, controls included, so a list of option rows needs n
 ```
 
 - Keep the value in your model, not in the control. The row is rebuilt from the item when it scrolls back into view, so set each control from the model in the cell factory and write changes back from a handler.
-- A press that a control does not consume reaches the list and selects the row. Buttons only act on the click, so a press on a button selects its row; sliders, text boxes and the like consume their press and leave the selection alone. To keep rows from ever being selected, cancel `SingleSelection.SELECT` on the list.
+- A press that a control does not consume reaches the list and selects the row. Buttons only act on the click, so a press on a button selects its row; sliders, text boxes and the like consume their press and leave the selection alone. To keep rows from ever being selected, cancel `Selection.SELECT` on the list.
 - Give the list a row height that fits the tallest control, and the row panel `Anchor.FILL` so it spans the row. A weighted [spacer](layout.md#spacer) between the label and the control pushes the control to the right edge.
 
 | Key | Required | Used for |
@@ -488,8 +499,10 @@ A cell can be any component, controls included, so a list of option rows needs n
 
 | Event | Kind | Fires |
 |---|---|---|
-| `SingleSelection.SELECT` | Pre | When a press or a key would change the selection, with the row index, or -1 to clear. Cancel to keep the selection, or set another row. |
-| `SingleSelection.SELECTED` | Post | After every change of the selected row, including `select`, `selectItem` and `setItems` |
+| `Selection.SELECT` | Pre | When a press or a key would change the selection, with the row index, or -1 to clear. Cancel to keep the selection, or set another row. |
+| `Selection.SELECTED` | Post | After every change of the selected row, including `select`, `selectItem` and `setItems` |
+| `MultiSelection.SELECT_MANY` | Pre | In `MULTIPLE` mode, when a press or a key would change the set, with the indexes it would leave. Cancel to keep the set, or set others. |
+| `MultiSelection.SELECTED_MANY` | Post | After every change of the set, in either mode, before `Selection.SELECTED` |
 | `Activatable.ACTIVATE` | Pre | When the user activates a row: a double press, Enter, or a click with `setActivateOnClick` |
 | `Activatable.ACTIVATED` | Post | After an activation nobody canceled, with the row index |
 
@@ -500,7 +513,7 @@ A drop-down that shows the selected option and opens a list of every option.
 ```java
 ComboBox<SortType> sort = factory.<SortType>comboBox(SortType::label)
         .setItems(List.of(SortType.values()))
-        .onEvent(SingleSelection.SELECTED, event -> search());
+        .onEvent(Selection.SELECTED, event -> search());
 ```
 
 A click opens the list as a [popup](overlays.md#popups), at least as wide as the box; a click on an option selects it. While closed and focused, Up, Down, Home and End change the selection, and Enter, Space or Alt+Down open it. While open, Up and Down move the highlight, Enter or Space picks it, and Escape closes without changing anything. `setMaxVisibleOptions(n)` (8 by default) caps how many rows show before the list scrolls. `setItems` keeps the selection on the option with the same key (`setKeyFunction`, the option itself by default), or selects the first option. `clearSelection()` leaves nothing selected, and the box then shows no text.
@@ -517,8 +530,8 @@ A click opens the list as a [popup](overlays.md#popups), at least as wide as the
 |---|---|---|
 | `Openable.OPEN` | Pre | When the user opens the list. A handler can change the options first, or cancel. |
 | `Openable.OPENED` | Post | After the list opened, including `open()` |
-| `SingleSelection.SELECT` | Pre | When the user picks an option, or Up, Down, Home or End on the closed box would change it, with the option index |
-| `SingleSelection.SELECTED` | Post | After every change of the selected index, including `select`, `selectItem`, `clearSelection` and `setItems` |
+| `Selection.SELECT` | Pre | When the user picks an option, or Up, Down, Home or End on the closed box would change it, with the option index |
+| `Selection.SELECTED` | Post | After every change of the selected index, including `select`, `selectItem`, `clearSelection` and `setItems` |
 | `Closable.CLOSED` | Post | Each time the list closes, however it closed. The box never fires `Closable.CLOSE`. |
 
 ## Window
@@ -581,7 +594,7 @@ The buttons come in sets: `OK`, `OK_CANCEL`, `YES_NO`, `YES_NO_CANCEL` and `CLOS
 
 ## TabBar
 
-A row of tabs, one of them selected. It only picks a tab; show the matching content from `SingleSelection.SELECTED`. Each tab is a `Tab`, made with `factory.tab(text)` or by the `addTab(text)` shorthand, which holds its text, whether it is enabled, and its tooltip. `tabs()` lists them, `addTab(tab)`, `addTab(index, tab)` and `removeTab(tab)` change them, `selected()` is the selected `Tab` and `selectItem(tab)` selects one.
+A row of tabs, one of them selected. It only picks a tab; show the matching content from `Selection.SELECTED`. Each tab is a `Tab`, made with `factory.tab(text)` or by the `addTab(text)` shorthand, which holds its text, whether it is enabled, and its tooltip. `tabs()` lists them, `addTab(tab)`, `addTab(index, tab)` and `removeTab(tab)` change them, `selected()` is the selected `Tab` and `selectItem(tab)` selects one.
 
 ```java
 Tab sell = factory.tab("Sell")
@@ -590,7 +603,7 @@ Tab sell = factory.tab("Sell")
 TabBar sides = factory.tabBar()
         .addTab("Buy")
         .addTab(sell)
-        .onEvent(SingleSelection.SELECTED, event -> showSide(event.value()));
+        .onEvent(Selection.SELECTED, event -> showSide(event.value()));
 ```
 
 A change to a tab shows in its bar at once, and a tab belongs to one bar at a time.
@@ -606,8 +619,8 @@ Tabs share the width equally. A click selects an enabled tab, and Left and Right
 
 | Event | Kind | Fires |
 |---|---|---|
-| `SingleSelection.SELECT` | Pre | When a click or Left and Right would select another tab, with its index. A rewritten index that is disabled or out of range is ignored. |
-| `SingleSelection.SELECTED` | Post | After another tab was selected, including `select` |
+| `Selection.SELECT` | Pre | When a click or Left and Right would select another tab, with its index. A rewritten index that is disabled or out of range is ignored. |
+| `Selection.SELECTED` | Post | After another tab was selected, including `select` |
 
 ## ProgressBar
 
@@ -665,7 +678,7 @@ RadioGroup<Difficulty> difficulty = factory.radioGroup();
 column.add(difficulty.add("Easy", Difficulty.EASY))
         .add(difficulty.add("Hard", Difficulty.HARD));
 difficulty.selectItem(settings.difficulty())
-        .onEvent(SingleSelection.SELECTED, event -> settings.setDifficulty(difficulty.selected().orElseThrow()));
+        .onEvent(Selection.SELECTED, event -> settings.setDifficulty(difficulty.selected().orElseThrow()));
 ```
 
 Each button stands for a value, and `group.selected()` returns the value of the selected one. A new group has nothing selected. A click, Enter or Space selects a button. Up and Left move the selection and focus to the previous usable button in the group, Down and Right to the next, wrapping at the ends and skipping disabled, hidden and detached buttons. `button.setSelected(true)`, `group.select(index)` and `group.selectItem(value)` work while disabled too; `selectItem` with a value no button stands for clears the selection. A button measures and draws like a [`CheckBox`](#checkbox), with the mark inset by three tenths of the box.
@@ -683,7 +696,7 @@ Each button stands for a value, and `group.selected()` returns the value of the 
 |---|---|---|
 | `Toggle.TOGGLE` | Pre | On the button about to be selected, by a click, Enter, Space or an arrow key, with the value true. Cancel to keep the selection and focus as they are. |
 | `Toggle.TOGGLED` | Post | On each button whose state changed, the one deselected first, from any source |
-| `SingleSelection.SELECTED` | Post | On the group, after the selected button changed from any source, with its index in `buttons()` or -1. Register it on the group: `group.onEvent(SingleSelection.SELECTED, ...)`. |
+| `Selection.SELECTED` | Post | On the group, after the selected button changed from any source, with its index in `buttons()` or -1. Register it on the group: `group.onEvent(Selection.SELECTED, ...)`. |
 
 ## ToggleSwitch
 
@@ -803,8 +816,8 @@ A column with a comparator is sortable, and text columns sort by their text, ign
 
 | Event | Kind | Fires |
 |---|---|---|
-| `SingleSelection.SELECT` | Pre | As for a list, with a row of `shownItems()` |
-| `SingleSelection.SELECTED` | Post | After every change of the selected row, including a sort or `setItems` moving it |
+| `Selection.SELECT` | Pre | As for a list, with a row of `shownItems()` |
+| `Selection.SELECTED` | Post | After every change of the selected row, including a sort or `setItems` moving it |
 | `Activatable.ACTIVATE` | Pre | When the user activates a row |
 | `Activatable.ACTIVATED` | Post | After an activation nobody canceled |
 | `TableView.SORT` | Pre | When a click on a sortable title asks to sort, with a `TableView.Sort` naming the column. Cancel or set another sort. |
@@ -818,7 +831,7 @@ Items in a hierarchy, such as store categories, each indented under its parent.
 TreeView<Category> categories = factory.<Category>treeView(category -> factory.label(category.name()))
         .setChildren(Category::subcategories)
         .setItems(store.categories())
-        .onEvent(SingleSelection.SELECTED, event -> categories.selected().ifPresent(this::showCategory));
+        .onEvent(Selection.SELECTED, event -> categories.selected().ifPresent(this::showCategory));
 ```
 
 The tree asks the children function for an item's children only when it shows them, so a large hierarchy costs what is expanded. Rows are indented 10 units per level (`setIndent`), then a 12-unit arrow column, then the cell. Clicking an arrow expands or collapses its item. Right expands the selected item or moves into it; Left collapses it or moves to its parent. The other keys and the scrolling work as in a list.
@@ -829,8 +842,8 @@ The rows read the `list.*` keys. The arrows read `tree.arrow` (paint, optional),
 
 | Event | Kind | Fires |
 |---|---|---|
-| `SingleSelection.SELECT` | Pre | As for a list, with a row of `shownItems()`. Right and Left moving to a child or parent count too. |
-| `SingleSelection.SELECTED` | Post | After every change of the selected row, including expanding or collapsing moving it |
+| `Selection.SELECT` | Pre | As for a list, with a row of `shownItems()`. Right and Left moving to a child or parent count too. |
+| `Selection.SELECTED` | Post | After every change of the selected row, including expanding or collapsing moving it |
 | `Activatable.ACTIVATE` | Pre | When the user activates a row |
 | `Activatable.ACTIVATED` | Post | After an activation nobody canceled |
 | `TreeView.EXPAND` | Pre | When a click on an arrow, or Right or Left, would expand or collapse an item, with a `TreeView.Expansion` |
@@ -890,8 +903,8 @@ A menu bar's titles are `SubmenuItem`s: `menus()` lists them, `addMenu(entry)` a
 | `Menu.CHOSEN` | Post | After the menus closed and the item's action ran, with the entry |
 | `Openable.OPENED` | Post | Each time the menu opens, from code or from its bar. A menu never fires `Openable.OPEN`. |
 | `Closable.CLOSED` | Post | Each time the menu closes, for any reason |
-| `SingleSelection.SELECT` | Pre | On the bar, when a click, a hover while a menu is open, or Left and Right would open a menu, with its title index |
-| `SingleSelection.SELECTED` | Post | On the bar, after its open menu changed: opened from a title or `select`, switched, or closed. Switching reports once. |
+| `Selection.SELECT` | Pre | On the bar, when a click, a hover while a menu is open, or Left and Right would open a menu, with its title index |
+| `Selection.SELECTED` | Post | On the bar, after its open menu changed: opened from a title or `select`, switched, or closed. Switching reports once. |
 
 ## Expander
 
@@ -1002,8 +1015,8 @@ There is one cell per item, null items being empty cells, in rows of `setColumns
 
 | Event | Kind | Fires |
 |---|---|---|
-| `SingleSelection.SELECT` | Pre | When a left click on a selectable grid would select another cell |
-| `SingleSelection.SELECTED` | Post | After every change of the selected cell, including `select` and `setItems` |
+| `Selection.SELECT` | Pre | When a left click on a selectable grid would select another cell |
+| `Selection.SELECTED` | Post | After every change of the selected cell, including `select` and `setItems` |
 | `GridView.CLICK` | Pre | When the user clicks a cell with any button, with a `GridView.Click` |
 | `GridView.CLICKED` | Post | After a click nobody canceled |
 | `Activatable.ACTIVATE` | Pre | After the click's `GridView.CLICK`, when a left double click, or a single one with `setActivateOnClick`, would activate a cell |

@@ -10,7 +10,7 @@ component.onEvent(InputEvents.CLICK, -100, event -> { ... });                   
 Subscription drag = component.subscribe(InputEvents.DRAG, 0, event -> { ... }); // removable later
 ```
 
-Event types are typed keys. `InputEvents.CLICK` is an `EventType<PointerButtonEvent>`, so the handler receives a `PointerButtonEvent` without a cast. Input types are the constants in `InputEvents`, and the focus events are on `Focusable`. A control's events are constants on the [attributes](controls.md#attributes) it has, such as `TextInput.EDITED` for every text field and `SingleSelection.SELECTED` for every list, table and tree, or on the control itself for what only it does, such as `Button.PRESS`. Every component has `Component.PAINT`, `Component.PAINTED` and `Component.MEASURED`. Always use the constants, because types are compared by identity.
+Event types are typed keys. `InputEvents.CLICK` is an `EventType<PointerButtonEvent>`, so the handler receives a `PointerButtonEvent` without a cast. Input types are the constants in `InputEvents`, and the focus events are on `Focusable`. A control's events are constants on the [attributes](controls.md#attributes) it has, such as `TextInput.EDITED` for every text field and `Selection.SELECTED` for every list, table, tree and other control that selects, or on the control itself for what only it does, such as `Button.PRESS`. Every component has `Component.PAINT`, `Component.PAINTED` and `Component.MEASURED`. Always use the constants, because types are compared by identity.
 
 `onEvent` returns the component, so registration chains with the setters:
 
@@ -66,7 +66,7 @@ Control events bubble, so one handler on a panel hears the controls inside it:
 --8<-- "events/EventExamples.java:form"
 ```
 
-The events of a control's private parts stop at that control. A table is built from an inner list, but a handler on your form for `SingleSelection.SELECTED` hears only the table: the event's `control()` is the table, never the list inside it.
+The events of a control's private parts stop at that control. A table is built from an inner list, but a handler on your form for `Selection.SELECTED` hears only the table: the event's `control()` is the table, never the list inside it.
 
 ## Canceling and stopping
 
