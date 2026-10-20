@@ -76,7 +76,7 @@ Any component can have a tooltip. It shows once the pointer has rested for half 
 | Lines | `Tooltip.lines(List<Text>)` | One `Text` per line, each over the `tooltip.text` style |
 | A component | `Tooltip.of(factory -> component)` | Built again each time the tooltip shows, with no box of its own |
 
-Text tooltips draw on the `tooltip.background` paint with 4 units of padding, or on a dark box with a purple edge when the theme lacks the key.
+Text tooltips draw on the `tooltip.background` paint inside the `tooltip.padding` insets, 4 units on every side by default, or on a dark box with a purple edge when the theme lacks the key.
 
 Adapters can make styled-lines tooltips from the engine's own tooltip text, for objects such as an engine visual.
 

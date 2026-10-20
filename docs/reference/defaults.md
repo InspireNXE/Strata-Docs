@@ -35,7 +35,7 @@ Every number Strata picks for you.
 | `ScrollPanel` policies | horizontal `NEVER`, vertical `AUTO` |
 | `ScrollPanel` scroll rate | 10 units a wheel notch or arrow key |
 | `ScrollPanel` scroll bar | 6 wide, 2 from the viewport; thumb at least 32 long and at most the track less 8 |
-| `Window` padding | 3 on every side |
+| `Window` padding | the theme's `window.padding`, else 3 on every side |
 | `Window` title bar | one line plus 3 above and below |
 | `Window` close button | 12 wide, at the right end of the title bar |
 | `Window` closable, movable | yes, yes |
@@ -54,7 +54,7 @@ Every number Strata picks for you.
 | | Spans | none: plain text |
 | | Text scale | 1 |
 | | Overflow | `VISIBLE` |
-| `Button` | Text padding | 8 left and right, 5 top and bottom; 2 on every side with an icon and no caption; none for a link |
+| `Button` | Text padding | the theme's `button.padding`, else 8 left and right and 5 top and bottom; `button.padding.icon`, else 2 on every side, with an icon and no caption; none for a link |
 | | Icon size, gap to the caption | 16 by 16, 4 |
 | | Link | off; a link has no minimum size |
 | | Minimum size | 20 by 20 |
@@ -77,7 +77,7 @@ Every number Strata picks for you.
 | | Thumb | 8 along the track, the slider's full thickness across it |
 | | Cursor | `HAND` |
 | `TextBox` | Desired width | 120 |
-| | Text padding | 4 left and right, 5 top and bottom |
+| | Text padding | the theme's `textbox.padding`, else 4 left and right and 5 top and bottom |
 | | Minimum size | 20 by 20 |
 | | Maximum length | `Integer.MAX_VALUE` code points |
 | | Mask character | `*` |
@@ -124,7 +124,7 @@ Every number Strata picks for you.
 | | Range, step, decimals, value | 0 to 100, 1, 0, 0 |
 | | Page Up and Page Down | 10 steps |
 | `TextArea` | Desired size | 160 wide, 4 lines plus padding tall |
-| | Text padding | 4 on each side |
+| | Text padding | the theme's `textarea.padding`, else `textbox.padding`, else 4 on each side |
 | | Wrapping | on |
 | | Wheel | 3 lines a notch |
 | | Caret after `setText` | at the start, scrolled to the top |
@@ -180,10 +180,10 @@ Every number Strata picks for you.
 | Keys the host repeats itself | Left, Right, Up, Down, Backspace, Delete, Home, End, Page Up, Page Down |
 | Tooltip delay | 500 ms (`Tooltip.DEFAULT_DELAY_MILLIS`), none when moving from one tooltip to another |
 | Tooltip position | 12 right of and 12 above the pointer, flipped left at the right edge, kept inside the host |
-| Tooltip padding | 4, with 1 between lines |
+| Tooltip padding | the theme's `tooltip.padding`, else 4; 1 between lines |
 | Toast time | 3000 ms for text toasts |
 | Toast position | 4 in from the top and right edges, stacked 4 apart |
-| Toast padding | 6; text wraps at a third of the host's width |
+| Toast padding | the theme's `toast.padding`, else 6; text wraps at a third of the host's width |
 
 The host synthesizes repeats only for engines whose platform reports `sendsKeyRepeat == false`. Swing sends its own.
 

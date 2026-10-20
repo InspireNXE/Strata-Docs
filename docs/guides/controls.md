@@ -109,7 +109,7 @@ Button save = factory.button("Save").onEvent(Button.PRESSED, event -> this.save(
 |---|---|
 | `setText(text)` | One line. A new layout runs. |
 | `press()` | Presses it from code: fires `PRESSED` but no `PRESS` request. Does nothing while disabled. |
-| `setTextPadding(Insets)`, `setTextPadding(all)`, `setTextPadding(h, v)`, `setTextPadding(l, t, r, b)` | Space between the caption and the edges. 8 left and right, 5 top and bottom by default; 2 on every side for an icon with no caption; none for a link. |
+| `setTextPadding(Insets)`, `setTextPadding(all)`, `setTextPadding(h, v)`, `setTextPadding(l, t, r, b)` | Space between the caption and the edges. By default the theme's `button.padding` (8 left and right, 5 top and bottom without it), `button.padding.icon` (2 on every side) for an icon with no caption, and none for a link. `null` follows the theme again. |
 | `setIcon(SpriteId)`, `setIcon(Visual)` | Shows an icon before the caption. A visual is drawn at its natural size. |
 | `setIconSize(width, height)` | The size the icon is drawn at, 16 by 16 by default. Strata cannot ask an engine for a sprite's size, so the caller gives it. |
 | `clearIcon()` | Removes the icon. |
@@ -293,7 +293,7 @@ name.setAlignment(HorizontalAlignment.STRETCH, VerticalAlignment.TOP);
 | `setPlaceholder(text)` | none | A hint drawn in `textbox.placeholder` while the box is empty, focused or not. It is never part of `text()`, and password mode does not mask it. |
 | `setPassword(boolean)` | off | Draws every code point as the mask character and disables copy and cut. `text()` still returns the real text. |
 | `setMaskCodePoint(cp)` | `'*'` | The mask character |
-| `setTextPadding(Insets)` and its number forms | 4 left and right, 5 top and bottom | Space between the text and the edges |
+| `setTextPadding(Insets)` and its number forms | the theme's `textbox.padding`, else 4 left and right, 5 top and bottom | Space between the text and the edges; `null` follows the theme again |
 | `setReadOnly(boolean)` | off | The box still focuses, selects and copies, but does not edit, and shows no caret. Its text uses `textbox.text.readonly`. |
 | `setHighlighter(h)` | none | Draws parts of the text in their own styles, for syntax coloring, highlighted matches or colored input. See [Styled text in fields](text.md#styled-text-in-fields). |
 | `setSelectAllOnFocus(boolean)` | off | Gaining focus selects everything, so typing replaces it. |
@@ -474,7 +474,7 @@ list.setSelectionMode(SelectionMode.MULTIPLE)
 
 Build each cell fresh from its item, and keep nothing in it that must survive scrolling: a row that scrolls out is dropped and rebuilt when it comes back.
 
-`ui.cellLabel(text)` makes the label the default cells use: `ComponentFactory.CELL_PADDING` (4 units) of margin on each side, vertically centered, and cut short with an ellipsis. Use it in your own cell factories so text rows line up with tables and the built-in lists. The `list.background` key paints the list's whole area behind its rows, so an empty list shows its placeholder on it.
+`ui.cellLabel(text)` makes the label the default cells use: the theme's `list.cell.padding` as its margin, or `ComponentFactory.CELL_PADDING` (4 units) at the sides without it, vertically centered, and cut short with an ellipsis. Its margin follows the theme until you set one. Use it in your own cell factories so text rows line up with tables and the built-in lists. The `list.background` key paints the list's whole area behind its rows, so an empty list shows its placeholder on it.
 
 ### Rows of controls
 
@@ -536,7 +536,7 @@ A click opens the list as a [popup](overlays.md#popups), at least as wide as the
 
 ## Window
 
-A framed panel with a title bar and a close button. Children are laid out below the bar as in an `AnchorPanel`, inside 3 units of padding.
+A framed panel with a title bar and a close button. Children are laid out below the bar as in an `AnchorPanel`, inside the theme's `window.padding`, 3 units on every side without it.
 
 ```java
 Window window = factory.window("Exchange").add(content);
@@ -771,7 +771,7 @@ It edits like a [`TextBox`](#textbox), with a filter, a length limit, read-only 
 | `setWrap(boolean)` | on | Long lines break after the last space that fits. Off, rows are lines and the view scrolls sideways, with a scroll bar along the bottom when a line is too wide. |
 | `setVisibleLines(n)` | 4 | How many lines the desired height holds |
 | `setHighlighter(h)` | none | Draws parts of the text in their own styles, measured in those styles, on every row. See [Styled text in fields](text.md#styled-text-in-fields). |
-| `setTextPadding(insets)` | 4 on each side | Space between the edge and the text |
+| `setTextPadding(insets)` | the theme's `textarea.padding`, else `textbox.padding`, else 4 on each side | Space between the edge and the text; `null` follows the theme again |
 
 The area asks for 160 units of width. Text taller than the view scrolls with the wheel (three lines a notch) and a scroll bar, and follows the caret. It reads the `textbox.*` keys, so it matches the text boxes around it, and the `scroll.*` keys for its bar.
 

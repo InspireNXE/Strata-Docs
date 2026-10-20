@@ -16,6 +16,8 @@ Every style key the built-in controls read. A theme lacking a required key canno
 | `button.link.text` | `Button.STYLE_LINK_TEXT` | text style | no | `button.text` |
 | `button.link.text.hovered` | `Button.STYLE_LINK_TEXT_HOVERED` | text style | no | `button.link.text` underlined |
 | `button.link.text.disabled` | `Button.STYLE_LINK_TEXT_DISABLED` | text style | no | `button.text.disabled` |
+| `button.padding` | `Button.STYLE_PADDING` | insets | no | 8, 5, 8 and 5 |
+| `button.padding.icon` | `Button.STYLE_PADDING_ICON` | insets | no | 2 on every side |
 
 The `button.link.*` keys apply to a button made a link, which reads no face keys. A `CycleButton` reads the same keys as a button.
 
@@ -69,6 +71,7 @@ A style set with `Label.setStyle` overrides the key.
 | `textbox.text.disabled` | `TextBox.STYLE_TEXT_DISABLED` | text style | no | `textbox.text` |
 | `textbox.text.readonly` | `TextBox.STYLE_TEXT_READ_ONLY` | text style | no | `textbox.text.disabled` |
 | `textbox.placeholder` | `TextBox.STYLE_PLACEHOLDER` | text style | no | `textbox.text.disabled` |
+| `textbox.padding` | `TextBox.STYLE_PADDING` | insets | no | 4, 5, 4 and 5 |
 | `textbox.selection` | `TextBox.STYLE_SELECTION` | paint | no | `0x806A9FFF`, translucent blue |
 | `textbox.caret` | `TextBox.STYLE_CARET` | paint | no | `0xFFE0E0E0`, light gray |
 | `textbox.suggestions` | `TextBox.STYLE_SUGGESTIONS` | paint | no | `combobox.popup` |
@@ -107,6 +110,7 @@ A standard scroll bar reads the `scroll.*` keys above (`ScrollBar.STYLE_TRACK`, 
 | `list.row` | `ListView.STYLE_ROW` | paint | no | Nothing |
 | `list.row.hovered` | `ListView.STYLE_ROW_HOVERED` | paint | no | `list.row` |
 | `list.placeholder` | `ListView.STYLE_PLACEHOLDER` | text style | no | `TextStyle.DEFAULT` |
+| `list.cell.padding` | `ListView.STYLE_CELL_PADDING` | insets | no | 4, 0, 4 and 0 |
 
 ## ComboBox
 
@@ -120,6 +124,7 @@ The open list also uses the `ListView` and `ScrollPanel` keys.
 | `combobox.disabled` | `ComboBox.STYLE_DISABLED` | paint | no | `combobox.normal` |
 | `combobox.text` | `ComboBox.STYLE_TEXT` | text style | no | `TextStyle.DEFAULT` |
 | `combobox.text.disabled` | `ComboBox.STYLE_TEXT_DISABLED` | text style | no | `combobox.text` |
+| `combobox.padding` | `ComboBox.STYLE_PADDING` | insets | no | 4, 3, 4 and 3 |
 
 ## Window
 
@@ -134,6 +139,8 @@ The open list also uses the `ListView` and `ScrollPanel` keys.
 | `window.close.hovered` | `Window.STYLE_CLOSE_HOVERED` | text style | no | `window.close` |
 | `window.grip` | `Window.STYLE_GRIP` | paint | no | Nothing |
 | `window.grip.hovered` | `Window.STYLE_GRIP_HOVERED` | paint | no | `window.grip` |
+| `window.title.padding` | `Window.STYLE_TITLE_PADDING` | insets | no | 3 on every side |
+| `window.padding` | `Window.STYLE_PADDING` | insets | no | 3 on every side |
 
 ## TabBar
 
@@ -200,13 +207,14 @@ The open list also uses the `ListView` and `ScrollPanel` keys.
 
 ## Spinner and TextArea
 
-A spinner's field and a text area read the `TextBox` keys, and a text area the `ScrollPanel` keys for its bar.
+A spinner's field and a text area read the `TextBox` keys, and a text area the `ScrollPanel` keys for its bar. A text area's padding has its own key, which falls back to `textbox.padding`.
 
 | Key | Constant | Kind | Required | Fallback |
 |---|---|---|---|---|
 | `spinner.button` | `Spinner.STYLE_BUTTON` | paint | no | `button.normal` |
 | `spinner.button.hovered` | `Spinner.STYLE_BUTTON_HOVERED` | paint | no | `button.hovered` |
 | `spinner.button.disabled` | `Spinner.STYLE_BUTTON_DISABLED` | paint | no | `button.disabled` |
+| `textarea.padding` | `TextArea.STYLE_PADDING` | insets | no | `textbox.padding`, else 4 on every side |
 
 The spinner's arrows use the colors of `button.text` and `button.text.disabled`.
 
@@ -220,6 +228,7 @@ Both read the `ListView` and `ScrollPanel` keys for their rows.
 | `table.header.hovered` | `TableView.STYLE_HEADER_HOVERED` | paint | no | `table.header` |
 | `table.header.text` | `TableView.STYLE_HEADER_TEXT` | text style | no | `TextStyle.DEFAULT` |
 | `table.grid` | `TableView.STYLE_GRID` | paint | no | Nothing |
+| `table.header.padding` | `TableView.STYLE_HEADER_PADDING` | insets | no | 4, 0, 4 and 0 |
 | `tree.arrow` | `TreeView.STYLE_ARROW` | paint | no | solid `0xFFA0A0A0` |
 
 ## Menu and MenuBar
@@ -232,9 +241,11 @@ Both read the `ListView` and `ScrollPanel` keys for their rows.
 | `menu.text.disabled` | `Menu.STYLE_TEXT_DISABLED` | text style | no | `menu.text` |
 | `menu.shortcut` | `Menu.STYLE_SHORTCUT` | text style | no | `menu.text.disabled` |
 | `menu.separator` | `Menu.STYLE_SEPARATOR` | paint | no | `separator` |
+| `menu.item.padding` | `Menu.STYLE_ITEM_PADDING` | insets | no | 14, 3, 14 and 3 |
 | `menubar.background` | `MenuBar.STYLE_BACKGROUND` | paint | no | Nothing |
 | `menubar.item.hovered` | `MenuBar.STYLE_ITEM_HOVERED` | paint | no | `menu.item.hovered` |
 | `menubar.text` | `MenuBar.STYLE_TEXT` | text style | no | `menu.text` |
+| `menubar.title.padding` | `MenuBar.STYLE_TITLE_PADDING` | insets | no | 8, 3, 8 and 3 |
 
 ## Expander, SplitPane and GridView
 
@@ -244,6 +255,7 @@ Both read the `ListView` and `ScrollPanel` keys for their rows.
 | `expander.header.hovered` | `Expander.STYLE_HEADER_HOVERED` | paint | no | `expander.header` |
 | `expander.text` | `Expander.STYLE_TEXT` | text style | no | `TextStyle.DEFAULT` |
 | `expander.text.disabled` | `Expander.STYLE_TEXT_DISABLED` | text style | no | `expander.text` |
+| `expander.header.padding` | `Expander.STYLE_HEADER_PADDING` | insets | no | 4, 3, 4 and 3 |
 | `split.divider` | `SplitPane.STYLE_DIVIDER` | paint | no | `separator` |
 | `split.divider.hovered` | `SplitPane.STYLE_DIVIDER_HOVERED` | paint | no | `split.divider` |
 | `grid.cell` | `GridView.STYLE_CELL` | paint | yes | |
@@ -268,8 +280,10 @@ A color picker's hex field uses the `TextBox` keys.
 | `overlay.backdrop` | `Overlays.STYLE_BACKDROP` | paint | no | Nothing |
 | `tooltip.background` | `Tooltip.STYLE_BACKGROUND` | paint | no | `0xF0100010` with a one-unit `0x805000FF` edge |
 | `tooltip.text` | `Tooltip.STYLE_TEXT` | text style | no | `TextStyle.DEFAULT` |
+| `tooltip.padding` | `Tooltip.STYLE_PADDING` | insets | no | 4 on every side |
 | `toast.background` | `Overlays.STYLE_TOAST` | paint | no | `tooltip.background` |
 | `toast.text` | `Overlays.STYLE_TOAST_TEXT` | text style | no | `tooltip.text` |
+| `toast.padding` | `Overlays.STYLE_TOAST_PADDING` | insets | no | 6 on every side |
 
 ## Image and panels
 
