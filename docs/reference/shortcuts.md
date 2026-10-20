@@ -22,6 +22,12 @@ Every key the built-in controls and hosts respond to. Control means Control with
 |---|---|
 | Enter, keypad Enter, Space, Alt+Down | Open the popup (not on repeat). A menu opened this way highlights its first item. |
 
+## InfoBar's close button, while focused
+
+| Keys | Action |
+|---|---|
+| Enter, keypad Enter, Space | Close the bar, after asking `Closable.CLOSE` (not on repeat) |
+
 ## CheckBox, while focused
 
 | Keys | Action |

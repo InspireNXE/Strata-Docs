@@ -18,6 +18,7 @@ package org.inspirenxe.strata.examples;
 import org.inspirenxe.strata.api.control.button.Button;
 import org.inspirenxe.strata.api.control.button.DropDownButton;
 import org.inspirenxe.strata.api.control.display.Avatar;
+import org.inspirenxe.strata.api.control.display.InfoBar;
 import org.inspirenxe.strata.api.control.field.ColorPicker;
 import org.inspirenxe.strata.api.control.field.DatePicker;
 import org.inspirenxe.strata.api.control.field.PasswordTextBox;
@@ -172,6 +173,27 @@ class ExamplesTest {
         assertEquals(3, avatar.badge());
         assertEquals(32f, avatar.bounds().width());
         assertEquals(32f, avatar.bounds().height());
+    }
+
+    @Test
+    void theSaveBarTriesAgainAndStaysOpenWhileSaving() {
+        final ScreenHost host = StrataCore.createScreenHost(new ToyPlatform(), Themes.flat());
+        host.resize(400, 100);
+        final boolean[] saving = {true};
+        final List<String> saves = new ArrayList<>();
+        final InfoBar[] bar = new InfoBar[1];
+        host.open(factory -> bar[0] = ControlExamples.saveFailed(factory, () -> saving[0], () -> saves.add("save")));
+        host.layout();
+        ((Button) bar[0].action().orElseThrow()).press();
+        assertEquals(List.of("save"), saves);
+        // The close button is the only tab stop after the action
+        host.key(Key.TAB, KeyAction.PRESS, Modifiers.NONE);
+        host.key(Key.TAB, KeyAction.PRESS, Modifiers.NONE);
+        host.key(Key.ENTER, KeyAction.PRESS, Modifiers.NONE);
+        assertTrue(bar[0].isOpen());
+        saving[0] = false;
+        host.key(Key.ENTER, KeyAction.PRESS, Modifiers.NONE);
+        assertFalse(bar[0].isOpen());
     }
 
     @Test

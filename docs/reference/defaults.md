@@ -73,6 +73,14 @@ Every number Strata picks for you.
 | | Badge | none; a count above 99 shows as `99+`; padding the theme's `badge.padding`, else 2 at the sides and 1 at the top and bottom |
 | | Badge visual | a third of the size, at the bottom-right corner |
 | | Focusable | no |
+| `InfoBar` | Severity, title, message, action | `INFO`, none, none, none |
+| | Open, closable, icon shown | yes, yes, yes |
+| | Alignment | stretched across its slot, at the top |
+| | Padding | the theme's `infobar.padding`, else 6 at the sides and 4 at the top and bottom |
+| | Accent strip | 3 wide |
+| | Gaps | 4 between the icon, the title, the message, the action and the close button |
+| | Close button | 12 wide and a line tall, at the right end; in the tab order |
+| | Closed | measures zero |
 | `CheckBox` | Box size | caption line height plus 8 (17 with a 9-unit line height) |
 | | Gap between box and caption | 4 |
 | | Mark inset | a fifth of the box size on each side |

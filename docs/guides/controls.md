@@ -1,6 +1,6 @@
 # Controls
 
-Strata's built-in controls are interfaces in the subpackages of `org.inspirenxe.strata.api.control`, made by the factory: `display` (`Label`, `Image`, `Avatar`, `ProgressBar`, `BusyIndicator`, `Separator`), `button` (`Button`, `DropDownButton`, `CycleButton`, `CheckBox`, `RadioButton`, `RadioGroup`, `ToggleSwitch`), `field` (`TextBox`, `PasswordTextBox`, `TextArea`, `Spinner`, `Slider`, `ColorPicker`, `CalendarView`, `DatePicker`, `TimePicker`, `DateTimePicker`), `collection` (`ListView`, `ComboBox`, `TableView`, `TreeView`, `GridView`), `menu` (`Menu`, `MenuBar`, `Flyout`), `pane` (`TabBar`, `Expander`, `SplitPane`, `ScrollBar`) and `window` (`Window`, `MessageBox`). Each one has [events](events.md): a request (Pre) for each change the user can make, which a handler can cancel or rewrite, and a report (Post) for each change from any source. Each section below lists them in an Events table. Their theme keys are listed on each control below and in the [theme key reference](../reference/theme-keys.md). Scrolling is a container, [`ScrollPanel`](layout.md#scrollpanel), and popups, dialogs and tooltips are in [Overlays and tooltips](overlays.md); `Menu` and `Flyout` are controls that open themselves as popups.
+Strata's built-in controls are interfaces in the subpackages of `org.inspirenxe.strata.api.control`, made by the factory: `display` (`Label`, `Image`, `Avatar`, `InfoBar`, `ProgressBar`, `BusyIndicator`, `Separator`), `button` (`Button`, `DropDownButton`, `CycleButton`, `CheckBox`, `RadioButton`, `RadioGroup`, `ToggleSwitch`), `field` (`TextBox`, `PasswordTextBox`, `TextArea`, `Spinner`, `Slider`, `ColorPicker`, `CalendarView`, `DatePicker`, `TimePicker`, `DateTimePicker`), `collection` (`ListView`, `ComboBox`, `TableView`, `TreeView`, `GridView`), `menu` (`Menu`, `MenuBar`, `Flyout`), `pane` (`TabBar`, `Expander`, `SplitPane`, `ScrollBar`) and `window` (`Window`, `MessageBox`). Each one has [events](events.md): a request (Pre) for each change the user can make, which a handler can cancel or rewrite, and a report (Post) for each change from any source. Each section below lists them in an Events table. Their theme keys are listed on each control below and in the [theme key reference](../reference/theme-keys.md). Scrolling is a container, [`ScrollPanel`](layout.md#scrollpanel), and popups, dialogs and tooltips are in [Overlays and tooltips](overlays.md); `Menu` and `Flyout` are controls that open themselves as popups.
 
 ## Attributes
 
@@ -8,8 +8,8 @@ Controls that do the same kind of thing share small interfaces called attributes
 
 | Attribute | Package | What it adds | Events | Controls |
 |---|---|---|---|---|
-| `HasText` | `text` | `text()`, `setText` | | `Button`, `CycleButton`, `CheckBox`, `RadioButton`, `ToggleSwitch`, `Label`, `ProgressBar`, `BusyIndicator`, and through `TextInput` the text fields |
-| `Titled` | `text` | `title()`, `setTitle` | | `Window`, `Expander` |
+| `HasText` | `text` | `text()`, `setText` | | `Button`, `DropDownButton`, `CycleButton`, `CheckBox`, `RadioButton`, `ToggleSwitch`, `Label`, `InfoBar` (the message), `ProgressBar`, `BusyIndicator`, and through `TextInput` the text fields |
+| `Titled` | `text` | `title()`, `setTitle` | | `Window`, `Expander`, `InfoBar` |
 | `TextEntry` | `text` | `length()`, `isEmpty()`, `clear()`, the caret, the selection, `setMaxLength`, `setReadOnly`, `setTextPadding`; nothing that carries the text | `MODIFY`, `MODIFIED` | `TextBox`, `TextArea`, `PasswordTextBox` |
 | `TextInput` | `text` | `TextEntry` plus `text()`, `setText`, `selectedText()` and the highlighter | `EDIT`, `EDITED` | `TextBox`, `TextArea` |
 | `Toggle` | `value` | `isSelected()`, `setSelected`, `toggle()` | `TOGGLE`, `TOGGLED` | `CheckBox`, `ToggleSwitch`, `RadioButton` |
@@ -25,7 +25,7 @@ Controls that do the same kind of thing share small interfaces called attributes
 | `Activatable` | `item` | `setActivateOnClick` | `ACTIVATE`, `ACTIVATED` | `ListView`, `TableView`, `TreeView`, `GridView` |
 | `RowView` | `item` | row height and spacing, the placeholder, scrolling, `setDeselectable` | | `ListView`, `TableView`, `TreeView` |
 | `Closable` | `popup` | `close()` | `CLOSE`, `CLOSED` | `Window`, `Overlay`, and through `Openable` the others |
-| `Openable` | `popup` | `Closable` plus `isOpen()` | `OPEN`, `OPENED` | `ComboBox`, `DropDownButton`, `DatePicker`, `TimePicker`, `DateTimePicker`, and through `Popup` the popups |
+| `Openable` | `popup` | `Closable` plus `isOpen()` | `OPEN`, `OPENED` | `ComboBox`, `DropDownButton`, `DatePicker`, `TimePicker`, `DateTimePicker`, `InfoBar`, and through `Popup` the popups |
 | `Popup` | `popup` | `Openable` plus `open(rect)` and `openAt(x, y)`: a component that opens itself in an overlay | | `Menu`, `Flyout` |
 
 An attribute owns its events, so `Toggle.TOGGLED` fires for a checkbox, a switch and a radio button alike, and one handler on a container hears every control inside it that has the attribute:
@@ -146,6 +146,52 @@ An avatar has no input. It is not focusable, and clicks pass through it to its a
 | `badge.padding` | no | Around the number. 2 at the sides and 1 at the top and bottom. |
 
 An avatar fires no events.
+
+## InfoBar
+
+A strip in a screen's layout that tells the user something about the screen, such as a failed save or a message from a server, and stays until it is closed. A [toast](overlays.md) closes itself after its time; an info bar does not.
+
+```java
+--8<-- "controls/ControlExamples.java:infobar"
+```
+
+From the left, the bar shows an accent strip in the severity's color, the severity's icon when the theme has one, the title in bold, the message, the action, and the close button at the right end. When the title, the message and the action fit on one line beside the close button, they share it. Otherwise the title and the message wrap, the message below the title, and the action goes below the message. The bar stretches across its slot unless you align it otherwise.
+
+| Method | Default | Notes |
+|---|---|---|
+| `setSeverity(severity)` | `INFO` | `INFO`, `SUCCESS`, `WARNING` or `ERROR`. Picks the background, the accent strip and the icon. |
+| `setTitle(title)` | none | A `String` or a [`Text`](text.md#text), drawn before the message in the title style |
+| `setText(message)` | none | The message. It is the bar's `HasText`, so code written against labels reaches it. |
+| `setAction(component)` | none | Any component after the message, such as a button. `null` removes it. A component already in a tree, or made by another factory, throws. |
+| `setAction(caption, runnable)` | | A link button that runs the code when pressed |
+| `setClosable(closable)` | `true` | Whether the close button shows. A bar without one closes only from code. |
+| `setIconShown(shown)` | `true` | Whether the severity's icon shows when the theme has one |
+| `open()`, `close()` | open | Show the bar again, or close it from code |
+
+A click on the close button, or Enter or Space while it has focus, asks `Closable.CLOSE`. Unless a handler cancels it, the bar closes. The close button is in the tab order, and its tooltip is the translated `strata.button.close`. The bar itself takes no focus.
+
+A closed bar takes no space: it measures zero and takes its action and close button out of the tree, as a collapsed [expander](#expander) takes out its content, so nothing in it keeps focus. Wrap the bar in a panel of fixed height if the screen must not move when it closes. `open()` shows it again. `setVisible(false)` is separate from closing, so layout code that hides a bar is not the user closing it, and a hidden bar reports nothing.
+
+The action is your content, so its events, such as a button's `PRESSED`, pass the bar on to its ancestors. Pressing it leaves the bar open; close it from a handler if you want. A disabled bar and everything in it take no input.
+
+| Key | Required | Used for |
+|---|---|---|
+| `infobar.background` | yes | Behind the bar |
+| `infobar.background.info`, `.success`, `.warning`, `.error` | no | Behind a bar of that severity. Each falls back to `infobar.background`. |
+| `infobar.accent.info`, `.success`, `.warning`, `.error` | no | The strip, 3 units wide, down the left edge. Nothing if missing; the strip's space stays. |
+| `infobar.icon.info`, `.success`, `.warning`, `.error` | no | The icon, a square one line tall. No icon, and no space for one, if missing. |
+| `infobar.title` | no | The title. Falls back to `infobar.text` made bold. |
+| `infobar.text` | no | The message. Falls back to `TextStyle.DEFAULT`. |
+| `infobar.close`, `infobar.close.hovered` | no | The close button's `x`, and while it is hovered or focused. Fall back to `window.close` and `window.close.hovered`. |
+| `infobar.padding` | no | Between the strip and the bar's edges and its contents. 6 at the sides and 4 at the top and bottom. |
+
+The focused close button also draws `button.focus` as a ring.
+
+| Event | Kind | Fires |
+|---|---|---|
+| `Closable.CLOSE` | Pre | When the user presses the close button. Cancel it to keep the bar open. |
+| `Closable.CLOSED` | Post | After the bar closed, by the user or with `close()` |
+| `Openable.OPENED` | Post | After `open()` showed a closed bar. A bar never fires `Openable.OPEN`, since only code opens it. |
 
 ## Button
 

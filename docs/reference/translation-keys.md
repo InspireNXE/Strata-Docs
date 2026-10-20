@@ -8,7 +8,7 @@ Strata's built-in controls show these keys through [translated text](../guides/t
 | `strata.button.cancel` | Cancel | Message box buttons |
 | `strata.button.yes` | Yes | Message box buttons |
 | `strata.button.no` | No | Message box buttons |
-| `strata.button.close` | Close | Message box buttons |
+| `strata.button.close` | Close | Message box buttons, and the tooltip of an info bar's close button |
 | `strata.password.show` | Show password | The password box's eye while the text is hidden |
 | `strata.password.hide` | Hide password | The password box's eye while the text shows |
 | `strata.date.placeholder` | Pick a date | An empty date picker |

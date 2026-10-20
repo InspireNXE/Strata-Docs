@@ -215,6 +215,22 @@ The open list also uses the `ListView` and `ScrollPanel` keys.
 
 The `badge.*` keys are for any control that shows a count, so a theme styles every count at once.
 
+## InfoBar
+
+| Key | Constant | Kind | Required | Fallback |
+|---|---|---|---|---|
+| `infobar.background` | `InfoBar.STYLE_BACKGROUND` | paint | yes | |
+| `infobar.background.info`, `.success`, `.warning`, `.error` | `InfoBar.STYLE_BACKGROUND_INFO` and the others | paint | no | `infobar.background` |
+| `infobar.accent.info`, `.success`, `.warning`, `.error` | `InfoBar.STYLE_ACCENT_INFO` and the others | paint | no | Nothing |
+| `infobar.icon.info`, `.success`, `.warning`, `.error` | `InfoBar.STYLE_ICON_INFO` and the others | paint | no | No icon |
+| `infobar.title` | `InfoBar.STYLE_TITLE` | text style | no | `infobar.text` made bold |
+| `infobar.text` | `InfoBar.STYLE_TEXT` | text style | no | `TextStyle.DEFAULT` |
+| `infobar.close` | `InfoBar.STYLE_CLOSE` | text style | no | `window.close`, then `infobar.text` |
+| `infobar.close.hovered` | `InfoBar.STYLE_CLOSE_HOVERED` | text style | no | `window.close.hovered`, then `infobar.close` |
+| `infobar.padding` | `InfoBar.STYLE_PADDING` | insets | no | 6, 4, 6 and 4 |
+
+The close button draws `button.focus` as a ring while it has focus.
+
 ## RadioButton
 
 | Key | Constant | Kind | Required | Fallback |
@@ -508,6 +524,11 @@ A color picker's hex field uses the `TextBox` keys.
 | `tooltip.text` | `0xFFF0F0F0` |
 | `avatar.background` | solid `0xFF3C3F44` |
 | `avatar.initials` | `0xFFF0F0F0` |
+| `infobar.background` | solid `0xFF24262A` |
+| `infobar.accent.info` | solid `0xFF4C86E0` |
+| `infobar.accent.success` | solid `0xFF43A047` |
+| `infobar.accent.warning` | solid `0xFFE8A33D` |
+| `infobar.accent.error` | solid `0xFFE05050` |
 
 Text styles are otherwise plain: no bold, italic, underline, strikethrough or shadow. `tooltip.background` is not set, so tooltips use the fallback box, and neither are `dropdown.arrow`, `flyout.background` and `flyout.padding`, so drop-down arrows take the button text's color and flyouts the combo box's popup paint. The `badge.*` keys are not set either, so badges are white numbers on a red fill.
 

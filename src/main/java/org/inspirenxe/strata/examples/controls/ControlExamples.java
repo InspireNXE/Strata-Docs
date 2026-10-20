@@ -18,6 +18,7 @@ package org.inspirenxe.strata.examples.controls;
 import org.inspirenxe.strata.api.ComponentFactory;
 import org.inspirenxe.strata.api.component.Component;
 import org.inspirenxe.strata.api.control.attribute.item.SingleSelection;
+import org.inspirenxe.strata.api.control.attribute.popup.Closable;
 import org.inspirenxe.strata.api.control.attribute.popup.Openable;
 import org.inspirenxe.strata.api.control.attribute.text.TextEntry;
 import org.inspirenxe.strata.api.control.attribute.value.HasDate;
@@ -30,6 +31,7 @@ import org.inspirenxe.strata.api.control.button.DropDownButton;
 import org.inspirenxe.strata.api.control.collection.ListView;
 import org.inspirenxe.strata.api.control.display.Avatar;
 import org.inspirenxe.strata.api.control.display.Image;
+import org.inspirenxe.strata.api.control.display.InfoBar;
 import org.inspirenxe.strata.api.control.display.Label;
 import org.inspirenxe.strata.api.control.field.ColorPicker;
 import org.inspirenxe.strata.api.control.field.DatePicker;
@@ -64,8 +66,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * The controls guide's examples for images, avatars, checkboxes, sliders, password boxes, rows of controls in a list
- * and date and time pickers.
+ * The controls guide's examples for images, avatars, info bars, checkboxes, sliders, password boxes, rows of controls
+ * in a list and date and time pickers.
  */
 public final class ControlExamples {
 
@@ -143,6 +145,28 @@ public final class ControlExamples {
                 .add(factory.label(seller).setAnchor(Anchor.MIDDLE_LEFT));
         // --8<-- [end:avatar]
         return line;
+    }
+
+    /**
+     * An error bar for a save that failed, with a button that tries again, which stays open while a save is running.
+     *
+     * @param factory the factory
+     * @param saving whether a save is running
+     * @param save starts a save
+     * @return the bar
+     */
+    public static InfoBar saveFailed(final ComponentFactory factory, final BooleanSupplier saving, final Runnable save) {
+        // --8<-- [start:infobar]
+        final InfoBar failed = factory.infoBar(InfoBar.Severity.ERROR, "Not saved", "The server did not answer.")
+                .setAction("Try again", save);
+        // The close button asks first, so a handler can keep the bar open
+        failed.onEvent(Closable.CLOSE, event -> {
+            if (saving.getAsBoolean()) {
+                event.cancel();
+            }
+        });
+        // --8<-- [end:infobar]
+        return failed;
     }
 
     /**
