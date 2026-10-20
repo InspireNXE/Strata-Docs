@@ -15,8 +15,14 @@
  */
 package org.inspirenxe.strata.examples;
 
+import org.inspirenxe.strata.api.control.button.Button;
+import org.inspirenxe.strata.api.control.window.Window;
+import org.inspirenxe.strata.api.event.Subscription;
+import org.inspirenxe.strata.api.theme.Paint;
 import org.inspirenxe.strata.api.theme.Theme;
 import org.inspirenxe.strata.api.theme.ThemeException;
+import org.inspirenxe.strata.api.theme.ThemeId;
+import org.inspirenxe.strata.api.theme.ThemeRef;
 import org.inspirenxe.strata.api.theme.Themes;
 import org.inspirenxe.strata.examples.adapter.ToyAdapter;
 import org.inspirenxe.strata.examples.controls.ControlExamples;
@@ -27,9 +33,11 @@ import org.inspirenxe.strata.examples.quickstart.SettingsScreen;
 import org.inspirenxe.strata.examples.screens.ScreenExamples;
 import org.inspirenxe.strata.examples.theming.ThemeExamples;
 import org.inspirenxe.strata.swing.SwingSnapshot;
+import org.inspirenxe.strata.swing.SwingThemeSource;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -62,6 +70,27 @@ class ExamplesTest {
                 () -> SwingSnapshot.render(new SettingsScreen(), Theme.builder("empty").build(), 320, 200, 1f));
         assertTrue(e.missingKeys().containsAll(List.of("button.normal", "button.hovered", "button.pressed",
                 "button.disabled", "textbox.normal", "textbox.focused", "textbox.disabled")));
+    }
+
+    @Test
+    void overridesFromCodeReachEveryRefUntilClosed() {
+        final SwingThemeSource source = new SwingThemeSource(ExamplesTest.class.getClassLoader());
+        final List<Subscription> subscriptions = ThemeExamples.fromCode();
+        try {
+            final Theme flat = source.resolve(ThemeRef.of(Themes.FLAT));
+            assertEquals(Paint.solid(0xFF2E7D32), flat.paint(Button.STYLE_NORMAL).orElseThrow());
+            assertEquals(Optional.of("code"), flat.layer(Button.STYLE_NORMAL));
+            assertEquals(Optional.of("base"), flat.layer(Button.STYLE_PRESSED));
+
+            final Theme shop = source.resolve(ThemeRef.of(ThemeId.of("examplemod", "shop")));
+            assertEquals(Paint.solid(0xF0101010), shop.paint(Window.STYLE_BACKGROUND).orElseThrow());
+            assertEquals(Paint.solid(0xFF2E7D32), shop.paint(Button.STYLE_NORMAL).orElseThrow());
+        } finally {
+            subscriptions.forEach(Subscription::close);
+        }
+        assertEquals(Themes.flat().paint(Button.STYLE_NORMAL),
+                source.resolve(ThemeRef.of(Themes.FLAT)).paint(Button.STYLE_NORMAL));
+        assertThrows(ThemeException.class, () -> source.resolve(ThemeRef.of(ThemeId.of("examplemod", "shop"))));
     }
 
     @Test

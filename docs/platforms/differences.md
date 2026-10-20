@@ -19,6 +19,7 @@ Strata hides most engine differences, but the SPI leaves some decisions to each 
 | Escape | Passed on to the engine when no component consumes it | Does nothing unless you handle it |
 | Clipboard | The engine's, or `Clipboard.NONE` | The system clipboard; none when headless |
 | Missing sprite | Anything visible | Magenta |
+| Theme files | Any order the adapter chooses, later files winning per key, each named for its layer | Class path order, earlier entries winning; a file's layer is its jar's name or its directory's URL |
 | Nine-slice slicing | The `border` argument, or slicing the engine stores with the image | From the `border` argument, in image pixels |
 | `NOT_ALLOWED` cursor | Any cursor the engine has | Shows the default arrow |
 | Screen stack | `ScreenStack`, or one host per engine screen when the engine stacks screens itself | `StrataPanel.screens()` |

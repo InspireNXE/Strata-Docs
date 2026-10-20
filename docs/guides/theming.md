@@ -146,13 +146,42 @@ ThemeRef theme = ThemeRef.of(ThemeId.of("mymod", "shop"))
         .override(Button.STYLE_NORMAL, Paint.solid(0xFF2E7D32));
 ```
 
-The host resolves the ref when it opens. It starts from the theme registered under the id, applies every theme file the engine finds for that id, and applies the ref's overrides last. `Themes.FLAT` (`strata:flat`) is registered on every engine, and adapters register their engine themes under ids of their own. An id with nothing registered is defined by its files alone and names its starting theme as `parent`.
+The host resolves the ref when it opens. `Themes.FLAT` (`strata:flat`) is registered on every engine, adapters register their engine themes under ids of their own, and code can define more. An id with nothing registered is defined by its files alone and names its starting theme as `parent`.
 
-When the engine reloads its assets, every host with a ref resolves it again and keeps the overrides. A reload whose result lacks a key the open screen needs is logged and ignored, so the screen keeps its old theme.
+When the engine reloads its assets, or code adds or closes [overrides](#overrides-from-code), every host with a ref resolves it again and keeps the ref's overrides. A result that lacks a key the open screen needs is logged and ignored, so the screen keeps its old theme.
+
+### Layers
+
+A theme comes together from layers, lowest first. Each layer sets keys over the ones below it, so the last layer to set a key wins:
+
+| Layer | What it holds | Name `layer(key)` reports |
+|---|---|---|
+| The base | The theme the adapter registers under the id, the adapter's [base files](#base-files), a theme defined in code, or the theme the id's files name as `parent` | `base` for a theme built in code; a base file's own layer |
+| Theme files | Every theme file the engine finds for the id, in the order the adapter gives them | The file's layer, usually its pack's id |
+| Overrides from code | Keys set with `Strata.themes().override`, in the order they were added | `code` |
+| The ref's overrides | Keys set with `ThemeRef.override` | `ref` |
+
+A parent resolves in full, its own files and overrides included, before the child's layers go on top. When an id has a base, its files' `parent` is ignored, so a pack can change keys of an engine theme but cannot swap it for another theme. The adapter decides the order of the theme files, so it decides where the player's packs and each mod's files fall. [Platform differences](../platforms/differences.md#at-a-glance) lists what Swing does.
+
+A resolved theme remembers which layer set each key. `theme.layer(key)` returns the layer's name, which shows where a color or a sprite came from. A theme built with `Theme.builder` reports none, and neither does a variant made with `toBuilder()`.
+
+### Overrides from code
+
+`ThemeRef.override` changes a theme for one screen. To change it for every screen that uses it, or to define a theme of your own on top of another, use the registry from `Strata.themes()`:
+
+```java
+--8<-- "theming/ThemeExamples.java:registry"
+```
+
+`ThemeOverrides` holds paints, text styles and insets by style key, with no id, so the same overrides can go to `override`, to `define` or to one ref. Overrides from code apply above every theme file, so your code has the last word over packs and over other projects' theme files, and only a ref's own overrides come after them. Overrides for one id apply in the order they were added.
+
+Nothing is written to a theme or a file. The keys apply each time the theme resolves, and closing the subscription brings back whatever lies beneath them. A text style from code replaces the whole style for its key, where a theme file's text entry changes only the fields it names.
+
+`define` gives an id a base that starts from its parent, as a theme file with `parent` does, and packs can restyle a defined theme like any other. Defining an id that is already defined, until that definition's subscription is closed, throws `ThemeException`, and so does defining `strata:flat`. An id that the adapter already gives a base cannot be defined either; that shows when the theme resolves, which then throws `ThemeException`.
 
 ### Theme files
 
-A theme file sets only the keys it changes. Where the files live depends on the engine: Swing reads `assets/<namespace>/themes/<path>.json` from the class path. A file whose id has a registered theme changes that theme key by key, and when several packs ship the same file, the higher-priority pack wins per key.
+A theme file sets only the keys it changes. Where the files live depends on the engine: Swing reads `assets/<namespace>/themes/<path>.json` from the class path. A file whose id has a base changes that theme key by key, and when several packs ship the same file, the one the adapter puts later wins per key.
 
 ```json
 {
@@ -185,6 +214,12 @@ A theme file sets only the keys it changes. Where the files live depends on the 
 | Insets | One number, `[horizontal, vertical]` or `[left, top, right, bottom]`, in UI units |
 
 A misspelled member, a bad color or broken JSON makes the whole file invalid. The engine logs it and skips that file, and the other packs still apply.
+
+### Base files
+
+An adapter can write its engine theme as JSON instead of building it in code. `ThemeSource.bases(id)` returns the files that make up the theme's base: the theme starts from the `parent` they name, applies them in order, and then applies the theme files and overrides as usual. A base file ships with the adapter, so a mistake in one is a bug: resolving throws `ThemeException` naming the file, where a broken pack file is only logged and skipped. An id cannot have both a base built in code and base files.
+
+In Swing, `SwingThemeSource.register(id, documents)` registers base files. Keep them out of `assets/<namespace>/themes`, or they apply a second time as theme files.
 
 ## Changing the theme at run time
 

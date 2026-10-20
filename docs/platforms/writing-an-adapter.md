@@ -55,7 +55,7 @@ dependencies {
 | `clock()` | Monotonic, never backward, advancing in real time. `Clock.SYSTEM` is `System.nanoTime`. Click counting, caret blinking and synthesized key repeat stall on a clock that stops. |
 | `textInput()` | Told when a text field gains and loses focus. `start` and `stop` may arrive repeatedly; a second `start` moves the input area. After `start`, the adapter must forward typed characters. Use `TextInputSink.NONE` if the engine always sends characters. |
 | `capabilities()` | Constant for the platform's life. `sendsKeyRepeat` is true when the adapter delivers `REPEAT` itself. `monospaceFont` is true when monospaced styles get a font whose characters all have the same width; otherwise they use the normal font, measured and drawn alike. `slicesSprites` is true when the engine stores slicing with its images and applies it in `sprite` as well as `nineSlice`; the host then passes sized nine-slices and tiled sprites to the canvas whole. When it is false, the host draws them from `spriteRegion` calls, one per piece. Its default draws the whole image with `sprite` inside a clip; override it to draw part of an image directly, which avoids seams between pieces at scales that are not whole numbers. |
-| `themes()` | Where themes named by id come from: themes the adapter builds in code (`base`), theme files from the engine's packs, lowest priority first (`documents`), and a `version()` that changes when either may have. Hosts read `version()` on every layout and render, so keep it cheap. Never throws for an unknown id. Use `ThemeSource.NONE` if the engine has no themes or packs. |
+| `themes()` | Where themes named by id come from: themes the adapter builds in code (`base`) or ships as JSON (`bases`, the theme's [base files](../guides/theming.md#base-files)), theme files from the engine's packs, lowest priority first (`documents`), and a `version()` that changes when any of them may have. An id must not have both a `base` and base files. Core applies the documents in the order returned, so the adapter decides where the player's packs and mods' files fall; each `ThemeDocument` names its layer, usually its pack's id, which `Theme.layer` reports. A base file that cannot be parsed makes the theme fail to resolve, while a broken document is skipped. Hosts read `version()` on every layout and render, so keep it cheap. Never throws for an unknown id. Use `ThemeSource.NONE` if the engine has no themes or packs. |
 
 Return the same objects every time; hosts may keep what they get.
 
@@ -98,6 +98,8 @@ Create a host with `StrataCore`:
 | `createScreenHost(platform, theme)` | One screen at a time. A screen that asks to close is closed by the host. |
 | `createScreenHost(platform, theme, closeRequested)` | The same, but you decide what closing means, such as closing the engine screen that holds the host. |
 | `createScreenStack(platform, theme)` | A stack of screens, for engines with no screen system |
+
+`createScreenHost(platform, theme, closeRequested)` and `createScreenStack(platform, theme)` also take a `ThemeRef`. A host given a ref also compares the version of the overrides code adds with `Strata.themes()`, which core keeps for every engine, and resolves the ref again when it changes. `StrataCore.resolveTheme` resolves a ref once, without a host.
 
 Then forward the engine's callbacks:
 

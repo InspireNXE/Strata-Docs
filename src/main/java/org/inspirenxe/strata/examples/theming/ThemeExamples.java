@@ -16,9 +16,12 @@
 package org.inspirenxe.strata.examples.theming;
 
 import org.inspirenxe.strata.api.ComponentFactory;
+import org.inspirenxe.strata.api.Strata;
 import org.inspirenxe.strata.api.control.button.Button;
 import org.inspirenxe.strata.api.control.display.Label;
 import org.inspirenxe.strata.api.control.field.TextBox;
+import org.inspirenxe.strata.api.control.window.Window;
+import org.inspirenxe.strata.api.event.Subscription;
 import org.inspirenxe.strata.api.geometry.Insets;
 import org.inspirenxe.strata.api.geometry.Size;
 import org.inspirenxe.strata.api.layout.Anchor;
@@ -29,9 +32,14 @@ import org.inspirenxe.strata.api.theme.Paint;
 import org.inspirenxe.strata.api.theme.SpriteId;
 import org.inspirenxe.strata.api.theme.Theme;
 import org.inspirenxe.strata.api.theme.ThemeException;
+import org.inspirenxe.strata.api.theme.ThemeId;
+import org.inspirenxe.strata.api.theme.ThemeOverrides;
+import org.inspirenxe.strata.api.theme.ThemeRef;
 import org.inspirenxe.strata.api.theme.Themes;
 import org.inspirenxe.strata.examples.quickstart.SettingsScreen;
 import org.inspirenxe.strata.swing.SwingSnapshot;
+
+import java.util.List;
 
 /**
  * The theming guide's examples.
@@ -128,6 +136,29 @@ public final class ThemeExamples {
             final java.util.Set<String> keys = e.missingKeys();
         }
         // --8<-- [end:missing]
+    }
+
+    /**
+     * Green buttons on every screen that shows the flat theme, and a theme of the example mod's own on top of it.
+     *
+     * @return the subscriptions, the overrides first; close them to take the changes back
+     */
+    public static List<Subscription> fromCode() {
+        // --8<-- [start:registry]
+        // Every screen that shows the flat theme gets green buttons, until the subscription is closed
+        final ThemeOverrides green = ThemeOverrides.of()
+                .with(Button.STYLE_NORMAL, Paint.solid(0xFF2E7D32))
+                .with(Button.STYLE_HOVERED, Paint.solid(0xFF388E3C));
+        final Subscription everywhere = Strata.themes().override(Themes.FLAT, green);
+
+        // A theme of your own that starts from another; packs can restyle it like any theme
+        final Subscription shop = Strata.themes().define(ThemeId.of("examplemod", "shop"), Themes.FLAT,
+                ThemeOverrides.of().with(Window.STYLE_BACKGROUND, Paint.solid(0xF0101010)));
+
+        // The same overrides on one screen only
+        final ThemeRef oneScreen = ThemeRef.of(Themes.FLAT).override(green);
+        // --8<-- [end:registry]
+        return List.of(everywhere, shop);
     }
 
     static void perComponent(final ComponentFactory factory) {

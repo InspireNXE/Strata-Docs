@@ -1,6 +1,6 @@
 # Theme keys
 
-Every style key the built-in controls read. A theme lacking a required key cannot show a tree that uses the control; see [Themes](../guides/theming.md#required-and-optional-keys).
+Every style key the built-in controls read. A theme lacking a required key cannot show a tree that uses the control; see [Themes](../guides/theming.md#required-and-optional-keys). On a theme resolved from a `ThemeRef`, `theme.layer(key)` names the [layer](../guides/theming.md#layers) that set a key.
 
 ## Button
 
