@@ -7,7 +7,7 @@ Every number Strata picks for you.
 | Setting | Default |
 |---|---|
 | Visible, enabled | yes |
-| Focusable, tabbable | no, except buttons, check boxes, radio buttons, toggle switches, sliders, text boxes, text areas, lists (also inside tables and trees), combo boxes, tab bars and expanders, the controls that are `Focusable`. Scroll bars and scroll panels are `Focusable` but start with focus off. Menus are focusable but not tabbable. A color picker is neither, but its hex field is. |
+| Focusable, tabbable | no, except buttons, checkboxes, radio buttons, toggle switches, sliders, text boxes, text areas, lists (also inside tables and trees), combo boxes, tab bars and expanders, the controls that are `Focusable`. Scroll bars and scroll panels are `Focusable` but start with focus off. Menus are focusable but not tabbable. A color picker is neither, but its hex field is. |
 | Margin | `Insets.NONE` |
 | Minimum size | 0 by 0 |
 | Maximum size | `Float.POSITIVE_INFINITY` both ways |
@@ -178,6 +178,7 @@ Every number Strata picks for you.
 | Synthesized key repeat delay | 400 ms |
 | Synthesized key repeat interval | 33 ms |
 | Keys the host repeats itself | Left, Right, Up, Down, Backspace, Delete, Home, End, Page Up, Page Down |
+| Tooltip delay | 500 ms (`Tooltip.DEFAULT_DELAY_MILLIS`), none when moving from one tooltip to another |
 | Tooltip position | 12 right of and 12 above the pointer, flipped left at the right edge, kept inside the host |
 | Tooltip padding | 4, with 1 between lines |
 | Toast time | 3000 ms for text toasts |

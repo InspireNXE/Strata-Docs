@@ -24,10 +24,10 @@ Controls that do the same kind of thing share small interfaces called attributes
 | `Closable` | `popup` | `close()` | `CLOSE`, `CLOSED` | `Window`, `Overlay`, and through `Openable` the others |
 | `Openable` | `popup` | `Closable` plus `isOpen()` | `OPEN`, `OPENED` | `ComboBox`, `Menu` |
 
-An attribute owns its events, so `Toggle.TOGGLED` fires for a check box, a switch and a radio button alike, and one handler on a container hears every control inside it that has the attribute:
+An attribute owns its events, so `Toggle.TOGGLED` fires for a checkbox, a switch and a radio button alike, and one handler on a container hears every control inside it that has the attribute:
 
 ```java
-// Save the settings page whenever any check box, switch or radio button on it changes
+// Save the settings page whenever any checkbox, switch or radio button on it changes
 settings.onEvent(Toggle.TOGGLED, event -> save());
 
 // Refresh the buttons whenever any list, table, tree, combo box or grid in the form changes selection
@@ -201,7 +201,7 @@ A box that is checked or not, with a caption to its right.
 | `toggle()` | | Flips it from code: fires `TOGGLED` but no `TOGGLE` request. Does nothing while disabled. |
 | `setBoxSize(size)` | line height plus 8 | The square box's size. `Float.NaN` goes back to the default, which is 17 with a 9-unit line height. |
 
-A left click anywhere on the check box, caption included, toggles it, and so does a press of Enter, keypad Enter or Space while it has focus. It consumes those inputs. It is focusable and tabbable and shows the hand cursor. The caption sits 4 units right of the box, both centered vertically.
+A left click anywhere on the checkbox, caption included, toggles it, and so does a press of Enter, keypad Enter or Space while it has focus. It consumes those inputs. It is focusable and tabbable and shows the hand cursor. The caption sits 4 units right of the box, both centered vertically.
 
 | Face | When |
 |---|---|
@@ -271,7 +271,7 @@ It is focusable and tabbable and shows the hand cursor. A horizontal slider want
 
 ## The controls together
 
-![Check boxes, a disabled check box and two sliders](../assets/images/controls-basic.png)
+![Checkboxes, a disabled checkbox and two sliders](../assets/images/controls-basic.png)
 
 ## TextBox
 
@@ -768,7 +768,7 @@ It edits like a [`TextBox`](#textbox), with a filter, a length limit, read-only 
 
 | Method | Default | Notes |
 |---|---|---|
-| `setWrap(boolean)` | on | Long lines break after the last space that fits. Off, rows are lines and the view scrolls sideways. |
+| `setWrap(boolean)` | on | Long lines break after the last space that fits. Off, rows are lines and the view scrolls sideways, with a scroll bar along the bottom when a line is too wide. |
 | `setVisibleLines(n)` | 4 | How many lines the desired height holds |
 | `setHighlighter(h)` | none | Draws parts of the text in their own styles, measured in those styles, on every row. See [Styled text in fields](text.md#styled-text-in-fields). |
 | `setTextPadding(insets)` | 4 on each side | Space between the edge and the text |

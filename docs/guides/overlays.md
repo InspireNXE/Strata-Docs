@@ -64,7 +64,7 @@ Dialogs are overlays inside the screen's host, so they need no engine screen of 
 
 ## Tooltips
 
-Any component can have a tooltip. It shows while the pointer rests on the component or anything inside it that has none of its own, follows the pointer 12 units right of and above it (left of it near the right edge), and stays inside the host. It hides while a drag is in progress. Tooltips take no input.
+Any component can have a tooltip. It shows once the pointer has rested for half a second on the component or anything inside it that has none of its own, and at once when the pointer moves straight from another tooltip. Adapters can change the wait with `setTooltipDelay` on their screen host or stack. The tooltip follows the pointer 12 units right of and above it (left of it near the right edge), and stays inside the host. It hides while a drag is in progress. Tooltips take no input.
 
 ```java
 --8<-- "overlays/OverlayExamples.java:tooltips"

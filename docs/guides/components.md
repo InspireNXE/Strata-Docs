@@ -76,7 +76,7 @@ Hiding or disabling a component also hides or disables everything inside it, and
 
 | Interface | Gives | Who has it |
 |---|---|---|
-| `Focusable` | Keyboard focus and tab order | Buttons, cycle buttons, check boxes, radio buttons, toggle switches, sliders, text boxes, text areas, combo boxes, lists, menus, expanders and tab bars. Scroll bars and scroll panels have it too, turned off until you call `setFocusable(true)`. |
+| `Focusable` | Keyboard focus and tab order | Buttons, cycle buttons, checkboxes, radio buttons, toggle switches, sliders, text boxes, text areas, combo boxes, lists, menus, expanders and tab bars. Scroll bars and scroll panels have it too, turned off until you call `setFocusable(true)`. |
 | `HasCursor` | `setCursor` | Every container, and every control except separators and busy indicators |
 | `HasTooltip` | `setTooltip` | Every container, and every control except separators and busy indicators |
 | `Container` | Children, padding, background and border | Panels, windows |
@@ -96,7 +96,7 @@ Hover and press state belong to a control's own drawing code, so they are not pu
 
 ### Cursors
 
-`setCursor(CursorKind)` picks the mouse cursor shown while the pointer is over the component. A component with no cursor of its own uses its nearest ancestor's, and the default is `ARROW`. Buttons, check boxes and sliders show `HAND`, and text boxes show `TEXT`.
+`setCursor(CursorKind)` picks the mouse cursor shown while the pointer is over the component. A component with no cursor of its own uses its nearest ancestor's, and the default is `ARROW`. Buttons, checkboxes and sliders show `HAND`, and text boxes show `TEXT`.
 
 | `CursorKind` | Meaning |
 |---|---|

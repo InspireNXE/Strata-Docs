@@ -44,7 +44,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * The controls guide's examples for images, check boxes, sliders and rows of controls in a list.
+ * The controls guide's examples for images, checkboxes, sliders and rows of controls in a list.
  */
 public final class ControlExamples {
 
