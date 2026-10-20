@@ -43,6 +43,14 @@ Use the panel on the Swing event dispatch thread only, the same as any Swing com
 
 Other adapters use other fonts with other widths. Layouts built on measured text adapt; layouts that assume widths will not.
 
+## Translations
+
+Swing has no language files of its own, so translated text reads through a translator you set for the whole process. `SwingTranslations.use(bundle)` reads a `ResourceBundle`, and `SwingTranslations.use(translator)` takes any `Translator`. Call it again with another bundle to change the language; open panels lay out again on their next frame. Until one is set, Strata's own keys read in English and other keys read as themselves.
+
+```java
+SwingTranslations.use(ResourceBundle.getBundle("shop.messages", Locale.GERMAN));
+```
+
 ## Sprites
 
 `SwingSprites` loads images from the classpath at `assets/<namespace>/sprites/<path>.png`. Pass a `SpriteResolver` to `SwingSprites`, and that to `StrataPanel` or `SwingSnapshot.render`, to read another layout. Images are loaded once and cached, including the fact that one is missing. A missing or unreadable image draws as solid magenta.

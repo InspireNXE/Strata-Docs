@@ -26,8 +26,7 @@ import org.inspirenxe.strata.api.control.window.Window;
 import org.inspirenxe.strata.api.event.input.InputEvents;
 import org.inspirenxe.strata.api.layout.AnchorPanel;
 import org.inspirenxe.strata.api.overlay.Overlay;
-import org.inspirenxe.strata.api.text.TextSpan;
-import org.inspirenxe.strata.api.text.TextStyle;
+import org.inspirenxe.strata.api.text.Text;
 import org.inspirenxe.strata.api.theme.Paint;
 
 import java.util.List;
@@ -80,11 +79,9 @@ public final class OverlayExamples {
         // --8<-- [start:tooltips]
         final Label price = factory.label("125.50/ea").setTooltip("Total: 1,506");
 
-        final TextStyle white = TextStyle.DEFAULT.withColor(0xFFFFFFFF);
-        final TextStyle blue = TextStyle.DEFAULT.withColor(0xFF5555FF).withItalic(true);
         price.setTooltip(Tooltip.lines(List.of(
-                List.of(new TextSpan("Diamond", white)),
-                List.of(new TextSpan("Example Mod", blue)))));
+                Text.of("Diamond"),
+                Text.of("Example Mod").color(0xFF5555FF).italic())));
         // --8<-- [end:tooltips]
         return price;
     }

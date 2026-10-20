@@ -46,19 +46,17 @@ help.setAlignment(HorizontalAlignment.STRETCH, VerticalAlignment.TOP);
 
 | Method | Default | Notes |
 |---|---|---|
-| `setText(text)` | | `\n` starts a new line. A new layout runs if the text changed. |
+| `setText(text)` | | A `String` or a [`Text`](text.md#text), which may be styled or translated. `\n` starts a new line. A new layout runs if the text changed. |
 | `setWrap(boolean)` | off | Also break between words to fit the width offered. See [Wrapping text](layout.md#wrapping-text). |
 | `setStyle(TextStyle)` | `null` | Overrides the theme's `label.text` for this label. `null` goes back to the theme. |
 | `setTextAlignment(HorizontalAlignment)` | `LEFT` | How each line sits within the label's width. It only shows when the label is wider than its text, for example when stretched. `STRETCH` acts as `LEFT`. |
-| `setSpans(List<TextSpan>)` | none | Text made of runs that each keep their own style, such as a white name followed by a gray count. `text()` returns them joined, and `setText` goes back to plain text. |
 | `setTextScale(float)` | 1 | Draws and measures the text larger or smaller, such as 0.8 for small print. Not greater than 0 throws. |
 | `setOverflow(TextOverflow)` | `VISIBLE` | `ELLIPSIS` cuts a line that does not fit the bounds and ends it with `...`, and the label asks for no more width than it is offered. |
 
-With wrapping on, a single word wider than a whole line is broken between characters, and spans wrap the same way, each piece keeping its run's style. The desired size is the widest line by the number of lines times the line height, all times the text scale.
+With wrapping on, a single word wider than a whole line is broken between characters, and styled text wraps the same way, each piece keeping its part's style. The desired size is the widest line by the number of lines times the line height, all times the text scale.
 
 ```java
-Label price = factory.label("")
-        .setSpans(List.of(new TextSpan("125.50", gold), new TextSpan("/ea", gray)))
+Label price = factory.label(Text.of("125.50").color(GOLD).append(Text.of("/ea").color(GRAY)))
         .setTextScale(0.8f);
 Label name = factory.label(item.name()).setOverflow(TextOverflow.ELLIPSIS);
 name.setAlignment(HorizontalAlignment.STRETCH, VerticalAlignment.MIDDLE);

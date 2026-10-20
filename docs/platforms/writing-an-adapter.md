@@ -59,6 +59,12 @@ dependencies {
 
 Return the same objects every time; hosts may keep what they get.
 
+### Translations
+
+Translated text reads through one `Translator` for the whole process, which the adapter gives core with `StrataCore.setTranslator` when it starts. `translate(key)` returns the pattern for the current language as written, with its `%s`, `%1$s` and `%%`, or empty when there is none; core formats the arguments. `version()` changes whenever translations may read differently, and hosts lay everything out again when it does, so keep it cheap. Calls may come from any thread.
+
+An engine with its own text type can wrap it as Strata text with `StrataCore.text(source)`. A `TextSource` resolves the engine text to spans over a base style each time a control lays out, so engine translations stay live, and every `Text` operation works on it.
+
 ## The canvas
 
 `Canvas` is what the engine draws for Strata:

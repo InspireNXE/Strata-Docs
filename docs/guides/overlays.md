@@ -72,8 +72,8 @@ Any component can have a tooltip. It shows while the pointer rests on the compon
 
 | Kind | Made with | Drawn |
 |---|---|---|
-| Plain text | `setTooltip(String)`, `Tooltip.text` | In the `tooltip.text` style, `\n` for new lines |
-| Styled lines | `Tooltip.lines(lines)` | Each span in its own style |
+| Text | `setTooltip(String)`, `setTooltip(Text)`, `Tooltip.text` | In the `tooltip.text` style, `\n` for new lines |
+| Lines | `Tooltip.lines(List<Text>)` | One `Text` per line, each over the `tooltip.text` style |
 | A component | `Tooltip.of(factory -> component)` | Built again each time the tooltip shows, with no box of its own |
 
 Text tooltips draw on the `tooltip.background` paint with 4 units of padding, or on a dark box with a purple edge when the theme lacks the key.

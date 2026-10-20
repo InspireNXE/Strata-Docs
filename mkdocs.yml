@@ -122,6 +122,7 @@ nav:
       - Theme keys: reference/theme-keys.md
       - Defaults and timings: reference/defaults.md
       - Keyboard shortcuts: reference/shortcuts.md
+      - Translation keys: reference/translation-keys.md
   - Help:
       - help/index.md
       - FAQ: help/faq.md

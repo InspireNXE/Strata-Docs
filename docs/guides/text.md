@@ -1,6 +1,63 @@
 # Text
 
-Text in Strata is plain values: characters with a style. The engine adapter picks the font, draws the text and measures it. The same text is therefore a little wider on one engine than on another, and layouts should never assume character widths.
+Controls show `Text`: characters with styles, which may be translated. The engine adapter picks the font, draws the text and measures it. The same text is therefore a little wider on one engine than on another, and layouts should never assume character widths.
+
+## Text
+
+`Text` is what captions, titles, messages, placeholders and tooltips take. Every setter that takes one also takes a `String`, so plain text needs nothing new:
+
+```java
+button.setText("Buy");
+button.setText(Text.translatable("shop.buy"));
+```
+
+Text has no style of its own until a control shows it. The control resolves it against the style it would draw plain text in, its base, which usually comes from the theme. `Text.of("Ana")` draws in the base. `color`, `bold`, `italic`, `underline`, `strikethrough` and `style(change)` change the base for the text they are called on, so parts that set the same property keep theirs. `Text.of(text, style)` ignores the base and draws in exactly that style.
+
+```java
+--8<-- "text/TextExamples.java:styled"
+```
+
+Text is immutable, and two texts built the same way are equal. Read the characters with `plain()`, for searching, sorting and narration.
+
+### Translated text
+
+`Text.translatable(key, args...)` looks the key up in the current language each time a control lays out, so a screen follows a language change without code of its own. The translation is a pattern: `%s` stands for the next argument, `%1$s` for the first, and `%%` for a percent sign. A text argument keeps its own styles, and any other argument shows as `String.valueOf`.
+
+```java
+--8<-- "text/TextExamples.java:translated"
+```
+
+Where the translation comes from depends on the platform. In game the adapter uses the game's own language files, so keys go in your `lang` files. On Swing, set a `ResourceBundle` with `SwingTranslations.use`; see [Swing](../platforms/swing.md#translations). A key with no translation shows the key itself, which makes missing ones easy to spot. Strata's own controls use keys too, listed in [Translation keys](../reference/translation-keys.md), with English built in.
+
+Plural rules are not handled. Pick the key for the count yourself, such as `shop.item` for one and `shop.items` for more.
+
+### Operations
+
+Every operation returns new text and runs each time the text is resolved, so it works on translated text in any language.
+
+| Operation | Does |
+|---|---|
+| `append(text)`, `Text.concat(parts)` | Joins texts one after another |
+| `Text.join(separator, parts)` | Joins texts with a separator between each two |
+| `mapSpans(mapper)` | Changes every resolved span, after each part has its style |
+| `styleMatches(pattern, change)` | Restyles the characters a regular expression matches, across parts |
+| `replace(target, replacement)` | Replaces every occurrence; the replacement takes the style of where it lands |
+| `trim()`, `normalizeWhitespace()` | Removes whitespace at the ends, or turns each run of it into one space |
+| `splitByLines()`, `splitByWords()` | Splits into lines or words. How many there are is decided when you call it. |
+
+```java
+--8<-- "text/TextExamples.java:matches"
+```
+
+```java
+--8<-- "text/TextExamples.java:join"
+```
+
+Tooltips take a list of texts, one per line:
+
+```java
+--8<-- "text/TextExamples.java:tooltip"
+```
 
 ## TextStyle
 
@@ -42,7 +99,7 @@ Other adapters use the engine's own text styles where it has them.
 
 ## TextSpan
 
-A `TextSpan` is a string with a `TextStyle`. `TextSpan.of(text)` uses the default style, and `withText` and `withStyle` make copies.
+A `TextSpan` is a string with a `TextStyle`, the unit engines draw. `Text.resolve(base)` turns text into spans. `TextSpan.of(text)` uses the default style, and `withText` and `withStyle` make copies.
 
 As far as engines are concerned, a span is one line. Break text into lines before drawing it, as `Label` does.
 
@@ -68,18 +125,26 @@ Engines with pixel fonts often report whole-pixel widths, and some make bold tex
 ```java
 @Override
 protected Size measure(MeasureContext context, float availableWidth, float availableHeight) {
-    this.span = new TextSpan(this.caption, this.style);
+    this.spans = this.caption.resolve(this.style);
+    float width = 0;
+    for (TextSpan span : this.spans) {
+        width += context.text().width(span);
+    }
     this.lineHeight = context.text().lineHeight(this.style);
-    return new Size(context.text().width(this.span), this.lineHeight);
+    return new Size(width, this.lineHeight);
 }
 
 @Override
 protected void paint(Painter painter, Rect bounds) {
-    painter.text(this.span, bounds.x(), bounds.y());
+    float x = bounds.x();
+    for (TextSpan span : this.spans) {
+        painter.text(span, x, bounds.y());
+        x += this.environment().text().width(span);
+    }
 }
 ```
 
-`Painter.text(span, x, y)` puts the top-left corner of the line box at the point: `y` is the top of the line, not the baseline. Build spans during measure and keep them for painting, so painting does not allocate. The [switch example](extending.md#write-a-new-component) does this.
+`Painter.text(span, x, y)` puts the top-left corner of the line box at the point: `y` is the top of the line, not the baseline. Resolve text during measure and keep the spans for painting, so translations are read once per layout and painting does not allocate. Hosts lay every component out again when the language changes. The [switch example](extending.md#write-a-new-component) does this.
 
 ## Wrapping
 
@@ -87,7 +152,7 @@ protected void paint(Painter painter, Rect bounds) {
 
 ## Mixed styles
 
-A label made with `setSpans` draws its spans one after another, each in its own style, and wraps them by the same rules, so a piece of a span keeps the span's style on any line. Use it for text like a white item name followed by a gray count, or a gold price followed by `/ea`. `setTextScale` draws a label larger or smaller, and `TextOverflow.ELLIPSIS` ends a line that does not fit with `...`, in the style of the last character kept. See [Label](controls.md#label).
+A label draws styled text one part after another, each in its own style, and wraps it by the same rules, so a piece of a part keeps its style on any line. Use it for text like a white item name followed by a gray count, or a gold price followed by `/ea`. `setTextScale` draws a label larger or smaller, and `TextOverflow.ELLIPSIS` ends a line that does not fit with `...`, in the style of the last character kept. See [Label](controls.md#label).
 
 ## Styled text in fields
 
