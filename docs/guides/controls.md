@@ -1,6 +1,6 @@
 # Controls
 
-Strata's built-in controls are interfaces in the subpackages of `org.inspirenxe.strata.api.control`, made by the factory: `display` (`Label`, `Image`, `ProgressBar`, `BusyIndicator`, `Separator`), `button` (`Button`, `DropDownButton`, `CycleButton`, `CheckBox`, `RadioButton`, `RadioGroup`, `ToggleSwitch`), `field` (`TextBox`, `PasswordTextBox`, `TextArea`, `Spinner`, `Slider`, `ColorPicker`, `CalendarView`, `DatePicker`, `TimePicker`, `DateTimePicker`), `collection` (`ListView`, `ComboBox`, `TableView`, `TreeView`, `GridView`), `menu` (`Menu`, `MenuBar`, `Flyout`), `pane` (`TabBar`, `Expander`, `SplitPane`, `ScrollBar`) and `window` (`Window`, `MessageBox`). Each one has [events](events.md): a request (Pre) for each change the user can make, which a handler can cancel or rewrite, and a report (Post) for each change from any source. Each section below lists them in an Events table. Their theme keys are listed on each control below and in the [theme key reference](../reference/theme-keys.md). Scrolling is a container, [`ScrollPanel`](layout.md#scrollpanel), and popups, dialogs and tooltips are in [Overlays and tooltips](overlays.md); `Menu` and `Flyout` are controls that open themselves as popups.
+Strata's built-in controls are interfaces in the subpackages of `org.inspirenxe.strata.api.control`, made by the factory: `display` (`Label`, `Image`, `Avatar`, `ProgressBar`, `BusyIndicator`, `Separator`), `button` (`Button`, `DropDownButton`, `CycleButton`, `CheckBox`, `RadioButton`, `RadioGroup`, `ToggleSwitch`), `field` (`TextBox`, `PasswordTextBox`, `TextArea`, `Spinner`, `Slider`, `ColorPicker`, `CalendarView`, `DatePicker`, `TimePicker`, `DateTimePicker`), `collection` (`ListView`, `ComboBox`, `TableView`, `TreeView`, `GridView`), `menu` (`Menu`, `MenuBar`, `Flyout`), `pane` (`TabBar`, `Expander`, `SplitPane`, `ScrollBar`) and `window` (`Window`, `MessageBox`). Each one has [events](events.md): a request (Pre) for each change the user can make, which a handler can cancel or rewrite, and a report (Post) for each change from any source. Each section below lists them in an Events table. Their theme keys are listed on each control below and in the [theme key reference](../reference/theme-keys.md). Scrolling is a container, [`ScrollPanel`](layout.md#scrollpanel), and popups, dialogs and tooltips are in [Overlays and tooltips](overlays.md); `Menu` and `Flyout` are controls that open themselves as popups.
 
 ## Attributes
 
@@ -100,6 +100,52 @@ Image icon = factory.image(SwingVisuals.image(bufferedImage));
 ```
 
 A canvas draws a placeholder for a visual it did not make. Each adapter documents the visuals it makes.
+
+## Avatar
+
+Who someone or something is, in a small square: their picture, or else their initials, or else a placeholder figure, with an optional badge for a count or a status.
+
+```java
+--8<-- "controls/ControlExamples.java:avatar"
+```
+
+The square shows the first of these it has:
+
+1. A sprite or visual set with `setSprite` or `setVisual`, stretched over the square.
+2. The icon of the value's [appearance](appearances.md). An adapter that registers an appearance for its player or account type makes `factory.avatar(account)` show that face with no more code.
+3. Initials: those set with `setInitials`, else worked out from the name set with `setName`, else from the value's name. They are the first letter of the first word and the first letter of the last word, upper cased for the language, so Ana Lima shows `AL`, Cleo shows `C`, and a name with no letters shows none.
+4. The theme's `avatar.placeholder`, or `avatar.placeholder.group` for a group, when it has one. Otherwise only the background shows.
+
+| Method | Default | Notes |
+|---|---|---|
+| `setValue(value)` | none | Its icon, its name for the initials, and its tooltip, all through its appearance. A value with no appearance is named by `String.valueOf`, so `factory.avatar("Ana Lima")` shows `AL`. |
+| `setSprite(sprite)`, `setVisual(visual)` | none | The picture. Each replaces the other, and `null` clears it. |
+| `setName(name)` | none | A `String` or a [`Text`](text.md#text) the initials come from, in place of the value's name |
+| `setInitials(initials)` | worked out | `null` works them out from the name again, and an empty string shows none |
+| `setGroup(group)` | `false` | Shows the group placeholder |
+| `setAvatarSize(size)` | 24 | The side of the square, which is also the desired size. Negative or infinite sizes throw. |
+| `setBadge(count)` | 0 | 0 hides the badge, and a count above 99 shows as `99+`. Negative counts throw. |
+| `setBadgeVisual(visual)` | none | A visual shown in place of the number, such as a status dot, in a square a third of the avatar's size |
+
+The initials draw centered in the `avatar.initials` style. They are scaled by a whole number so that a line takes at most two fifths of the square, and never drawn smaller than the font's own size, which keeps bitmap fonts crisp: with a 9-unit line, a 24 unit avatar draws them at their own size and a 48 unit one at twice it. Translated names follow the language.
+
+`avatar.background` draws behind the square and `avatar.frame` over the picture, so a theme can round the corners with a frame sprite whose corners are the color behind the avatar. An avatar is always square, since canvases clip only to rectangles; in bounds of another shape it draws the largest square that fits, centered.
+
+The badge sits at the square's bottom-right corner: its number is a line tall, with `badge.padding` around it on `badge.background`. The three `badge.*` keys carry no avatar prefix, since any control that shows a count may read them.
+
+An avatar has no input. It is not focusable, and clicks pass through it to its ancestors. Its tooltip is the value's, asked anew each time the pointer arrives, until you set one with `setTooltip`. To make an avatar clickable, put it in a component that handles clicks, or use a [button](#button) whose icon is the avatar's picture. A disabled avatar looks the same as an enabled one.
+
+| Key | Required | Used for |
+|---|---|---|
+| `avatar.background` | yes | Behind the square |
+| `avatar.frame` | no | Over the picture, the initials or the placeholder. Nothing if missing. |
+| `avatar.initials` | no | The initials. Falls back to `TextStyle.DEFAULT`. |
+| `avatar.placeholder`, `avatar.placeholder.group` | no | The figure shown with no picture and no initials. Nothing if missing, and the group's falls back to the plain one. |
+| `badge.background` | no | Behind the badge's number. A red fill if missing. |
+| `badge.text` | no | The badge's number. Falls back to `TextStyle.DEFAULT`. |
+| `badge.padding` | no | Around the number. 2 at the sides and 1 at the top and bottom. |
+
+An avatar fires no events.
 
 ## Button
 
@@ -1363,4 +1409,4 @@ The fields draw with the text box's faces, text, placeholder and padding, and th
 
 ## Controls that do not exist yet
 
-There is no multiple selection in lists, tables and trees, and no editable table cell. You can build them on `CustomComponent`, or on `CustomComposite` for one made of other components; the [extending guide](extending.md) builds a switch. [Status and limitations](../help/status.md) lists what is planned.
+There is no editable table cell yet. You can build one on `CustomComponent`, or on `CustomComposite` for one made of other components; the [extending guide](extending.md) builds a switch. [Status and limitations](../help/status.md) lists what is planned.

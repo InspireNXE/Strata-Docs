@@ -200,6 +200,21 @@ The open list also uses the `ListView` and `ScrollPanel` keys.
 | `busy.dot.active` | `BusyIndicator.STYLE_DOT_ACTIVE` | paint | yes | |
 | `busy.text` | `BusyIndicator.STYLE_TEXT` | text style | no | `TextStyle.DEFAULT` |
 
+## Avatar
+
+| Key | Constant | Kind | Required | Fallback |
+|---|---|---|---|---|
+| `avatar.background` | `Avatar.STYLE_BACKGROUND` | paint | yes | |
+| `avatar.frame` | `Avatar.STYLE_FRAME` | paint | no | Nothing |
+| `avatar.initials` | `Avatar.STYLE_INITIALS` | text style | no | `TextStyle.DEFAULT` |
+| `avatar.placeholder` | `Avatar.STYLE_PLACEHOLDER` | paint | no | Nothing |
+| `avatar.placeholder.group` | `Avatar.STYLE_PLACEHOLDER_GROUP` | paint | no | `avatar.placeholder` |
+| `badge.background` | `Avatar.STYLE_BADGE` | paint | no | solid `0xFFD32F2F`, a red fill |
+| `badge.text` | `Avatar.STYLE_BADGE_TEXT` | text style | no | `TextStyle.DEFAULT` |
+| `badge.padding` | `Avatar.STYLE_BADGE_PADDING` | insets | no | 2, 1, 2 and 1 |
+
+The `badge.*` keys are for any control that shows a count, so a theme styles every count at once.
+
 ## RadioButton
 
 | Key | Constant | Kind | Required | Fallback |
@@ -491,8 +506,10 @@ A color picker's hex field uses the `TextBox` keys.
 | `toast.text` | `0xFFF0F0F0` |
 | `overlay.backdrop` | solid `0x60000000` |
 | `tooltip.text` | `0xFFF0F0F0` |
+| `avatar.background` | solid `0xFF3C3F44` |
+| `avatar.initials` | `0xFFF0F0F0` |
 
-Text styles are otherwise plain: no bold, italic, underline, strikethrough or shadow. `tooltip.background` is not set, so tooltips use the fallback box, and neither are `dropdown.arrow`, `flyout.background` and `flyout.padding`, so drop-down arrows take the button text's color and flyouts the combo box's popup paint.
+Text styles are otherwise plain: no bold, italic, underline, strikethrough or shadow. `tooltip.background` is not set, so tooltips use the fallback box, and neither are `dropdown.arrow`, `flyout.background` and `flyout.padding`, so drop-down arrows take the button text's color and flyouts the combo box's popup paint. The `badge.*` keys are not set either, so badges are white numbers on a red fill.
 
 ## Naming your own keys
 

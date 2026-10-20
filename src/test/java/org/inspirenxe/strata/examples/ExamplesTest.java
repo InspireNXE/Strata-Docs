@@ -17,6 +17,7 @@ package org.inspirenxe.strata.examples;
 
 import org.inspirenxe.strata.api.control.button.Button;
 import org.inspirenxe.strata.api.control.button.DropDownButton;
+import org.inspirenxe.strata.api.control.display.Avatar;
 import org.inspirenxe.strata.api.control.field.ColorPicker;
 import org.inspirenxe.strata.api.control.field.DatePicker;
 import org.inspirenxe.strata.api.control.field.PasswordTextBox;
@@ -157,6 +158,20 @@ class ExamplesTest {
         host.key(Key.ENTER, KeyAction.PRESS, Modifiers.NONE);
         assertEquals(List.of("name"), sorted);
         assertFalse(sort[0].isOpen());
+    }
+
+    @Test
+    void theSellerLineShowsInitialsAndTheUnreadCount() {
+        final ScreenHost host = StrataCore.createScreenHost(new ToyPlatform(), Themes.flat());
+        host.resize(300, 100);
+        final StackPanel[] line = new StackPanel[1];
+        host.open(factory -> line[0] = ControlExamples.sellerLine(factory, "Ana Lima", 3));
+        host.layout();
+        final Avatar avatar = (Avatar) line[0].children().getFirst();
+        assertEquals("AL", avatar.initials());
+        assertEquals(3, avatar.badge());
+        assertEquals(32f, avatar.bounds().width());
+        assertEquals(32f, avatar.bounds().height());
     }
 
     @Test

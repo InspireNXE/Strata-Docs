@@ -28,6 +28,7 @@ import org.inspirenxe.strata.api.control.button.Button;
 import org.inspirenxe.strata.api.control.button.CheckBox;
 import org.inspirenxe.strata.api.control.button.DropDownButton;
 import org.inspirenxe.strata.api.control.collection.ListView;
+import org.inspirenxe.strata.api.control.display.Avatar;
 import org.inspirenxe.strata.api.control.display.Image;
 import org.inspirenxe.strata.api.control.display.Label;
 import org.inspirenxe.strata.api.control.field.ColorPicker;
@@ -63,8 +64,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * The controls guide's examples for images, checkboxes, sliders, password boxes, rows of controls in a list and
- * date and time pickers.
+ * The controls guide's examples for images, avatars, checkboxes, sliders, password boxes, rows of controls in a list
+ * and date and time pickers.
  */
 public final class ControlExamples {
 
@@ -119,6 +120,29 @@ public final class ControlExamples {
         final Image faded = factory.image(SpriteId.of("examplemod", "icon/star")).setTint(0x80FFFFFF);
         // --8<-- [end:image]
         return star;
+    }
+
+    /**
+     * A seller's line: their avatar, with a badge for their unread messages, beside their name.
+     *
+     * @param factory the factory
+     * @param seller the seller's name
+     * @param unread how many of the seller's messages are unread
+     * @return the line: the avatar and a label
+     */
+    public static StackPanel sellerLine(final ComponentFactory factory, final String seller, final int unread) {
+        // --8<-- [start:avatar]
+        // No picture, so the avatar shows initials from the name: Ana Lima shows AL
+        final Avatar avatar = factory.avatar()
+                .setName(seller)
+                .setAvatarSize(32)
+                .setBadge(unread)
+                .setTooltip(unread + " unread");
+        final StackPanel line = factory.stackPanel(Orientation.HORIZONTAL).setSpacing(6)
+                .add(avatar)
+                .add(factory.label(seller).setAnchor(Anchor.MIDDLE_LEFT));
+        // --8<-- [end:avatar]
+        return line;
     }
 
     /**

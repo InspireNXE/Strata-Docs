@@ -23,7 +23,7 @@ Publishing to Maven and depending on Strata from a separate project have not bee
 
 ## Not built yet
 
-- Controls: multiple selection in lists, tables and trees, editable table cells.
+- Controls: editable table cells.
 - Inline sprites in text. `SpriteSpan` and `InlineElement` are reserved.
 - Firing custom event types.
 - Narration and other accessibility support.
@@ -36,7 +36,6 @@ Publishing to Maven and depending on Strata from a separate project have not bee
 These are recorded in the [pending design](../design-pending.md#open-questions):
 
 - A platform shortcut modifier: Command on macOS, Control elsewhere.
-- Whether `ListView`, `TableView` and `TreeView` need multiple selection.
 
 ## Compatibility promise
 

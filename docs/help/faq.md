@@ -62,7 +62,7 @@ For small changes, call setters: `label.setText(...)`, `button.setEnabled(...)`.
 
 ### Is there a scroll panel, list or dropdown?
 
-Not yet. The built-ins are `Label`, `Image`, `Button`, `CheckBox`, `Slider`, `TextBox` and four panels. A scroll panel is next; see [Status and limitations](status.md). The extending guide builds a [switch](../guides/extending.md#write-a-new-component) as a complete example of writing your own.
+Yes. [`ScrollPanel`](../guides/layout.md#scrollpanel) scrolls anything larger than itself; `ListView`, `TableView`, `TreeView` and `GridView` show collections; `ComboBox` picks one item from a drop-down list; and `DropDownButton` opens a menu or a flyout. The [controls guide](../guides/controls.md) covers every built-in control. To write your own, the extending guide builds a [switch](../guides/extending.md#write-a-new-component) as a complete example.
 
 ### Can I use Strata from Kotlin or another JVM language?
 

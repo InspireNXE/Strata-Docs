@@ -67,6 +67,12 @@ Every number Strata picks for you.
 | | Made with `image()` | draws nothing until given a sprite or a visual |
 | | Scaling | `STRETCH` |
 | | Tint | `0xFFFFFFFF` |
+| `Avatar` | Size and desired size | 24 by 24 |
+| | Made with `avatar()` | the background alone, or the theme's placeholder |
+| | Initials | the first letter of the first and last words of the name, scaled by whole steps to at most two fifths of the size |
+| | Badge | none; a count above 99 shows as `99+`; padding the theme's `badge.padding`, else 2 at the sides and 1 at the top and bottom |
+| | Badge visual | a third of the size, at the bottom-right corner |
+| | Focusable | no |
 | `CheckBox` | Box size | caption line height plus 8 (17 with a 9-unit line height) |
 | | Gap between box and caption | 4 |
 | | Mark inset | a fifth of the box size on each side |
