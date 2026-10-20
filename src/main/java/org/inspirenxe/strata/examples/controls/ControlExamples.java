@@ -19,6 +19,8 @@ import org.inspirenxe.strata.api.ComponentFactory;
 import org.inspirenxe.strata.api.component.Component;
 import org.inspirenxe.strata.api.control.attribute.item.SingleSelection;
 import org.inspirenxe.strata.api.control.attribute.text.TextEntry;
+import org.inspirenxe.strata.api.control.attribute.value.HasDate;
+import org.inspirenxe.strata.api.control.attribute.value.HasTime;
 import org.inspirenxe.strata.api.control.attribute.value.Ranged;
 import org.inspirenxe.strata.api.control.attribute.value.Toggle;
 import org.inspirenxe.strata.api.control.button.Button;
@@ -26,9 +28,11 @@ import org.inspirenxe.strata.api.control.button.CheckBox;
 import org.inspirenxe.strata.api.control.collection.ListView;
 import org.inspirenxe.strata.api.control.display.Image;
 import org.inspirenxe.strata.api.control.display.Label;
+import org.inspirenxe.strata.api.control.field.DatePicker;
 import org.inspirenxe.strata.api.control.field.PasswordTextBox;
 import org.inspirenxe.strata.api.control.field.Slider;
 import org.inspirenxe.strata.api.control.field.TextBox;
+import org.inspirenxe.strata.api.control.field.TimePicker;
 import org.inspirenxe.strata.api.layout.Anchor;
 import org.inspirenxe.strata.api.layout.HorizontalAlignment;
 import org.inspirenxe.strata.api.layout.Orientation;
@@ -40,14 +44,20 @@ import org.inspirenxe.strata.api.text.TextHighlighter;
 import org.inspirenxe.strata.api.theme.Paint;
 import org.inspirenxe.strata.api.theme.SpriteId;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * The controls guide's examples for images, checkboxes, sliders, password boxes and rows of controls in a list.
+ * The controls guide's examples for images, checkboxes, sliders, password boxes, rows of controls in a list and
+ * date and time pickers.
  */
 public final class ControlExamples {
 
@@ -102,6 +112,31 @@ public final class ControlExamples {
         final Image faded = factory.image(SpriteId.of("examplemod", "icon/star")).setTint(0x80FFFFFF);
         // --8<-- [end:image]
         return star;
+    }
+
+    /**
+     * A booking row: a day that is not a Sunday within the next two months, a time in quarter hours, and a Book button
+     * that is enabled once both are set.
+     *
+     * @param factory the factory
+     * @param book takes the day and time when Book is pressed
+     * @return the row: the date picker, the time picker and the button
+     */
+    public static StackPanel booking(final ComponentFactory factory, final Consumer<LocalDateTime> book) {
+        // --8<-- [start:booking]
+        final DatePicker day = factory.datePicker()
+                .setDateRange(LocalDate.now(), LocalDate.now().plusMonths(2))
+                .setDateFilter(date -> date.getDayOfWeek() != DayOfWeek.SUNDAY);
+        final TimePicker time = factory.timePicker(LocalTime.of(9, 0)).setMinuteStep(15);
+        final Button bookButton = factory.button("Book").setEnabled(false);
+        final StackPanel row = factory.stackPanel(Orientation.HORIZONTAL).setSpacing(4)
+                .add(day).add(time).add(bookButton);
+        // One handler on the row hears both pickers, from the user and from code
+        row.onEvent(HasDate.DATE_PICKED, event -> bookButton.setEnabled(day.date().isPresent() && time.time().isPresent()));
+        row.onEvent(HasTime.TIME_PICKED, event -> bookButton.setEnabled(day.date().isPresent() && time.time().isPresent()));
+        bookButton.onEvent(Button.PRESSED, event -> book.accept(day.date().orElseThrow().atTime(time.time().orElseThrow())));
+        // --8<-- [end:booking]
+        return row;
     }
 
     static CheckBox checkBox(final ComponentFactory factory, final Settings settings) {

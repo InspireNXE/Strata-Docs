@@ -16,6 +16,7 @@
 package org.inspirenxe.strata.examples;
 
 import org.inspirenxe.strata.api.control.button.Button;
+import org.inspirenxe.strata.api.control.field.DatePicker;
 import org.inspirenxe.strata.api.control.field.PasswordTextBox;
 import org.inspirenxe.strata.api.input.Key;
 import org.inspirenxe.strata.api.input.KeyAction;
@@ -44,6 +45,8 @@ import org.inspirenxe.strata.spi.ScreenHost;
 import org.inspirenxe.strata.swing.SwingThemeSource;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -110,6 +113,25 @@ class ExamplesTest {
                 () -> SwingSnapshot.render(ExtendingExamples.customComponents(), Themes.flat(), 320, 200, 1f));
         assertEquals(java.util.Set.of("examplemod.switch.track", "examplemod.switch.track.on", "examplemod.switch.knob"),
                 e.missingKeys());
+    }
+
+    @Test
+    void theBookingRowEnablesBookOnceADayAndATimeAreSet() {
+        final ScreenHost host = StrataCore.createScreenHost(new ToyPlatform(), Themes.flat());
+        host.resize(400, 200);
+        final List<LocalDateTime> booked = new ArrayList<>();
+        final StackPanel[] row = new StackPanel[1];
+        host.open(factory -> row[0] = ControlExamples.booking(factory, booked::add));
+        host.layout();
+        final DatePicker day = (DatePicker) row[0].children().get(0);
+        final Button book = (Button) row[0].children().get(2);
+        assertFalse(book.isEnabled());
+        final LocalDate tomorrow = LocalDate.now().plusDays(1);
+        day.setDate(tomorrow);
+        assertTrue(book.isEnabled());
+        book.requestFocus();
+        host.key(Key.ENTER, KeyAction.PRESS, Modifiers.NONE);
+        assertEquals(List.of(tomorrow.atTime(9, 0)), booked);
     }
 
     @Test

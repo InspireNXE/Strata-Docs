@@ -294,6 +294,42 @@ A color picker's hex field uses the `TextBox` keys.
 | `colorpicker.marker.outline` | `ColorPicker.STYLE_MARKER_OUTLINE` | paint | no | `0xFF000000`, black |
 | `colorpicker.disabled` | `ColorPicker.STYLE_DISABLED` | paint | no | Nothing |
 
+## CalendarView
+
+| Key | Constant | Kind | Required | Fallback |
+|---|---|---|---|---|
+| `calendar.background` | `CalendarView.STYLE_BACKGROUND` | paint | no | Nothing; in a picker's popup, `picker.popup` is behind it |
+| `calendar.header.text` | `CalendarView.STYLE_HEADER_TEXT` | text style | no | `TextStyle.DEFAULT` |
+| `calendar.header.hovered` | `CalendarView.STYLE_HEADER_HOVERED` | paint | no | `list.row.hovered` |
+| `calendar.weekday.text` | `CalendarView.STYLE_WEEKDAY_TEXT` | text style | no | `calendar.day.text.outside` |
+| `calendar.day.text` | `CalendarView.STYLE_DAY_TEXT` | text style | no | `TextStyle.DEFAULT` |
+| `calendar.day.text.outside` | `CalendarView.STYLE_DAY_TEXT_OUTSIDE` | text style | no | `calendar.day.text.disabled` |
+| `calendar.day.text.disabled` | `CalendarView.STYLE_DAY_TEXT_DISABLED` | text style | no | `textbox.text.disabled`, else `TextStyle.DEFAULT` |
+| `calendar.day.text.selected` | `CalendarView.STYLE_DAY_TEXT_SELECTED` | text style | no | `calendar.day.text` |
+| `calendar.day.hovered` | `CalendarView.STYLE_DAY_HOVERED` | paint | no | `list.row.hovered` |
+| `calendar.day.selected` | `CalendarView.STYLE_DAY_SELECTED` | paint | yes | |
+| `calendar.day.today` | `CalendarView.STYLE_DAY_TODAY` | paint | no | A one-unit outline in the `calendar.day.text` color |
+| `calendar.day.marker` | `CalendarView.STYLE_DAY_MARKER` | paint | no | The `calendar.day.text` color |
+| `calendar.arrow` | `CalendarView.STYLE_ARROW` | paint | no | Arrows in the `calendar.header.text` color, and the `calendar.day.text.disabled` color at the ends of the range |
+| `calendar.focus` | `CalendarView.STYLE_FOCUS` | paint | no | `button.focus` |
+| `calendar.padding` | `CalendarView.STYLE_PADDING` | insets | no | 4 on every side |
+| `calendar.cell.padding` | `CalendarView.STYLE_CELL_PADDING` | insets | no | 3, 2, 3 and 2 |
+
+## Date and time pickers
+
+`DatePicker`, `TimePicker` and `DateTimePicker` share these keys, and their constants are on each of the three. The fields also read `textbox.normal`, `textbox.focused` and `textbox.disabled`, which they require, and the `textbox.*` text and placeholder styles. A date picker requires `calendar.day.selected` for its calendar, and a time picker requires `list.row.selected` and `scroll.thumb` for its columns; a date and time picker requires all three.
+
+| Key | Constant | Kind | Required | Fallback |
+|---|---|---|---|---|
+| `picker.segment.focused` | `DatePicker.STYLE_SEGMENT_FOCUSED` | paint | no | `textbox.selection` |
+| `picker.button` | `DatePicker.STYLE_BUTTON` | paint | no | `spinner.button`, else `button.normal` |
+| `picker.button.hovered` | `DatePicker.STYLE_BUTTON_HOVERED` | paint | no | `spinner.button.hovered`, else `button.hovered` |
+| `picker.button.disabled` | `DatePicker.STYLE_BUTTON_DISABLED` | paint | no | `spinner.button.disabled`, else `button.disabled` |
+| `picker.icon.date` | `DatePicker.STYLE_ICON`, `DateTimePicker.STYLE_ICON` | paint | no | The combo box's down arrow in the text color |
+| `picker.icon.time` | `TimePicker.STYLE_ICON` | paint | no | The combo box's down arrow in the text color |
+| `picker.popup` | `DatePicker.STYLE_POPUP` | paint | no | `combobox.popup` |
+| `picker.padding` | `DatePicker.STYLE_PADDING` | insets | no | `textbox.padding` |
+
 ## Overlays and tooltips
 
 | Key | Constant | Kind | Required | Fallback |

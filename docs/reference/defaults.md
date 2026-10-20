@@ -180,6 +180,27 @@ Every number Strata picks for you.
 | | Square, strip width, spacing | 96 square, 10, 4 |
 | | Checkerboard cells | 4, white and `0xFFC8C8C8` |
 | | Cursor | `CROSSHAIR`, and `TEXT` over the hex field |
+| `CalendarView` | Date | none |
+| | Month in view | today's |
+| | Zoom | `MONTH` |
+| | Range, filter, mark filter | none, every day, no day |
+| | First day of the week | the language's |
+| | Days of other months | shown |
+| | Padding, cell padding | the theme's `calendar.padding`, else 4; `calendar.cell.padding`, else 3 at the sides and 2 at the top and bottom |
+| | Cells | a line plus the cell padding tall, at least as wide as tall; seven across and eight down |
+| | Today | read from the wall clock at most once a minute |
+| | Focusable | yes |
+| `DatePicker`, `TimePicker`, `DateTimePicker` | Value | none |
+| | Placeholder | "Pick a date", "Pick a time" or "Pick a date and time", from `strata.date.placeholder`, `strata.time.placeholder` and `strata.datetime.placeholder` |
+| | Clearable | yes |
+| | Text padding | the theme's `picker.padding`, else `textbox.padding`, else 4 left and right and 5 top and bottom |
+| | Button | 12 wide |
+| | Width | the widest text the parts can show, or the placeholder if wider, plus the padding and the button |
+| | Range, filter, first day of the week | none, every day, the language's |
+| | Clock format, seconds, minute step | the language's, hidden, 1 |
+| | Default time (`DateTimePicker`) | midnight |
+| | Time columns | rows a line plus 4 tall, at most 7 showing |
+| | Focusable | yes |
 
 ## Input
 

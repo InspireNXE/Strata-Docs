@@ -54,7 +54,7 @@ Other adapters use other fonts with other widths. Layouts built on measured text
 
 ## Translations
 
-Swing has no language files of its own, so translated text reads through a translator you set for the whole process. `SwingTranslations.use(bundle)` reads a `ResourceBundle`, and `SwingTranslations.use(translator)` takes any `Translator`. Call it again with another bundle to change the language; open panels lay out again on their next frame. Until one is set, Strata's own keys read in English and other keys read as themselves.
+Swing has no language files of its own, so translated text reads through a translator you set for the whole process. `SwingTranslations.use(bundle)` reads a `ResourceBundle`, and `SwingTranslations.use(translator)` takes any `Translator`. Call it again with another bundle to change the language; open panels lay out again on their next frame. The bundle's locale becomes the translator's, so dates and times follow the bundle's language; a base bundle, whose locale is `Locale.ROOT`, leaves the JVM's default locale for formatting. Until one is set, Strata's own keys read in English and other keys read as themselves.
 
 ```java
 SwingTranslations.use(ResourceBundle.getBundle("shop.messages", Locale.GERMAN));

@@ -1,6 +1,6 @@
 # Controls
 
-Strata's built-in controls are interfaces in the subpackages of `org.inspirenxe.strata.api.control`, made by the factory: `display` (`Label`, `Image`, `ProgressBar`, `BusyIndicator`, `Separator`), `button` (`Button`, `CycleButton`, `CheckBox`, `RadioButton`, `RadioGroup`, `ToggleSwitch`), `field` (`TextBox`, `PasswordTextBox`, `TextArea`, `Spinner`, `Slider`, `ColorPicker`), `collection` (`ListView`, `ComboBox`, `TableView`, `TreeView`, `GridView`), `menu` (`Menu`, `MenuBar`), `pane` (`TabBar`, `Expander`, `SplitPane`, `ScrollBar`) and `window` (`Window`, `MessageBox`). Each one has [events](events.md): a request (Pre) for each change the user can make, which a handler can cancel or rewrite, and a report (Post) for each change from any source. Each section below lists them in an Events table. Their theme keys are listed on each control below and in the [theme key reference](../reference/theme-keys.md). Scrolling is a container, [`ScrollPanel`](layout.md#scrollpanel), and popups, dialogs and tooltips are in [Overlays and tooltips](overlays.md).
+Strata's built-in controls are interfaces in the subpackages of `org.inspirenxe.strata.api.control`, made by the factory: `display` (`Label`, `Image`, `ProgressBar`, `BusyIndicator`, `Separator`), `button` (`Button`, `CycleButton`, `CheckBox`, `RadioButton`, `RadioGroup`, `ToggleSwitch`), `field` (`TextBox`, `PasswordTextBox`, `TextArea`, `Spinner`, `Slider`, `ColorPicker`, `CalendarView`, `DatePicker`, `TimePicker`, `DateTimePicker`), `collection` (`ListView`, `ComboBox`, `TableView`, `TreeView`, `GridView`), `menu` (`Menu`, `MenuBar`), `pane` (`TabBar`, `Expander`, `SplitPane`, `ScrollBar`) and `window` (`Window`, `MessageBox`). Each one has [events](events.md): a request (Pre) for each change the user can make, which a handler can cancel or rewrite, and a report (Post) for each change from any source. Each section below lists them in an Events table. Their theme keys are listed on each control below and in the [theme key reference](../reference/theme-keys.md). Scrolling is a container, [`ScrollPanel`](layout.md#scrollpanel), and popups, dialogs and tooltips are in [Overlays and tooltips](overlays.md).
 
 ## Attributes
 
@@ -15,6 +15,8 @@ Controls that do the same kind of thing share small interfaces called attributes
 | `Toggle` | `value` | `isSelected()`, `setSelected`, `toggle()` | `TOGGLE`, `TOGGLED` | `CheckBox`, `ToggleSwitch`, `RadioButton` |
 | `Ranged` | `value` | `value()`, `setValue`, `min()`, `max()`, `setRange` | `CHANGE`, `CHANGED` | `Slider`, `Spinner`, `ProgressBar`, `ScrollBar` |
 | `Stepped` | `value` | `Ranged` plus `step()`, `setStep` | | `Slider`, `Spinner` |
+| `HasDate` | `value` | `date()`, `setDate`, `clearDate()`, `minDate()`, `maxDate()`, `setDateRange`, `setDateFilter`, `firstDayOfWeek()`, `setFirstDayOfWeek` | `PICK_DATE`, `DATE_PICKED` | `CalendarView`, `DatePicker`, `DateTimePicker` |
+| `HasTime` | `value` | `time()`, `setTime`, `clearTime()`, `clockFormat()`, `setClockFormat`, `isSecondsShown()`, `setSecondsShown`, `minuteStep()`, `setMinuteStep` | `PICK_TIME`, `TIME_PICKED` | `TimePicker`, `DateTimePicker` |
 | `ItemSource` | `item` | `items()`, `setItems`, `refresh()`, `setKeyFunction` | | `ListView`, `TableView`, `TreeView`, `ComboBox`, `GridView`, `CycleButton` |
 | `CellSource` | `item` | `setCellFactory` | | `ListView`, `TreeView`, `GridView` |
 | `Selection` | `item` | `selectedIndex()`, `selected()`, `select(index)`, `selectItem(item)`, `clearSelection()`: the current entry | `SELECT`, `SELECTED` | every control below that selects |
@@ -23,7 +25,7 @@ Controls that do the same kind of thing share small interfaces called attributes
 | `Activatable` | `item` | `setActivateOnClick` | `ACTIVATE`, `ACTIVATED` | `ListView`, `TableView`, `TreeView`, `GridView` |
 | `RowView` | `item` | row height and spacing, the placeholder, scrolling, `setDeselectable` | | `ListView`, `TableView`, `TreeView` |
 | `Closable` | `popup` | `close()` | `CLOSE`, `CLOSED` | `Window`, `Overlay`, and through `Openable` the others |
-| `Openable` | `popup` | `Closable` plus `isOpen()` | `OPEN`, `OPENED` | `ComboBox`, `Menu` |
+| `Openable` | `popup` | `Closable` plus `isOpen()` | `OPEN`, `OPENED` | `ComboBox`, `DatePicker`, `TimePicker`, `DateTimePicker`, `Menu` |
 
 An attribute owns its events, so `Toggle.TOGGLED` fires for a checkbox, a switch and a radio button alike, and one handler on a container hears every control inside it that has the attribute:
 
@@ -1159,6 +1161,134 @@ The hex field uses the `TextBox` keys. The alpha strip and the swatch draw a gra
 | `ColorPicker.PICKED` | Post | After every change of the color, including `setColor` |
 
 The color is an `int`, which `Ranged`'s `double` cannot hold, so the picker has its own events.
+
+## Dates and times
+
+Four controls pick dates and times: `CalendarView`, a month grid; `DatePicker`, a field with a calendar in a popup; `TimePicker`, a field with columns of hours and minutes in a popup; and `DateTimePicker`, one field for both. Values are `java.time` types with no zone: `LocalDate`, `LocalTime` and `LocalDateTime`. A screen shows what the user picked, and your project decides which zone it means. Every value may be empty, and empty is where the pickers start.
+
+```java
+--8<-- "controls/ControlExamples.java:booking"
+```
+
+They share two attributes, `HasDate` and `HasTime`, so one handler on a form hears every date or time in it:
+
+| Method | Default | Notes |
+|---|---|---|
+| `setDate(date)`, `clearDate()` | empty | Kept inside the range. `null` clears. The filter does not apply to code. |
+| `setDateRange(min, max)` | no limits | Both ends included; `null` for no limit at that end. A date outside moves to the nearest end. |
+| `setDateFilter(allowed)` | every date | Which dates the user may pick. Refused days draw disabled. The control asks the filter whenever it draws or checks a date, so it may read state that changes. |
+| `setFirstDayOfWeek(day)` | the language's | `null` follows the language again |
+| `setTime(time)`, `clearTime()` | empty | Seconds are dropped unless shown, and the fraction of a second always |
+| `setClockFormat(format)` | the language's | `ClockFormat.H12` or `H24`; `null` follows the language again |
+| `setSecondsShown(shown)` | false | Hiding seconds drops them from the time |
+| `setMinuteStep(minutes)` | 1 | A divisor of 60: the rows of the minute column and the step of Up and Down on the minutes. Typed minutes and minutes from code stay as they are. |
+
+The language decides month and weekday names, the first day of the week, the order of a date's parts and their separator, and whether the clock has 12 or 24 hours. Strata reads them from the JDK's data for the translator's locale, after asking the translator for the `strata.date.*` and `strata.time.*` keys in the [translation keys reference](../reference/translation-keys.md#dates-and-times). Today comes from the platform's wall clock.
+
+### CalendarView
+
+A month to pick a day from, with a year view and a decade view to move far quickly.
+
+```java
+CalendarView calendar = factory.calendarView()
+        .setDateRange(LocalDate.now(), null)
+        .setMarkFilter(bookings::hasBookingOn)
+        .onEvent(HasDate.DATE_PICKED, event -> showBookings(event.value()));
+```
+
+The header holds the month and year between two arrows, then come the short weekday names and six rows of days, always six so the calendar keeps its height. Days of the months before and after fill the rows in the outside style; `setOutsideDaysShown(false)` leaves their cells empty. Today has an outline, the picked day the `calendar.day.selected` paint, and a day the mark filter accepts (`setMarkFilter`) a small square under its number.
+
+A click on a day picks it, and a click on a day of the month before or after browses there first. The arrows browse by a month, and stop at the months of the range. A click on the title zooms out to the twelve months of the year, and again to the twelve years around a decade; a click on a month or a year zooms back in. The wheel is left to the panel around the calendar.
+
+While focused, a cursor marks one day, starting on the picked date, else today, else the first of the month. The arrow keys move it by a day or a week, Page Up and Page Down by a month (with Shift by a year), and Home and End to the ends of the month. It passes over disabled days, stays inside the range, and browses when it leaves the month. Enter or Space picks its day. Control+Up zooms out, and Control+Down or Enter zooms in.
+
+`shownMonth()` and `setShownMonth(month)` read and set the month in view, and `setZoom` the view (`Zoom.MONTH`, `YEAR` or `DECADE`). `setDate` also shows the date's month.
+
+A cell is a line plus the cell padding tall, and as wide as the widest day number or weekday name plus the padding, but never narrower than it is tall. The calendar asks for seven cells across and eight down (the header, the weekday names and six rows), plus its padding; given more room, the cells share it.
+
+| Event | Kind | Fires |
+|---|---|---|
+| `HasDate.PICK_DATE` | Pre | When the user picks a day, with the day. Cancel it, or set another date, which applies as `setDate` does. A day already picked fires nothing. |
+| `HasDate.DATE_PICKED` | Post | After every change of the date, including `setDate` and `setDateRange` |
+| `CalendarView.BROWSE` | Pre | When an arrow, the cursor, a click outside the month or zooming in would show another month, with that month. Cancel it, or set another month, which is kept inside the range. |
+| `CalendarView.BROWSED` | Post | After every change of the month in view, including `setShownMonth` and `setDate` |
+
+### DatePicker
+
+A date in parts the user can type into or step, with a button that opens a calendar in a popup.
+
+```java
+DatePicker due = factory.datePicker()
+        .setDateRange(LocalDate.now(), null)
+        .onEvent(HasDate.DATE_PICKED, event -> task.setDue(event.value()));
+```
+
+The date shows as day, month and year in the language's order and with its separator, such as `20.10.2026`, `10/20/2026` or `2026/10/20`. Days and months have two digits and years four. Empty and unfocused, the field shows its placeholder, "Pick a date" by default (`setPlaceholder`); focused and empty, each part shows dashes.
+
+- A click on a part focuses it. Left and Right move between the parts, Home and End go to the first and last, and Tab leaves the field.
+- Up and Down step the focused part, wrapping within it, so the 31st steps to the 1st and the month stays. An empty part starts from today's.
+- Digits type into the focused part and move on when no further digit could fit: on a month-first field, `1`, `0`, `2`, `0` fill the month and the day. Typing the separator moves on too, and Backspace empties the part.
+- What the user types or steps is a draft. It becomes the date on Enter and when the field loses focus, if every part is filled and they make a date the user may pick. A day past the end of the month is cut to its last day, and a year typed with two digits lands in the hundred years around today. On Enter a draft that cannot be taken stays to be fixed; on focus loss it is dropped and the field shows the date again. Escape drops the draft, and is consumed only when there was one, so an Escape with nothing to drop still closes a dialog.
+- Delete clears the date while the picker is clearable (`setClearable`, true by default).
+- The button, Alt+Down and F4 open the calendar, with the picker's range, filter and first day of the week. It shows the date's month or today's, and takes focus. Picking a day sets the date, closes the calendar and gives focus back to the field. Escape and a press outside close it with no change.
+
+The picker asks for the width of its widest possible text in the current font and language, or of its placeholder, plus its padding and the 12 unit button, so it never resizes as the date changes. A disabled picker takes no focus, draws the text box's disabled face and cannot open.
+
+| Event | Kind | Fires |
+|---|---|---|
+| `HasDate.PICK_DATE` | Pre | When a draft is taken on Enter or focus loss, a day is picked in the calendar, or Delete clears the date (with `null`). Cancel it, or set another date, which applies as `setDate` does. |
+| `HasDate.DATE_PICKED` | Post | After every change of the date, including `setDate` and `setDateRange` |
+| `Openable.OPEN` | Pre | When the user opens the calendar. Cancel to keep it closed. |
+| `Openable.OPENED` | Post | After the calendar opened, including `open()` |
+| `Closable.CLOSED` | Post | Each time the calendar closes. The picker never fires `Closable.CLOSE`. |
+
+The calendar is private to the picker and fires no events of its own.
+
+### TimePicker
+
+A time of day in parts, with columns of hours, minutes, seconds and the halves of the day in a popup.
+
+```java
+TimePicker alarm = factory.timePicker(LocalTime.of(7, 30))
+        .setMinuteStep(5)
+        .onEvent(HasTime.TIME_PICKED, event -> alarm.setTime(event.value()));
+```
+
+The time shows as hour and minute, the second while shown, and on a 12 hour clock the half of the day, such as `14:05` or `02:05 PM`. The field edits as a date picker's does. On the half of the day, the first letter of either name picks it, and Up and Down flip it. Up and Down on the minutes move by the minute step, and an empty part starts from the current time's.
+
+The button, Alt+Down and F4 open a row of lists: hours (12 and 1 to 11, or 0 to 23), minutes in the minute step, seconds while shown, and the two halves on a 12 hour clock. Rows are a line plus 4 tall and at most seven show. A row picked sets that part of the time at once; when the time was empty, the other parts start at zero. Focus stays in the field, whose focused part is the column the keys work on: Left and Right move between columns, Up and Down pick the row above or below at once, and Enter and Escape close the popup.
+
+| Event | Kind | Fires |
+|---|---|---|
+| `HasTime.PICK_TIME` | Pre | When a draft is taken on Enter or focus loss, a row is picked or stepped in the popup, or Delete clears the time (with `null`). Cancel it, or set another time, which applies as `setTime` does. |
+| `HasTime.TIME_PICKED` | Post | After every change of the time, including `setTime` and hiding seconds |
+| `Openable.OPEN`, `Openable.OPENED`, `Closable.CLOSED` | | As on `DatePicker` |
+
+### DateTimePicker
+
+One field for a date and a time: the date's parts, a space, then the time's, with the calendar beside the time columns in its popup.
+
+```java
+DateTimePicker start = factory.dateTimePicker()
+        .setDefaultTime(LocalTime.of(9, 0))
+        .onEvent(DateTimePicker.PICKED, event -> meeting.setStart(event.value()));
+```
+
+The value is one `LocalDateTime` with one range, `setRange(min, max)`; `dateTime()` reads it, and `date()` and `time()` its parts. `setDateRange` sets the range from the start of the first day to the end of the last. Setting one part of an empty value fills the other, the date with today and the time with `defaultTime()` (midnight unless `setDefaultTime` says otherwise), and clearing either part clears the value. Picking a day in the popup sets the date and leaves the popup open so the time can follow. Focus stays in the field while the popup is open, and Up and Down set the value at once.
+
+A change by the user first asks `PICK` with the whole new value, then `PICK_DATE` if the date changes and `PICK_TIME` if the time does. Canceling any of them stops the change. Rewriting `PICK` changes both parts, and rewriting `PICK_DATE` only the date. Every change then reports `PICKED`, and `DATE_PICKED` and `TIME_PICKED` for the parts that changed.
+
+| Event | Kind | Fires |
+|---|---|---|
+| `DateTimePicker.PICK` | Pre | When the user would change the value, with the whole new value, or `null` for Delete |
+| `HasDate.PICK_DATE`, `HasTime.PICK_TIME` | Pre | After `PICK`, for each part that changes |
+| `DateTimePicker.PICKED` | Post | After every change of the value, including `setDateTime`, `setDate`, `setTime` and the ranges |
+| `HasDate.DATE_PICKED`, `HasTime.TIME_PICKED` | Post | After `PICKED`, for each part that changed |
+| `Openable.OPEN`, `Openable.OPENED`, `Closable.CLOSED` | | As on `DatePicker` |
+
+### Drawing the pickers
+
+The fields draw with the text box's faces, text, placeholder and padding, and the time columns with the list keys, so a theme that styles text boxes and lists styles the pickers too. The calendar needs one key of its own, `calendar.day.selected`. A picker draws its focused part on `picker.segment.focused`, its button with the `picker.button` keys (which fall back to the spinner's buttons), and an icon from `picker.icon.date` or `picker.icon.time` when the theme has one, otherwise the combo box's arrow. Every key is in the [theme key reference](../reference/theme-keys.md#calendarview).
 
 ## Controls that do not exist yet
 
