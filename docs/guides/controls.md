@@ -1,6 +1,6 @@
 # Controls
 
-Strata's built-in controls are interfaces in the subpackages of `org.inspirenxe.strata.api.control`, made by the factory: `display` (`Label`, `Image`, `ProgressBar`, `BusyIndicator`, `Separator`), `button` (`Button`, `CycleButton`, `CheckBox`, `RadioButton`, `RadioGroup`, `ToggleSwitch`), `field` (`TextBox`, `TextArea`, `Spinner`, `Slider`, `ColorPicker`), `collection` (`ListView`, `ComboBox`, `TableView`, `TreeView`, `GridView`, `DualList`), `menu` (`Menu`, `MenuBar`), `pane` (`TabBar`, `Expander`, `SplitPane`, `ScrollBar`) and `window` (`Window`, `MessageBox`). Each one has [events](events.md): a request (Pre) for each change the user can make, which a handler can cancel or rewrite, and a report (Post) for each change from any source. Each section below lists them in an Events table. Their theme keys are listed on each control below and in the [theme key reference](../reference/theme-keys.md). Scrolling is a container, [`ScrollPanel`](layout.md#scrollpanel), and popups, dialogs and tooltips are in [Overlays and tooltips](overlays.md).
+Strata's built-in controls are interfaces in the subpackages of `org.inspirenxe.strata.api.control`, made by the factory: `display` (`Label`, `Image`, `ProgressBar`, `BusyIndicator`, `Separator`), `button` (`Button`, `CycleButton`, `CheckBox`, `RadioButton`, `RadioGroup`, `ToggleSwitch`), `field` (`TextBox`, `TextArea`, `Spinner`, `Slider`, `ColorPicker`), `collection` (`ListView`, `ComboBox`, `TableView`, `TreeView`, `GridView`), `menu` (`Menu`, `MenuBar`), `pane` (`TabBar`, `Expander`, `SplitPane`, `ScrollBar`) and `window` (`Window`, `MessageBox`). Each one has [events](events.md): a request (Pre) for each change the user can make, which a handler can cancel or rewrite, and a report (Post) for each change from any source. Each section below lists them in an Events table. Their theme keys are listed on each control below and in the [theme key reference](../reference/theme-keys.md). Scrolling is a container, [`ScrollPanel`](layout.md#scrollpanel), and popups, dialogs and tooltips are in [Overlays and tooltips](overlays.md).
 
 ## Attributes
 
@@ -15,7 +15,7 @@ Controls that do the same kind of thing share small interfaces called attributes
 | `Ranged` | `value` | `value()`, `setValue`, `min()`, `max()`, `setRange` | `CHANGE`, `CHANGED` | `Slider`, `Spinner`, `ProgressBar`, `ScrollBar` |
 | `Stepped` | `value` | `Ranged` plus `step()`, `setStep` | | `Slider`, `Spinner` |
 | `ItemSource` | `item` | `items()`, `setItems`, `refresh()`, `setKeyFunction` | | `ListView`, `TableView`, `TreeView`, `ComboBox`, `GridView`, `CycleButton` |
-| `CellSource` | `item` | `setCellFactory` | | `ListView`, `TreeView`, `GridView`, `DualList` |
+| `CellSource` | `item` | `setCellFactory` | | `ListView`, `TreeView`, `GridView` |
 | `SingleSelection` | `item` | `selectedIndex()`, `selected()`, `select(index)`, `selectItem(item)`, `clearSelection()` | `SELECT`, `SELECTED` | the collections, `CycleButton`, `TabBar`, `MenuBar`, `RadioGroup` |
 | `Activatable` | `item` | `setActivateOnClick` | `ACTIVATE`, `ACTIVATED` | `ListView`, `TableView`, `TreeView`, `GridView` |
 | `RowView` | `item` | row height and spacing, the placeholder, scrolling, `setDeselectable` | | `ListView`, `TableView`, `TreeView` |
@@ -1003,39 +1003,6 @@ There is one cell per item, null items being empty cells, in rows of `setColumns
 | `GridView.CLICKED` | Post | After a click nobody canceled |
 | `Activatable.ACTIVATE` | Pre | After the click's `GridView.CLICK`, when a left double click, or a single one with `setActivateOnClick`, would activate a cell |
 | `Activatable.ACTIVATED` | Post | After an activation nobody canceled |
-
-## DualList
-
-Two lists side by side with buttons between them that move items across, for picking a subset such as the members of a group.
-
-```java
-DualList<String> members = factory.<String>dualList()
-        .setTitle(DualList.Side.LEFT, "Players")
-        .setTitle(DualList.Side.RIGHT, "Members")
-        .setItems(DualList.Side.LEFT, List.of("Ana", "Ben", "Cleo"))
-        .setItems(DualList.Side.RIGHT, List.of("Dev"))
-        .onEvent(DualList.MOVED, event -> group.setMembers(members.items(DualList.Side.RIGHT)));
-```
-
-The `>` button moves the selected item of the left list to the end of the right one and `<` the other way; `>>` and `<<` move every item across, in order. A double click on a row, or Enter in a list, moves that row's item. Each button is enabled only while it can act. When the selected item moves, the selection goes to the item that took its place, so pressing the same button again moves the next one. `move(item, side)` and `moveAll(side)` move items from code.
-
-At most one item is selected across both lists. As a `SingleSelection`, the dual list counts the left items first and then the right ones, so index `items(Side.LEFT).size()` is the first item on the right, and `selectedSide()` says which list has the selection. The key function (`setKeyFunction`) matches items for `selectItem`, for moves and for keeping the selection when `setItems` replaces a side. Both lists build their rows with the one cell factory (`setCellFactory`). Items must not be null.
-
-Each list asks to be 100 units wide and tall enough for `setVisibleRows(n)` rows (6 by default). The buttons sit in a column between the lists, 4 units apart and 4 from each list. When either side has a title, a row of titles sits above the lists.
-
-| Key | Required | Used for |
-|---|---|---|
-| `duallist.list` | no | Behind each list. Nothing if missing. |
-| `duallist.title` | no | The titles. Falls back to `label.text`. |
-
-The rows use the `ListView` keys and the buttons the `Button` keys.
-
-| Event | Kind | Fires |
-|---|---|---|
-| `DualList.MOVE` | Pre | When the user moves an item with a button, a double click or Enter, once per item for `>>` and `<<`. The value is a `DualList.Move` naming the item and where it would go, the end of the other list. Cancel to leave it, or set another move: an item on the other side of the one the move names, and an index there, which is clamped. |
-| `DualList.MOVED` | Post | After every move, including `move` and `moveAll`. The value names the item's new side and index, and `previous()` the side and index it left. |
-| `SingleSelection.SELECT` | Pre | When the user selects a row by a press or the arrow keys, with the index across both lists |
-| `SingleSelection.SELECTED` | Post | After every change of the selected index or item, including `select`, moves and `setItems` |
 
 ## ColorPicker
 

@@ -7,7 +7,7 @@ Every number Strata picks for you.
 | Setting | Default |
 |---|---|
 | Visible, enabled | yes |
-| Focusable, tabbable | no, except buttons, check boxes, radio buttons, toggle switches, sliders, text boxes, text areas, lists (also inside tables, trees and dual lists), combo boxes, tab bars and expanders, the controls that are `Focusable`. Scroll bars and scroll panels are `Focusable` but start with focus off. Menus are focusable but not tabbable. A color picker is neither, but its hex field is. |
+| Focusable, tabbable | no, except buttons, check boxes, radio buttons, toggle switches, sliders, text boxes, text areas, lists (also inside tables and trees), combo boxes, tab bars and expanders, the controls that are `Focusable`. Scroll bars and scroll panels are `Focusable` but start with focus off. Menus are focusable but not tabbable. A color picker is neither, but its hex field is. |
 | Margin | `Insets.NONE` |
 | Minimum size | 0 by 0 |
 | Maximum size | `Float.POSITIVE_INFINITY` both ways |
@@ -158,7 +158,6 @@ Every number Strata picks for you.
 | | Content inset | 1 |
 | | Selectable | no |
 | | Activation | a left double click |
-| `DualList` | List width, rows shown | 100 each, 6 rows of 20 |
 | | Spacing | 4 between the lists, the buttons and the title row |
 | | Titles, items, selection | none, none, none |
 | | Cell factory, key function | a label of `String.valueOf(item)`, the item itself |
