@@ -70,6 +70,7 @@ Every number Strata picks for you.
 | | Cursor | `HAND` |
 | `Slider` | Orientation | `HORIZONTAL` |
 | | Desired size | 150 by 20, or 20 by 150 when vertical |
+| | Label padding | the theme's `slider.padding`, else none |
 | | Range | 0 to 1 |
 | | Step | 0 (continuous) |
 | | Key step | the step, or a hundredth of the range |
@@ -105,10 +106,12 @@ Every number Strata picks for you.
 | | Cursor | `HAND` |
 | `MessageBox` | Message width | wraps at 280 |
 | | Buttons | 64 wide, 4 apart, the first focused |
+| | Padding | the theme's `messagebox.padding`, else 4 around the message and buttons |
 | `TabBar` | Tab size | text plus 8 on each side; one line plus 7 |
 | | Spacing | 0 |
 | | Selected | the first tab added |
-| `ProgressBar` | Desired size | 100 wide, one line plus 4 |
+| `ProgressBar` | Desired size | the wider of 100 and its text plus padding; one line plus padding tall |
+| | Padding | the theme's `progress.padding`, else 2 on every side |
 | | Range, value | 0 to 1, 0 |
 | | Indeterminate | no; when on, a segment a quarter of the width (at least 8) crosses every 1.5 s |
 | `BusyIndicator` | Dots | 3, each 4 square, 4 apart |
@@ -117,8 +120,8 @@ Every number Strata picks for you.
 | `Separator` | Thickness | 1 |
 | `RadioButton` | Box, gap and cursor | as `CheckBox` |
 | | Mark inset | three tenths of the box size on each side |
-| `ToggleSwitch` | Track | caption line height plus 4 tall, twice that wide |
-| | Knob | a square 2 in from the track's edges |
+| `ToggleSwitch` | Track | a box one caption line tall and two wide, grown by the theme's `toggle.track.padding`, else 4 at the sides and 2 at the top and bottom |
+| | Knob | a square in from the track's edges by the theme's `toggle.knob.padding`, else 2 |
 | | Gap between track and caption | 4 |
 | `Spinner` | Desired width | 60, of which the buttons take 12 |
 | | Range, step, decimals, value | 0 to 100, 1, 0, 0 |
@@ -137,7 +140,7 @@ Every number Strata picks for you.
 | | Arrow column | 12 |
 | | Children | none: every item is a leaf |
 | `Menu` | Item height | one line plus 6 |
-| | Gutters | 14 at each side of an item, 2 around the items |
+| | Gutters | the theme's `menu.item.padding` at each side of an item, else 14; `menu.padding` around the items, else 2 |
 | | Separator height | 5 |
 | | Smallest width | 60 |
 | `MenuBar` | Title size | text plus 8 on each side; one line plus 6 |
@@ -155,7 +158,7 @@ Every number Strata picks for you.
 | | Focusable | no |
 | | Cursor | `HAND` |
 | `GridView` | Columns, cell size, spacing | 9, 18, 0 |
-| | Content inset | 1 |
+| | Content inset | the theme's `grid.cell.padding`, else 1 |
 | | Selectable | no |
 | | Activation | a left double click |
 | | Spacing | 4 between the lists, the buttons and the title row |

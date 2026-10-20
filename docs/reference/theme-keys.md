@@ -59,6 +59,7 @@ A style set with `Label.setStyle` overrides the key.
 | `slider.thumb.disabled` | `Slider.STYLE_THUMB_DISABLED` | paint | no | `slider.thumb` |
 | `slider.text` | `Slider.STYLE_TEXT` | text style | no | `TextStyle.DEFAULT` |
 | `slider.text.disabled` | `Slider.STYLE_TEXT_DISABLED` | text style | no | `slider.text` |
+| `slider.padding` | `Slider.STYLE_PADDING` | insets | no | None |
 
 ## TextBox
 
@@ -128,7 +129,7 @@ The open list also uses the `ListView` and `ScrollPanel` keys.
 
 ## Window
 
-`MessageBox` uses these keys, plus those of `Label` and `Button`.
+`MessageBox` uses these keys and those of `Label` and `Button`, and its own `messagebox.padding`, the last row.
 
 | Key | Constant | Kind | Required | Fallback |
 |---|---|---|---|---|
@@ -141,6 +142,7 @@ The open list also uses the `ListView` and `ScrollPanel` keys.
 | `window.grip.hovered` | `Window.STYLE_GRIP_HOVERED` | paint | no | `window.grip` |
 | `window.title.padding` | `Window.STYLE_TITLE_PADDING` | insets | no | 3 on every side |
 | `window.padding` | `Window.STYLE_PADDING` | insets | no | 3 on every side |
+| `messagebox.padding` | `MessageBox.STYLE_PADDING` | insets | no | 4 on every side |
 
 ## TabBar
 
@@ -165,6 +167,7 @@ The open list also uses the `ListView` and `ScrollPanel` keys.
 | `progress.fill` | `ProgressBar.STYLE_FILL` | paint | yes | |
 | `progress.text` | `ProgressBar.STYLE_TEXT` | text style | no | `TextStyle.DEFAULT` |
 | `progress.segment` | `ProgressBar.STYLE_SEGMENT` | paint | no | `progress.fill` |
+| `progress.padding` | `ProgressBar.STYLE_PADDING` | insets | no | 2 on every side |
 | `separator` | `Separator.STYLE_LINE` | paint | yes | |
 
 ## BusyIndicator
@@ -204,6 +207,8 @@ The open list also uses the `ListView` and `ScrollPanel` keys.
 | `toggle.focus` | `ToggleSwitch.STYLE_FOCUS` | paint | no | No focus ring |
 | `toggle.text` | `ToggleSwitch.STYLE_TEXT` | text style | no | `TextStyle.DEFAULT` |
 | `toggle.text.disabled` | `ToggleSwitch.STYLE_TEXT_DISABLED` | text style | no | `toggle.text` |
+| `toggle.track.padding` | `ToggleSwitch.STYLE_TRACK_PADDING` | insets | no | 4, 2, 4 and 2 |
+| `toggle.knob.padding` | `ToggleSwitch.STYLE_KNOB_PADDING` | insets | no | 2 on every side |
 
 ## Spinner and TextArea
 
@@ -242,6 +247,7 @@ Both read the `ListView` and `ScrollPanel` keys for their rows.
 | `menu.shortcut` | `Menu.STYLE_SHORTCUT` | text style | no | `menu.text.disabled` |
 | `menu.separator` | `Menu.STYLE_SEPARATOR` | paint | no | `separator` |
 | `menu.item.padding` | `Menu.STYLE_ITEM_PADDING` | insets | no | 14, 3, 14 and 3 |
+| `menu.padding` | `Menu.STYLE_PADDING` | insets | no | 2 on every side |
 | `menubar.background` | `MenuBar.STYLE_BACKGROUND` | paint | no | Nothing |
 | `menubar.item.hovered` | `MenuBar.STYLE_ITEM_HOVERED` | paint | no | `menu.item.hovered` |
 | `menubar.text` | `MenuBar.STYLE_TEXT` | text style | no | `menu.text` |
@@ -261,6 +267,7 @@ Both read the `ListView` and `ScrollPanel` keys for their rows.
 | `grid.cell` | `GridView.STYLE_CELL` | paint | yes | |
 | `grid.cell.hovered` | `GridView.STYLE_CELL_HOVERED` | paint | no | Nothing |
 | `grid.cell.selected` | `GridView.STYLE_CELL_SELECTED` | paint | no | `grid.cell.hovered` |
+| `grid.cell.padding` | `GridView.STYLE_CELL_PADDING` | insets | no | 1 on every side |
 
 ## ColorPicker
 
