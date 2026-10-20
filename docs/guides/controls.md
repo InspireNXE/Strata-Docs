@@ -1,6 +1,6 @@
 # Controls
 
-Strata's built-in controls are interfaces in the subpackages of `org.inspirenxe.strata.api.control`, made by the factory: `display` (`Label`, `Image`, `ProgressBar`, `BusyIndicator`, `Separator`), `button` (`Button`, `CycleButton`, `CheckBox`, `RadioButton`, `RadioGroup`, `ToggleSwitch`), `field` (`TextBox`, `PasswordTextBox`, `TextArea`, `Spinner`, `Slider`, `ColorPicker`, `CalendarView`, `DatePicker`, `TimePicker`, `DateTimePicker`), `collection` (`ListView`, `ComboBox`, `TableView`, `TreeView`, `GridView`), `menu` (`Menu`, `MenuBar`), `pane` (`TabBar`, `Expander`, `SplitPane`, `ScrollBar`) and `window` (`Window`, `MessageBox`). Each one has [events](events.md): a request (Pre) for each change the user can make, which a handler can cancel or rewrite, and a report (Post) for each change from any source. Each section below lists them in an Events table. Their theme keys are listed on each control below and in the [theme key reference](../reference/theme-keys.md). Scrolling is a container, [`ScrollPanel`](layout.md#scrollpanel), and popups, dialogs and tooltips are in [Overlays and tooltips](overlays.md).
+Strata's built-in controls are interfaces in the subpackages of `org.inspirenxe.strata.api.control`, made by the factory: `display` (`Label`, `Image`, `ProgressBar`, `BusyIndicator`, `Separator`), `button` (`Button`, `DropDownButton`, `CycleButton`, `CheckBox`, `RadioButton`, `RadioGroup`, `ToggleSwitch`), `field` (`TextBox`, `PasswordTextBox`, `TextArea`, `Spinner`, `Slider`, `ColorPicker`, `CalendarView`, `DatePicker`, `TimePicker`, `DateTimePicker`), `collection` (`ListView`, `ComboBox`, `TableView`, `TreeView`, `GridView`), `menu` (`Menu`, `MenuBar`, `Flyout`), `pane` (`TabBar`, `Expander`, `SplitPane`, `ScrollBar`) and `window` (`Window`, `MessageBox`). Each one has [events](events.md): a request (Pre) for each change the user can make, which a handler can cancel or rewrite, and a report (Post) for each change from any source. Each section below lists them in an Events table. Their theme keys are listed on each control below and in the [theme key reference](../reference/theme-keys.md). Scrolling is a container, [`ScrollPanel`](layout.md#scrollpanel), and popups, dialogs and tooltips are in [Overlays and tooltips](overlays.md); `Menu` and `Flyout` are controls that open themselves as popups.
 
 ## Attributes
 
@@ -25,7 +25,8 @@ Controls that do the same kind of thing share small interfaces called attributes
 | `Activatable` | `item` | `setActivateOnClick` | `ACTIVATE`, `ACTIVATED` | `ListView`, `TableView`, `TreeView`, `GridView` |
 | `RowView` | `item` | row height and spacing, the placeholder, scrolling, `setDeselectable` | | `ListView`, `TableView`, `TreeView` |
 | `Closable` | `popup` | `close()` | `CLOSE`, `CLOSED` | `Window`, `Overlay`, and through `Openable` the others |
-| `Openable` | `popup` | `Closable` plus `isOpen()` | `OPEN`, `OPENED` | `ComboBox`, `DatePicker`, `TimePicker`, `DateTimePicker`, `Menu` |
+| `Openable` | `popup` | `Closable` plus `isOpen()` | `OPEN`, `OPENED` | `ComboBox`, `DropDownButton`, `DatePicker`, `TimePicker`, `DateTimePicker`, and through `Popup` the popups |
+| `Popup` | `popup` | `Openable` plus `open(rect)` and `openAt(x, y)`: a component that opens itself in an overlay | | `Menu`, `Flyout` |
 
 An attribute owns its events, so `Toggle.TOGGLED` fires for a checkbox, a switch and a radio button alike, and one handler on a container hears every control inside it that has the attribute:
 
@@ -161,6 +162,40 @@ A link has no frame. It draws only its caption, and the caption underlines while
 | `button.link.text.disabled` (optional) | The caption when disabled. Falls back to `button.text.disabled`. |
 
 A link reads none of the face keys and no focus ring.
+
+## DropDownButton
+
+A button with a down arrow after its caption that opens a popup below itself: a [menu](#menu-and-menubar) of commands, or a [flyout](#flyout) that holds any component.
+
+```java
+--8<-- "controls/ControlExamples.java:dropdown"
+```
+
+| Method | Notes |
+|---|---|
+| `setPopup(popup)` | The `Menu` or `Flyout` it opens; `null` for none. Replacing an open popup closes it first. A popup belongs to one button at a time, so a popup another button holds, a menu that is a submenu or in a menu bar, and a popup made by another factory throw `IllegalArgumentException`. |
+| `popup()` | The popup, or empty |
+| `open()`, `close()` | Open the popup below the button, or close it, from code. Neither asks anything; both report. |
+| `isOpen()` | True from `OPENED` to `CLOSED`. A popup the button holds but someone else opened does not count. |
+| `setText(text)`, `setTextPadding(...)`, `setIcon(SpriteId)`, `setIcon(Visual)`, `setIconSize(width, height)`, `clearIcon()` | As on a [button](#button) |
+
+A left click opens the popup, and so does Enter, keypad Enter, Space or Alt+Down while the button has focus (held keys that repeat do not). The popup takes focus. A menu opened by a key highlights its first item, so a second Enter chooses it. When the popup closes, for any reason, focus goes back to the button. A click on the open button closes the popup; with a popup that closes on a press outside, that press closes it and does nothing else.
+
+A menu opens at least as wide as the button, for that opening only, and keeps any minimum width you gave it. A flyout opens at its content's size. With no popup, or one with nothing to show (a menu with no items, a flyout with no content), the button asks nothing and stays closed. A disabled button takes no focus, does not open, and closes its popup if it is open.
+
+It looks and measures like a button, with the combo box's arrow, 7 by 4, at the right end of the space inside its padding, 4 units after the caption. The caption and icon center in the space left of the arrow. While open it draws `button.pressed`. It reads every `button.*` key a framed button reads, requires the same four faces, and adds one key:
+
+| Key | Required | Used for |
+|---|---|---|
+| `dropdown.arrow` | no | The arrow's lines. Falls back to the caption's text color. A disabled button draws the arrow in the disabled caption's color whatever the key says. |
+
+| Event | Kind | Fires |
+|---|---|---|
+| `Openable.OPEN` | Pre | When the user opens the popup. Cancel it to keep the popup closed. A handler may also change the menu's items first; a menu left empty does not open. |
+| `Openable.OPENED` | Post | After the button opened its popup, including `open()`, once the popup has reported its own `OPENED` |
+| `Closable.CLOSED` | Post | After the popup the button opened closed, for any reason, once the popup has reported its own `CLOSED`. The button never fires `Closable.CLOSE`. |
+
+The popup's own events, such as `Menu.CHOSEN`, reach only handlers on the popup, since it opens in an overlay outside the screen's tree. Listen on the menu or the flyout, or give menu items their actions.
 
 ## CycleButton
 
@@ -981,7 +1016,9 @@ MenuItem paste = factory.menuItem("Paste")
         .setAction(this::paste);
 menu.addItem(paste);
 paste.setEnabled(clipboard.hasText());
-``` `open(rect)` opens the menu below a rectangle as a [popup](overlays.md#popups), and `openAt(x, y)` with its corner at a point.
+```
+
+`open(rect)` opens the menu below a rectangle as a [popup](overlays.md#popups), and `openAt(x, y)` with its corner at a point. A [drop-down button](#dropdownbutton) opens a menu below itself for you. `setMinWidth(width)` makes a menu at least that wide; it is never narrower than 60 units or its widest item.
 
 An open menu takes focus. Hovering an item highlights it and opens its submenu. Up and Down move the highlight past separators and disabled items; Right opens a submenu and Left closes it; Enter or Space chooses; Escape closes the menu it is pressed in. Choosing closes the whole chain of menus and then runs the action, and focus goes back to where it was before the first menu opened. A click outside closes them all.
 
@@ -991,7 +1028,7 @@ MenuBar bar = factory.menuBar()
         .addMenu("View", viewMenu);
 ```
 
-A menu bar's titles are `SubmenuItem`s: `menus()` lists them, `addMenu(entry)` and `removeMenu(entry)` change them, and a disabled title opens nothing. A menu bar opens a title's menu below it on a click and closes it on a second. While one of its menus is open, moving the pointer onto another title switches to that menu, and Left and Right in a menu with no submenu open move along the bar. A menu belongs to at most one bar or parent menu. The bar's selection is its open menu: `selectedIndex()` is the open title or -1, `select(index)` opens a menu from code and `clearSelection()` closes it.
+A menu bar's titles are `SubmenuItem`s: `menus()` lists them, `addMenu(entry)` and `removeMenu(entry)` change them, and a disabled title opens nothing. A menu bar opens a title's menu below it on a click and closes it on a second. While one of its menus is open, moving the pointer onto another title switches to that menu, and Left and Right in a menu with no submenu open move along the bar. A menu belongs to at most one bar, parent menu or drop-down button. The bar's selection is its open menu: `selectedIndex()` is the open title or -1, `select(index)` opens a menu from code and `clearSelection()` closes it.
 
 | Key | Required | Used for |
 |---|---|---|
@@ -1008,10 +1045,44 @@ A menu bar's titles are `SubmenuItem`s: `menus()` lists them, `addMenu(entry)` a
 |---|---|---|
 | `Menu.CHOOSE` | Pre | When the user chooses an item, with the `MenuEntry`. Cancel to keep the menu open and the item as it is, or set another entry. |
 | `Menu.CHOSEN` | Post | After the menus closed and the item's action ran, with the entry |
-| `Openable.OPENED` | Post | Each time the menu opens, from code or from its bar. A menu never fires `Openable.OPEN`. |
+| `Openable.OPENED` | Post | Each time the menu opens, from code, its bar or a drop-down button. A menu never fires `Openable.OPEN`; the bar and the button ask on their own behalf. |
 | `Closable.CLOSED` | Post | Each time the menu closes, for any reason |
 | `Selection.SELECT` | Pre | On the bar, when a click, a hover while a menu is open, or Left and Right would open a menu, with its title index |
 | `Selection.SELECTED` | Post | On the bar, after its open menu changed: opened from a title or `select`, switched, or closed. Switching reports once. |
+
+## Flyout
+
+A popup that shows any component, such as a color picker opened from a button, or a small form opened on a right click.
+
+```java
+--8<-- "controls/ControlExamples.java:flyout"
+```
+
+`open(rect)` opens it below a rectangle, or above when there is more room there, and `openAt(x, y)` with its corner at a point, as a [menu](#menu-and-menubar) opens. A [drop-down button](#dropdownbutton) opens one for you. Opening an open flyout, or one with no content, does nothing.
+
+| Method | Default | Notes |
+|---|---|---|
+| `setContent(component)` | none | What it shows; `null` for none. Content already in a tree, or made by another factory, throws `IllegalArgumentException`. While open, new content takes the old content's place, and clearing the content closes the flyout. |
+| `setLightDismiss(dismiss)` | `true` | Whether a click outside closes it. Applies at once to an open flyout. |
+| `close()` | | Closes it from code |
+
+The flyout draws `flyout.background` and puts its content inside `flyout.padding`. It asks for the content's desired size plus the padding, no larger than the host, and stays inside the host.
+
+Opening it moves focus to the first component of its content that Tab would stop at, or to the flyout itself when there is none; the flyout is focusable for that reason but not tabbable. While focus is inside it, Tab and Shift+Tab move only among the content's components and wrap at the ends. Escape closes it, as it closes the top overlay. When it closes, focus goes back to where it was before it opened.
+
+With light dismiss, the default, a click outside the flyout closes it and does nothing else, as for any popup. Without it, the flyout stays open and the click goes on to what is under the pointer, so the user can keep working on the screen behind it. Escape and `close()` still close it.
+
+The content is yours, so the control events of components inside it, such as a button's `PRESSED` or a color picker's `PICKED`, reach handlers on the flyout. They go no further, since the flyout opens in an overlay outside the screen's tree.
+
+| Key | Required | Used for |
+|---|---|---|
+| `flyout.background` | no | Behind the flyout. Falls back to `combobox.popup`. |
+| `flyout.padding` | no | Between the flyout's edges and its content. 4 on every side by default. |
+
+| Event | Kind | Fires |
+|---|---|---|
+| `Openable.OPENED` | Post | Each time the flyout opens. A flyout never fires `Openable.OPEN`; a drop-down button asks on its own behalf. |
+| `Closable.CLOSED` | Post | Each time it closes, for any reason: Escape, a click outside, `close()`, or its content cleared |
 
 ## Expander
 

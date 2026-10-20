@@ -14,6 +14,8 @@ A popup shows a component next to an area, usually the bounds of the component t
 
 The popup takes its desired size. It sits below the area with left edges lined up, above it when there is more room above, and moves left as needed to stay inside the host. A press anywhere outside the popup closes it, and that press goes nowhere else, so clicking another button while a menu is open only closes the menu. Escape closes it too. The [`ComboBox`](controls.md#combobox) is built this way.
 
+Two controls open themselves as popups and share the `Popup` attribute: a [`Menu`](controls.md#menu-and-menubar) of commands, and a [`Flyout`](controls.md#flyout) that shows any component. Both take focus when they open and give it back when they close, and a [`DropDownButton`](controls.md#dropdownbutton) opens either one below itself. A flyout can also turn off closing on a press outside, so the press reaches the screen and the flyout stays open.
+
 ## Dialogs
 
 A dialog is modal. Its content is laid out in the whole host, where its own alignment places it, so a centered [window](controls.md#window) stays centered when the host resizes.

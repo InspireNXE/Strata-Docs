@@ -16,6 +16,12 @@ Every key the built-in controls and hosts respond to. Control means Control with
 |---|---|
 | Enter, keypad Enter, Space | Press (not on repeat) |
 
+## DropDownButton, while focused
+
+| Keys | Action |
+|---|---|
+| Enter, keypad Enter, Space, Alt+Down | Open the popup (not on repeat). A menu opened this way highlights its first item. |
+
 ## CheckBox, while focused
 
 | Keys | Action |
@@ -99,6 +105,14 @@ A double click selects everything. The box consumes every typed character while 
 | Alt+Down, F4 | Open the popup, or close it |
 
 The pickers consume every typed character while they have focus.
+
+## Flyout, while focus is inside it
+
+| Keys | Action |
+|---|---|
+| Tab | Focus the next tabbable component in the flyout, wrapping at the end; focus stays in the flyout |
+| Shift+Tab | Focus the previous one |
+| Escape | Close it, unless something in it consumed the key, and give focus back |
 
 ## Mouse in a TextBox
 

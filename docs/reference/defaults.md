@@ -7,7 +7,7 @@ Every number Strata picks for you.
 | Setting | Default |
 |---|---|
 | Visible, enabled | yes |
-| Focusable, tabbable | no, except buttons, checkboxes, radio buttons, toggle switches, sliders, text boxes, text areas, lists (also inside tables and trees), combo boxes, tab bars and expanders, the controls that are `Focusable`. Scroll bars and scroll panels are `Focusable` but start with focus off. Menus are focusable but not tabbable. A color picker is neither, but its hex field is. |
+| Focusable, tabbable | no, except buttons, drop-down buttons, checkboxes, radio buttons, toggle switches, sliders, text boxes, text areas, lists (also inside tables and trees), combo boxes, tab bars and expanders, the controls that are `Focusable`. Scroll bars and scroll panels are `Focusable` but start with focus off. Menus and flyouts are focusable but not tabbable. A color picker is neither, but its hex field is. |
 | Margin | `Insets.NONE` |
 | Minimum size | 0 by 0 |
 | Maximum size | `Float.POSITIVE_INFINITY` both ways |
@@ -60,6 +60,9 @@ Every number Strata picks for you.
 | | Minimum size | 20 by 20 |
 | | Cursor | `HAND` |
 | | Focus ring | one unit, inside the edge, if the theme has `button.focus` |
+| `DropDownButton` | Text padding, icon, minimum size, cursor, focus ring | as `Button` |
+| | Arrow | 7 by 4, 4 after the caption, at the right end of the space inside the padding |
+| | Popup | none |
 | `Image` | Image size and desired size | 16 by 16 |
 | | Made with `image()` | draws nothing until given a sprite or a visual |
 | | Scaling | `STRETCH` |
@@ -153,7 +156,11 @@ Every number Strata picks for you.
 | `Menu` | Item height | one line plus 6 |
 | | Gutters | the theme's `menu.item.padding` at each side of an item, else 14; `menu.padding` around the items, else 2 |
 | | Separator height | 5 |
-| | Smallest width | 60 |
+| | Smallest width | 60, or the width set with `setMinWidth`, or the drop-down button's width while one opened it, whichever is widest |
+| `Flyout` | Content | none |
+| | Padding | the theme's `flyout.padding`, else 4 on every side |
+| | Light dismiss | on |
+| | Size | the content's desired size plus the padding, no larger than the host |
 | `MenuBar` | Title size | text plus 8 on each side; one line plus 6 |
 | `Expander` | Header | one line plus 6 tall |
 | | Expanded | no |

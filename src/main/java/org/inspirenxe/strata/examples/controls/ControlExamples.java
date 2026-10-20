@@ -18,6 +18,7 @@ package org.inspirenxe.strata.examples.controls;
 import org.inspirenxe.strata.api.ComponentFactory;
 import org.inspirenxe.strata.api.component.Component;
 import org.inspirenxe.strata.api.control.attribute.item.SingleSelection;
+import org.inspirenxe.strata.api.control.attribute.popup.Openable;
 import org.inspirenxe.strata.api.control.attribute.text.TextEntry;
 import org.inspirenxe.strata.api.control.attribute.value.HasDate;
 import org.inspirenxe.strata.api.control.attribute.value.HasTime;
@@ -25,14 +26,18 @@ import org.inspirenxe.strata.api.control.attribute.value.Ranged;
 import org.inspirenxe.strata.api.control.attribute.value.Toggle;
 import org.inspirenxe.strata.api.control.button.Button;
 import org.inspirenxe.strata.api.control.button.CheckBox;
+import org.inspirenxe.strata.api.control.button.DropDownButton;
 import org.inspirenxe.strata.api.control.collection.ListView;
 import org.inspirenxe.strata.api.control.display.Image;
 import org.inspirenxe.strata.api.control.display.Label;
+import org.inspirenxe.strata.api.control.field.ColorPicker;
 import org.inspirenxe.strata.api.control.field.DatePicker;
 import org.inspirenxe.strata.api.control.field.PasswordTextBox;
 import org.inspirenxe.strata.api.control.field.Slider;
 import org.inspirenxe.strata.api.control.field.TextBox;
 import org.inspirenxe.strata.api.control.field.TimePicker;
+import org.inspirenxe.strata.api.control.menu.Flyout;
+import org.inspirenxe.strata.api.control.menu.Menu;
 import org.inspirenxe.strata.api.layout.Anchor;
 import org.inspirenxe.strata.api.layout.HorizontalAlignment;
 import org.inspirenxe.strata.api.layout.Orientation;
@@ -50,7 +55,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -137,6 +144,51 @@ public final class ControlExamples {
         bookButton.onEvent(Button.PRESSED, event -> book.accept(day.date().orElseThrow().atTime(time.time().orElseThrow())));
         // --8<-- [end:booking]
         return row;
+    }
+
+    /**
+     * A drop-down button that opens a sort menu, and refuses to open while the list is loading.
+     *
+     * @param factory the factory
+     * @param loading whether the list is loading
+     * @param sortBy takes the order chosen: {@code name}, {@code price}, {@code unsold} or {@code all}
+     * @return the button
+     */
+    public static DropDownButton sortButton(final ComponentFactory factory, final BooleanSupplier loading,
+                                            final Consumer<String> sortBy) {
+        // --8<-- [start:dropdown]
+        final Menu order = factory.menu()
+                .addItem("By name", () -> sortBy.accept("name"))
+                .addItem("By price", () -> sortBy.accept("price"))
+                .addSeparator()
+                .addCheckItem("Hide sold", true, hidden -> sortBy.accept(hidden ? "unsold" : "all"));
+        final DropDownButton sort = factory.dropDownButton("Sort", order).setTooltip("Change the order");
+        // The button asks before it opens, so a handler can keep the menu closed
+        sort.onEvent(Openable.OPEN, event -> {
+            if (loading.getAsBoolean()) {
+                event.cancel();
+            }
+        });
+        // --8<-- [end:dropdown]
+        return sort;
+    }
+
+    /**
+     * A button that opens a color picker in a flyout below itself.
+     *
+     * @param factory the factory
+     * @param tint takes each color picked
+     * @return the button
+     */
+    public static Button tintButton(final ComponentFactory factory, final IntConsumer tint) {
+        // --8<-- [start:flyout]
+        final ColorPicker picker = factory.colorPicker()
+                .onEvent(ColorPicker.PICKED, event -> tint.accept(event.value()));
+        final Flyout flyout = factory.flyout(picker);
+        final Button button = factory.button("Tint");
+        button.onEvent(Button.PRESSED, event -> flyout.open(button.bounds()));
+        // --8<-- [end:flyout]
+        return button;
     }
 
     static CheckBox checkBox(final ComponentFactory factory, final Settings settings) {

@@ -16,14 +16,18 @@
 package org.inspirenxe.strata.examples;
 
 import org.inspirenxe.strata.api.control.button.Button;
+import org.inspirenxe.strata.api.control.button.DropDownButton;
+import org.inspirenxe.strata.api.control.field.ColorPicker;
 import org.inspirenxe.strata.api.control.field.DatePicker;
 import org.inspirenxe.strata.api.control.field.PasswordTextBox;
+import org.inspirenxe.strata.api.control.menu.Flyout;
 import org.inspirenxe.strata.api.input.Key;
 import org.inspirenxe.strata.api.input.KeyAction;
 import org.inspirenxe.strata.api.input.Modifiers;
 import org.inspirenxe.strata.api.layout.StackPanel;
 import org.inspirenxe.strata.api.control.window.Window;
 import org.inspirenxe.strata.api.event.Subscription;
+import org.inspirenxe.strata.api.overlay.Overlay;
 import org.inspirenxe.strata.api.theme.Paint;
 import org.inspirenxe.strata.api.theme.Theme;
 import org.inspirenxe.strata.api.theme.ThemeException;
@@ -132,6 +136,42 @@ class ExamplesTest {
         book.requestFocus();
         host.key(Key.ENTER, KeyAction.PRESS, Modifiers.NONE);
         assertEquals(List.of(tomorrow.atTime(9, 0)), booked);
+    }
+
+    @Test
+    void theSortButtonOpensItsMenuUnlessTheListIsLoading() {
+        final ScreenHost host = StrataCore.createScreenHost(new ToyPlatform(), Themes.flat());
+        host.resize(400, 200);
+        final boolean[] loading = {true};
+        final List<String> sorted = new ArrayList<>();
+        final DropDownButton[] sort = new DropDownButton[1];
+        host.open(factory -> sort[0] = ControlExamples.sortButton(factory, () -> loading[0], sorted::add));
+        host.layout();
+        sort[0].requestFocus();
+        host.key(Key.ENTER, KeyAction.PRESS, Modifiers.NONE);
+        assertFalse(sort[0].isOpen());
+        loading[0] = false;
+        host.key(Key.ENTER, KeyAction.PRESS, Modifiers.NONE);
+        assertTrue(sort[0].isOpen());
+        // A key opens the menu on its first item, and Enter chooses it
+        host.key(Key.ENTER, KeyAction.PRESS, Modifiers.NONE);
+        assertEquals(List.of("name"), sorted);
+        assertFalse(sort[0].isOpen());
+    }
+
+    @Test
+    void theTintButtonOpensAColorPickerBelowItself() {
+        final ScreenHost host = StrataCore.createScreenHost(new ToyPlatform(), Themes.flat());
+        host.resize(400, 300);
+        final Button[] button = new Button[1];
+        host.open(factory -> button[0] = ControlExamples.tintButton(factory, color -> { }));
+        host.layout();
+        button[0].requestFocus();
+        host.key(Key.ENTER, KeyAction.PRESS, Modifiers.NONE);
+        final Overlay flyout = host.factory().overlays().open().getFirst();
+        assertTrue(flyout.content() instanceof Flyout);
+        assertEquals(button[0].bounds().bottom(), flyout.content().bounds().y());
+        assertTrue(((Flyout) flyout.content()).content().orElseThrow() instanceof ColorPicker);
     }
 
     @Test

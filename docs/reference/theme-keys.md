@@ -21,6 +21,14 @@ Every style key the built-in controls read. A theme lacking a required key canno
 
 The `button.link.*` keys apply to a button made a link, which reads no face keys. A `CycleButton` reads the same keys as a button.
 
+## DropDownButton
+
+A drop-down button reads the `Button` keys above except the link keys, with the same requirements, and one of its own.
+
+| Key | Constant | Kind | Required | Fallback |
+|---|---|---|---|---|
+| `dropdown.arrow` | `DropDownButton.STYLE_ARROW` | paint | no | The arrow in the `button.text` color; a disabled button always uses the `button.text.disabled` color |
+
 ## Label
 
 | Key | Constant | Kind | Required | Fallback |
@@ -267,6 +275,13 @@ Both read the `ListView` and `ScrollPanel` keys for their rows.
 | `menubar.text` | `MenuBar.STYLE_TEXT` | text style | no | `menu.text` |
 | `menubar.title.padding` | `MenuBar.STYLE_TITLE_PADDING` | insets | no | 8, 3, 8 and 3 |
 
+## Flyout
+
+| Key | Constant | Kind | Required | Fallback |
+|---|---|---|---|---|
+| `flyout.background` | `Flyout.STYLE_BACKGROUND` | paint | no | `combobox.popup` |
+| `flyout.padding` | `Flyout.STYLE_PADDING` | insets | no | 4 on every side |
+
 ## Expander, SplitPane and GridView
 
 | Key | Constant | Kind | Required | Fallback |
@@ -477,7 +492,7 @@ A color picker's hex field uses the `TextBox` keys.
 | `overlay.backdrop` | solid `0x60000000` |
 | `tooltip.text` | `0xFFF0F0F0` |
 
-Text styles are otherwise plain: no bold, italic, underline, strikethrough or shadow. `tooltip.background` is not set, so tooltips use the fallback box.
+Text styles are otherwise plain: no bold, italic, underline, strikethrough or shadow. `tooltip.background` is not set, so tooltips use the fallback box, and neither are `dropdown.arrow`, `flyout.background` and `flyout.padding`, so drop-down arrows take the button text's color and flyouts the combo box's popup paint.
 
 ## Naming your own keys
 
