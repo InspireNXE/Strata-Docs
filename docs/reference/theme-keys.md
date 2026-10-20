@@ -39,6 +39,8 @@ A style set with `Label.setStyle` overrides the key.
 | `checkbox.checked.disabled` | `CheckBox.STYLE_CHECKED_DISABLED` | paint | no | `checkbox.checked` |
 | `checkbox.mark` | `CheckBox.STYLE_MARK` | paint | no | No mark |
 | `checkbox.mark.disabled` | `CheckBox.STYLE_MARK_DISABLED` | paint | no | `checkbox.mark` |
+| `checkbox.mark.mixed` | `CheckBox.STYLE_MARK_MIXED` | paint | no | `checkbox.mark` |
+| `checkbox.mark.mixed.disabled` | `CheckBox.STYLE_MARK_MIXED_DISABLED` | paint | no | `checkbox.mark.disabled`, then `checkbox.mark.mixed` |
 | `checkbox.focus` | `CheckBox.STYLE_FOCUS` | paint | no | No focus ring |
 | `checkbox.text` | `CheckBox.STYLE_TEXT` | text style | no | `TextStyle.DEFAULT` |
 | `checkbox.text.disabled` | `CheckBox.STYLE_TEXT_DISABLED` | text style | no | `checkbox.text` |

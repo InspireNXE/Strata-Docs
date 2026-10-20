@@ -193,7 +193,9 @@ A box that is checked or not, with a caption to its right.
 | Method | Default | Notes |
 |---|---|---|
 | `setText(text)` | | One line. May be empty for a box alone. |
-| `setSelected(boolean)` | unchecked | Fires `TOGGLED` if the state changed. Works while disabled, so code can keep a disabled box in step with its setting. |
+| `setSelected(boolean)` | unchecked | Checks or empties it. Fires `CHANGED`, and `TOGGLED` if it changed whether the box is checked. Works while disabled, so code can keep a disabled box in step with its setting. |
+| `setState(CheckState)` | `UNCHECKED` | `UNCHECKED`, `CHECKED` or `MIXED`, the filled square a box shows while the things it stands for disagree. `isSelected()` is true only for `CHECKED`. |
+| `setAllowsMixed(boolean)` | off | Makes the user's clicks cycle empty, checked, mixed. Off, a click checks an empty or mixed box and empties a checked one, and only code sets mixed. |
 | `toggle()` | | Flips it from code: fires `TOGGLED` but no `TOGGLE` request. Does nothing while disabled. |
 | `setBoxSize(size)` | line height plus 8 | The square box's size. `Float.NaN` goes back to the default, which is 17 with a 9-unit line height. |
 
@@ -204,15 +206,18 @@ A left click anywhere on the check box, caption included, toggles it, and so doe
 | `checkbox.normal`, `checkbox.checked` | Idle |
 | `checkbox.hovered`, `checkbox.checked.hovered` | Hovered or focused |
 | `checkbox.disabled`, `checkbox.checked.disabled` (optional) | Disabled. Fall back to the idle faces. |
-| `checkbox.mark`, `checkbox.mark.disabled` (optional) | Drawn over a checked box, inset by a fifth of its size |
+| `checkbox.mark`, `checkbox.mark.disabled` (optional) | A check drawn over a checked box, inside a fifth of its size from each edge |
+| `checkbox.mark.mixed`, `checkbox.mark.mixed.disabled` (optional) | A square over a mixed box, inset by a fifth of its size. Fall back to the mark keys. A mixed box uses the unchecked faces. |
 | `checkbox.focus` (optional) | A one-unit ring inside the box's edge while focused |
 
 Themes built from images can draw the check mark into the checked faces and leave `checkbox.mark` out. Themes built from colors use `checkbox.mark`.
 
 | Event | Kind | Fires |
 |---|---|---|
-| `Toggle.TOGGLE` | Pre | When the user flips it, with the state about to be taken. Cancel to refuse, or set another state. |
-| `Toggle.TOGGLED` | Post | After every change, with the new and previous state |
+| `CheckBox.CHANGE` | Pre | When the user changes it, with the `CheckState` about to be taken. Cancel to refuse, or set another state. |
+| `Toggle.TOGGLE` | Pre | After `CHANGE`, when the change would check or uncheck the box, with whether it would be checked. Cancel to refuse. |
+| `CheckBox.CHANGED` | Post | After every change of state, with the new and previous `CheckState` |
+| `Toggle.TOGGLED` | Post | After a change that checked or unchecked it. Going between empty and mixed fires only `CHANGED`. |
 
 ## Slider
 
