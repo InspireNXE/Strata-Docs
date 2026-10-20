@@ -14,7 +14,9 @@ A popup shows a component next to an area, usually the bounds of the component t
 
 The popup takes its desired size. It sits below the area with left edges lined up, above it when there is more room above, and moves left as needed to stay inside the host. A press anywhere outside the popup closes it, and that press goes nowhere else, so clicking another button while a menu is open only closes the menu. Escape closes it too. The [`ComboBox`](controls.md#combobox) is built this way.
 
-Two controls open themselves as popups and share the `Popup` attribute: a [`Menu`](controls.md#menu-and-menubar) of commands, and a [`Flyout`](controls.md#flyout) that shows any component. Both take focus when they open and give it back when they close, and a [`DropDownButton`](controls.md#dropdownbutton) opens either one below itself. A flyout can also turn off closing on a press outside, so the press reaches the screen and the flyout stays open.
+A popup can also be laid out inside an area with `popupIn(content, area)`, as a dialog is laid out in the whole host: content that stretches fills the area, and other content takes its size where its alignment places it. The area is cut to the host. It closes like any popup. A [navigation view](controls.md#navigationview) opens its pane over the content this way.
+
+Two controls open themselves as popups and share the `Popup` attribute: a [`Menu`](controls.md#menu-and-menubar) of commands, and a [`Flyout`](controls.md#flyout) that shows any component. Both take focus when they open and give it back when they close, and a [`DropDownButton`](controls.md#dropdownbutton) opens either one below itself. A flyout can also turn off closing on a press outside, so the press reaches the screen and the flyout stays open, and open inside an area with `openIn`, such as beside a component.
 
 ## Dialogs
 

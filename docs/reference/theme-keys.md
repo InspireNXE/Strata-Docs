@@ -213,7 +213,7 @@ The open list also uses the `ListView` and `ScrollPanel` keys.
 | `badge.text` | `Avatar.STYLE_BADGE_TEXT` | text style | no | `TextStyle.DEFAULT` |
 | `badge.padding` | `Avatar.STYLE_BADGE_PADDING` | insets | no | 2, 1, 2 and 1 |
 
-The `badge.*` keys are for any control that shows a count, so a theme styles every count at once.
+The `badge.*` keys are shared with the items of a `NavigationView`, so a theme styles every count at once.
 
 ## InfoBar
 
@@ -312,6 +312,29 @@ Both read the `ListView` and `ScrollPanel` keys for their rows.
 |---|---|---|---|---|
 | `flyout.background` | `Flyout.STYLE_BACKGROUND` | paint | no | `combobox.popup` |
 | `flyout.padding` | `Flyout.STYLE_PADDING` | insets | no | 4 on every side |
+
+## NavigationView
+
+| Key | Constant | Kind | Required | Fallback |
+|---|---|---|---|---|
+| `nav.pane` | `NavigationView.STYLE_PANE` | paint | no | Nothing |
+| `nav.pane.overlay` | `NavigationView.STYLE_PANE_OVERLAY` | paint | no | `nav.pane`, then `combobox.popup` |
+| `nav.item.hovered` | `NavigationView.STYLE_ITEM_HOVERED` | paint | no | `list.row.hovered` |
+| `nav.item.selected` | `NavigationView.STYLE_ITEM_SELECTED` | paint | yes | |
+| `nav.indicator` | `NavigationView.STYLE_INDICATOR` | paint | no | Nothing |
+| `nav.item.text` | `NavigationView.STYLE_ITEM_TEXT` | text style | no | `TextStyle.DEFAULT` |
+| `nav.item.text.selected` | `NavigationView.STYLE_ITEM_TEXT_SELECTED` | text style | no | `nav.item.text` |
+| `nav.item.text.disabled` | `NavigationView.STYLE_ITEM_TEXT_DISABLED` | text style | no | `textbox.text.disabled`, then `nav.item.text` |
+| `nav.header.text` | `NavigationView.STYLE_HEADER_TEXT` | text style | no | `nav.item.text.disabled` |
+| `nav.title.text` | `NavigationView.STYLE_TITLE_TEXT` | text style | no | `TextStyle.DEFAULT` |
+| `nav.separator` | `NavigationView.STYLE_SEPARATOR` | paint | no | `separator` |
+| `nav.toggle` | `NavigationView.STYLE_TOGGLE` | paint | no | Nothing |
+| `nav.toggle.hovered` | `NavigationView.STYLE_TOGGLE_HOVERED` | paint | no | `nav.item.hovered` |
+| `nav.focus` | `NavigationView.STYLE_FOCUS` | paint | no | `button.focus` |
+| `nav.item.padding` | `NavigationView.STYLE_ITEM_PADDING` | insets | no | 6, 5, 6 and 5 |
+| `nav.pane.padding` | `NavigationView.STYLE_PANE_PADDING` | insets | no | 2 on every side |
+
+The toggle's three lines are drawn in the `nav.item.text` color over `nav.toggle`. Badges use the `badge.*` keys, and the scrolling items the `scroll.*` keys.
 
 ## Expander, SplitPane and GridView
 
@@ -529,6 +552,10 @@ A color picker's hex field uses the `TextBox` keys.
 | `infobar.accent.success` | solid `0xFF43A047` |
 | `infobar.accent.warning` | solid `0xFFE8A33D` |
 | `infobar.accent.error` | solid `0xFFE05050` |
+| `nav.pane` | solid `0xFF1F2024` |
+| `nav.item.selected` | solid `0xFF3A4D6E` |
+| `nav.indicator` | solid `0xFF6A9FFF` |
+| `nav.item.text` | `0xFFE0E0E0` |
 
 Text styles are otherwise plain: no bold, italic, underline, strikethrough or shadow. `tooltip.background` is not set, so tooltips use the fallback box, and neither are `dropdown.arrow`, `flyout.background` and `flyout.padding`, so drop-down arrows take the button text's color and flyouts the combo box's popup paint. The `badge.*` keys are not set either, so badges are white numbers on a red fill.
 

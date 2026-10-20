@@ -112,6 +112,17 @@ A double click selects everything. The box consumes every typed character while 
 
 The pickers consume every typed character while they have focus.
 
+## NavigationView, while focused
+
+| Keys | Action |
+|---|---|
+| Up, Down | Move the cursor to the item above or below, skipping headers, separators and disabled items (repeats) |
+| Home, End | Move the cursor to the first or last item |
+| Enter, keypad Enter, Space | Pick the cursor's item as a click does; with the pane hidden in `MINIMAL`, open it (not on repeat) |
+| Right | Expand the cursor's item, or open its menu of children in the column of icons |
+| Left | Collapse the cursor's item, or move the cursor to its parent |
+| Escape | Close the pane over the content, unless something consumed the key |
+
 ## Flyout, while focus is inside it
 
 | Keys | Action |

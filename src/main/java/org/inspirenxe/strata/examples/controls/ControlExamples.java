@@ -17,6 +17,7 @@ package org.inspirenxe.strata.examples.controls;
 
 import org.inspirenxe.strata.api.ComponentFactory;
 import org.inspirenxe.strata.api.component.Component;
+import org.inspirenxe.strata.api.control.attribute.item.Activatable;
 import org.inspirenxe.strata.api.control.attribute.item.SingleSelection;
 import org.inspirenxe.strata.api.control.attribute.popup.Closable;
 import org.inspirenxe.strata.api.control.attribute.popup.Openable;
@@ -41,6 +42,8 @@ import org.inspirenxe.strata.api.control.field.TextBox;
 import org.inspirenxe.strata.api.control.field.TimePicker;
 import org.inspirenxe.strata.api.control.menu.Flyout;
 import org.inspirenxe.strata.api.control.menu.Menu;
+import org.inspirenxe.strata.api.control.pane.NavigationItem;
+import org.inspirenxe.strata.api.control.pane.NavigationView;
 import org.inspirenxe.strata.api.layout.Anchor;
 import org.inspirenxe.strata.api.layout.HorizontalAlignment;
 import org.inspirenxe.strata.api.layout.Orientation;
@@ -67,7 +70,7 @@ import java.util.regex.Pattern;
 
 /**
  * The controls guide's examples for images, avatars, info bars, checkboxes, sliders, password boxes, rows of controls
- * in a list and date and time pickers.
+ * in a list, date and time pickers and navigation views.
  */
 public final class ControlExamples {
 
@@ -167,6 +170,38 @@ public final class ControlExamples {
         });
         // --8<-- [end:infobar]
         return failed;
+    }
+
+    /**
+     * A settings screen's navigation: General and Sound with their pages, a header, Account with two children, and
+     * Sign out in the footer, which signs out.
+     *
+     * @param factory the factory
+     * @param signOut what Sign out runs
+     * @return the view, with General selected
+     */
+    public static NavigationView settings(final ComponentFactory factory, final Runnable signOut) {
+        // --8<-- [start:navigation]
+        final NavigationItem signOutItem = factory.navigationItem("Sign out").setSelectable(false);
+        final NavigationView settings = factory.navigationView()
+                .setTitle("Settings")
+                .addItem("General", ui -> ui.label("General settings"))
+                .addItem("Sound", ui -> ui.slider().setLabel(value -> "Volume " + (int) (value * 100)))
+                .addSeparator()
+                .addHeader("Account")
+                .addItem(factory.navigationItem("Profile")
+                        .addItem(factory.navigationItem("Name").setPage(ui -> ui.textBox()))
+                        .addItem(factory.navigationItem("Picture").setPage(ui -> ui.avatar().setAvatarSize(48))))
+                .addFooterItem(signOutItem)
+                .select(0);
+        // Sign out is not selectable, so a click only activates it
+        settings.onEvent(Activatable.ACTIVATED, event -> {
+            if (settings.allItems().get(event.value()) == signOutItem) {
+                signOut.run();
+            }
+        });
+        // --8<-- [end:navigation]
+        return settings;
     }
 
     /**

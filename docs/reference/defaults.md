@@ -181,6 +181,19 @@ Every number Strata picks for you.
 | `SplitPane` | Divider | 4 thick |
 | | Position | 0.5 |
 | | Minimum side when dragging | 20 |
+| `NavigationView` | Display mode | `AUTO`: `EXPANDED` from 400 units wide, `COMPACT` from 240, `MINIMAL` below |
+| | Pane width | 120 |
+| | Column of icons | an item's height plus the pane padding wide, 23 with a 9-unit line |
+| | Bar of `MINIMAL` | an item's height plus the pane padding tall, 23 with a 9-unit line |
+| | Item | a line plus the theme's `nav.item.padding`, else 6 at the sides and 5 at the top and bottom; 19 tall with a 9-unit line |
+| | Icon | a square one line tall; children indented by a line and 4 |
+| | Gaps | 4 between an item's icon, text, badge and arrow, and between the toggle and the title |
+| | Separator | a one-unit line with 4 above and below |
+| | Pane padding | the theme's `nav.pane.padding`, else 2 on every side |
+| | Selection, title, content | none, none, none |
+| | Toggle shown, activate on click | yes, yes |
+| | Alignment | stretched over its slot |
+| | Focusable | yes, one tab stop |
 | `ScrollBar` | Orientation | `VERTICAL` |
 | | Desired size | 6 by 100, or 100 by 6 across; 2 thick when slim |
 | | Range, visible amount, value | 0 to 0, 0, 0: nothing to scroll |

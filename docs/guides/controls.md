@@ -1,6 +1,6 @@
 # Controls
 
-Strata's built-in controls are interfaces in the subpackages of `org.inspirenxe.strata.api.control`, made by the factory: `display` (`Label`, `Image`, `Avatar`, `InfoBar`, `ProgressBar`, `BusyIndicator`, `Separator`), `button` (`Button`, `DropDownButton`, `CycleButton`, `CheckBox`, `RadioButton`, `RadioGroup`, `ToggleSwitch`), `field` (`TextBox`, `PasswordTextBox`, `TextArea`, `Spinner`, `Slider`, `ColorPicker`, `CalendarView`, `DatePicker`, `TimePicker`, `DateTimePicker`), `collection` (`ListView`, `ComboBox`, `TableView`, `TreeView`, `GridView`), `menu` (`Menu`, `MenuBar`, `Flyout`), `pane` (`TabBar`, `Expander`, `SplitPane`, `ScrollBar`) and `window` (`Window`, `MessageBox`). Each one has [events](events.md): a request (Pre) for each change the user can make, which a handler can cancel or rewrite, and a report (Post) for each change from any source. Each section below lists them in an Events table. Their theme keys are listed on each control below and in the [theme key reference](../reference/theme-keys.md). Scrolling is a container, [`ScrollPanel`](layout.md#scrollpanel), and popups, dialogs and tooltips are in [Overlays and tooltips](overlays.md); `Menu` and `Flyout` are controls that open themselves as popups.
+Strata's built-in controls are interfaces in the subpackages of `org.inspirenxe.strata.api.control`, made by the factory: `display` (`Label`, `Image`, `Avatar`, `InfoBar`, `ProgressBar`, `BusyIndicator`, `Separator`), `button` (`Button`, `DropDownButton`, `CycleButton`, `CheckBox`, `RadioButton`, `RadioGroup`, `ToggleSwitch`), `field` (`TextBox`, `PasswordTextBox`, `TextArea`, `Spinner`, `Slider`, `ColorPicker`, `CalendarView`, `DatePicker`, `TimePicker`, `DateTimePicker`), `collection` (`ListView`, `ComboBox`, `TableView`, `TreeView`, `GridView`), `menu` (`Menu`, `MenuBar`, `Flyout`), `pane` (`TabBar`, `Expander`, `SplitPane`, `ScrollBar`, `NavigationView`) and `window` (`Window`, `MessageBox`). Each one has [events](events.md): a request (Pre) for each change the user can make, which a handler can cancel or rewrite, and a report (Post) for each change from any source. Each section below lists them in an Events table. Their theme keys are listed on each control below and in the [theme key reference](../reference/theme-keys.md). Scrolling is a container, [`ScrollPanel`](layout.md#scrollpanel), and popups, dialogs and tooltips are in [Overlays and tooltips](overlays.md); `Menu` and `Flyout` are controls that open themselves as popups.
 
 ## Attributes
 
@@ -9,7 +9,7 @@ Controls that do the same kind of thing share small interfaces called attributes
 | Attribute | Package | What it adds | Events | Controls |
 |---|---|---|---|---|
 | `HasText` | `text` | `text()`, `setText` | | `Button`, `DropDownButton`, `CycleButton`, `CheckBox`, `RadioButton`, `ToggleSwitch`, `Label`, `InfoBar` (the message), `ProgressBar`, `BusyIndicator`, and through `TextInput` the text fields |
-| `Titled` | `text` | `title()`, `setTitle` | | `Window`, `Expander`, `InfoBar` |
+| `Titled` | `text` | `title()`, `setTitle` | | `Window`, `Expander`, `InfoBar`, `NavigationView` |
 | `TextEntry` | `text` | `length()`, `isEmpty()`, `clear()`, the caret, the selection, `setMaxLength`, `setReadOnly`, `setTextPadding`; nothing that carries the text | `MODIFY`, `MODIFIED` | `TextBox`, `TextArea`, `PasswordTextBox` |
 | `TextInput` | `text` | `TextEntry` plus `text()`, `setText`, `selectedText()` and the highlighter | `EDIT`, `EDITED` | `TextBox`, `TextArea` |
 | `Toggle` | `value` | `isSelected()`, `setSelected`, `toggle()` | `TOGGLE`, `TOGGLED` | `CheckBox`, `ToggleSwitch`, `RadioButton` |
@@ -20,9 +20,9 @@ Controls that do the same kind of thing share small interfaces called attributes
 | `ItemSource` | `item` | `items()`, `setItems`, `refresh()`, `setKeyFunction` | | `ListView`, `TableView`, `TreeView`, `ComboBox`, `GridView`, `CycleButton` |
 | `CellSource` | `item` | `setCellFactory` | | `ListView`, `TreeView`, `GridView` |
 | `Selection` | `item` | `selectedIndex()`, `selected()`, `select(index)`, `selectItem(item)`, `clearSelection()`: the current entry | `SELECT`, `SELECTED` | every control below that selects |
-| `SingleSelection` | `item` | `Selection` and nothing more: the control only ever selects one entry | | `ComboBox`, `GridView`, `CycleButton`, `TabBar`, `MenuBar`, `RadioGroup` |
+| `SingleSelection` | `item` | `Selection` and nothing more: the control only ever selects one entry | | `ComboBox`, `GridView`, `CycleButton`, `TabBar`, `MenuBar`, `RadioGroup`, `NavigationView` |
 | `MultiSelection` | `item` | `Selection` plus `setSelectionMode`, `selectedIndexes()`, `selectedItems()`, `selectIndexes`, `selectAll()` | `SELECT_MANY`, `SELECTED_MANY` | `ListView`, `TableView`, `TreeView` |
-| `Activatable` | `item` | `setActivateOnClick` | `ACTIVATE`, `ACTIVATED` | `ListView`, `TableView`, `TreeView`, `GridView` |
+| `Activatable` | `item` | `setActivateOnClick` | `ACTIVATE`, `ACTIVATED` | `ListView`, `TableView`, `TreeView`, `GridView`, `NavigationView` |
 | `RowView` | `item` | row height and spacing, the placeholder, scrolling, `setDeselectable` | | `ListView`, `TableView`, `TreeView` |
 | `Closable` | `popup` | `close()` | `CLOSE`, `CLOSED` | `Window`, `Overlay`, and through `Openable` the others |
 | `Openable` | `popup` | `Closable` plus `isOpen()` | `OPEN`, `OPENED` | `ComboBox`, `DropDownButton`, `DatePicker`, `TimePicker`, `DateTimePicker`, `InfoBar`, and through `Popup` the popups |
@@ -131,7 +131,7 @@ The initials draw centered in the `avatar.initials` style. They are scaled by a 
 
 `avatar.background` draws behind the square and `avatar.frame` over the picture, so a theme can round the corners with a frame sprite whose corners are the color behind the avatar. An avatar is always square, since canvases clip only to rectangles; in bounds of another shape it draws the largest square that fits, centered.
 
-The badge sits at the square's bottom-right corner: its number is a line tall, with `badge.padding` around it on `badge.background`. The three `badge.*` keys carry no avatar prefix, since any control that shows a count may read them.
+The badge sits at the square's bottom-right corner: its number is a line tall, with `badge.padding` around it on `badge.background`. The three `badge.*` keys carry no avatar prefix, since the items of a [navigation view](#navigationview) read them too.
 
 An avatar has no input. It is not focusable, and clicks pass through it to its ancestors. Its tooltip is the value's, asked anew each time the pointer arrives, until you set one with `setTooltip`. To make an avatar clickable, put it in a component that handles clicks, or use a [button](#button) whose icon is the avatar's picture. A disabled avatar looks the same as an enabled one.
 
@@ -1150,7 +1150,7 @@ A popup that shows any component, such as a color picker opened from a button, o
 --8<-- "controls/ControlExamples.java:flyout"
 ```
 
-`open(rect)` opens it below a rectangle, or above when there is more room there, and `openAt(x, y)` with its corner at a point, as a [menu](#menu-and-menubar) opens. A [drop-down button](#dropdownbutton) opens one for you. Opening an open flyout, or one with no content, does nothing.
+`open(rect)` opens it below a rectangle, or above when there is more room there, and `openAt(x, y)` with its corner at a point, as a [menu](#menu-and-menubar) opens. `openIn(rect)` lays it out inside an area, at its size and where its alignment places it, the area's top-left corner by default, so a flyout can open beside a component: pass the space from the component's right edge to the host's. A [drop-down button](#dropdownbutton) opens one for you. Opening an open flyout, or one with no content, does nothing.
 
 | Method | Default | Notes |
 |---|---|---|
@@ -1215,6 +1215,84 @@ Keys: `split.divider` and `split.divider.hovered` (paints, optional). The divide
 |---|---|---|
 | `SplitPane.MOVE` | Pre | For each drag step that would move the divider, with the position already kept within the minimum sizes |
 | `SplitPane.MOVED` | Post | After every move, including `setPosition` |
+
+## NavigationView
+
+A pane of navigation items at the side of a screen, with the content of the selected item beside it, for screens with several sections such as a settings screen or a market with Buy, Sell and History.
+
+```java
+--8<-- "controls/ControlExamples.java:navigation"
+```
+
+The pane holds, from the top: the toggle and the title, the pane header (`setPaneHeader`, such as a search box), the items, which scroll, the footer items (`addFooterItem`), and the pane footer (`setPaneFooter`, such as the user's [avatar](#avatar)). The entries are made by the factory, as menu items are: `navigationItem(text)`, `navigationHeader(text)` for a caption over a group, and `navigationSeparator()` for a line. The view's `addItem(text, page)`, `addHeader(text)` and `addSeparator()` make them for you. An entry belongs to one view, or one parent item, at a time.
+
+| Item method | Default | Notes |
+|---|---|---|
+| `setText(text)` | | The item's text |
+| `setIcon(sprite)`, `setIcon(visual)`, `clearIcon()` | none | A square one line tall before the text, and all the column of icons shows |
+| `setPage(builder)` | none | Builds the item's page with the view's factory the first time it is selected; see below |
+| `setSelectable(selectable)` | `true` | Not selectable: a pick only activates it, as for Sign out |
+| `setEnabled(enabled)` | `true` | A disabled item cannot be picked; its tooltip still shows |
+| `setTooltip(tooltip)` | none | In the column of icons, an item with no tooltip shows its text |
+| `setBadge(count)` | 0 | A count at the item's right end, with the shared `badge.*` keys; 0 hides it, and above 99 it shows `99+` |
+| `addItem(child)`, `removeItem(child)` | none | Children, shown below the item, indented, while it is expanded |
+| `setExpanded(expanded)` | `false` | Shows the children |
+
+### Display modes
+
+`setDisplayMode` picks how the pane shows:
+
+- `EXPANDED`: the pane is open at its width, 120 by default (`setPaneWidth`), beside the content.
+- `COMPACT`: the pane is a column of icons beside the content. The toggle at its top opens the full pane over the content.
+- `MINIMAL`: the pane is hidden, and a bar across the top holds the toggle and the title. The toggle opens the pane over the content.
+- `AUTO`, the default: `EXPANDED` at 400 units wide and more, `COMPACT` from 240, and `MINIMAL` below, worked out from the view's width each time it is laid out. `setAutoWidths(compactBelow, minimalBelow)` changes the two widths, and `shownMode()` says what the view chose.
+
+The pane over the content is a popup laid out at the view's left edge, as wide as the pane and as tall as the view. A click outside it, Escape and a pick close it, and so does a change of the shown mode. `setExpanded(true)` opens it from code, and `isExpanded()` says whether it is open. While it is open the pane is in that popup, outside the view's tree, so the events of the pane header and footer reach only handlers on them until it closes. `setToggleShown(false)` leaves the toggle out.
+
+### Picking
+
+A click on an item asks `Activatable.ACTIVATE`, then, if the item is selectable and not selected, `Selection.SELECT`, and reports `SELECTED` and `ACTIVATED`. Activation fires on every click, the selected item's included, so an item that only acts, such as Sign out, is made not selectable and handled with `ACTIVATED`. A click on an item's arrow expands or collapses it, and a click elsewhere on an item with children that is not selectable does the same. In the column of icons, a click on an item with children opens them in a menu beside the column; choosing one picks that child. With `setActivateOnClick(false)`, a single click selects or expands without activating, and a double click activates.
+
+The indexes of these events count `allItems()`: every item depth first, the children of collapsed items included, then the footer items. Adding or removing items before the selected one moves its index, and the view reports `SELECTED` with the new one.
+
+### Pages and content
+
+An item's page is built the first time the item is selected and kept while the item stays in the view. Selecting another item takes the old page out of the tree, as a collapsed [expander](#expander) takes out its content, so a hidden page keeps no focus and costs no layout, and coming back finds it as it was. Removing the item, or calling `setPage` again, discards the kept page. While the selected item has no page, or nothing is selected, the view shows its own `setContent`, so code that manages its own content can set it from a `SELECTED` handler. Pages, the content, the pane header and the pane footer are your content, so their events pass the view.
+
+### Keyboard
+
+The view is one tab stop. While it has focus, a cursor marks one of the items the pane shows, starting on the selected one. Up and Down move it, skipping headers, separators and disabled items, Home and End go to the ends, Enter and Space pick its item, Right expands it, or opens its menu in the column of icons, and Left collapses it or moves to its parent. With the pane hidden in `MINIMAL`, Enter and Space open it. Tab moves on to the pane header, the pane footer and the content.
+
+### Drawing
+
+An item is a line plus `nav.item.padding`'s top and bottom tall, 19 units with a 9-unit line. The selected item draws `nav.item.selected` and a strip, `nav.indicator`, 3 units wide down its left edge; while its row is hidden, its nearest shown parent draws them. The toggle draws three lines in the item text's color on `nav.toggle`.
+
+| Key | Required | Used for |
+|---|---|---|
+| `nav.pane` | no | Behind the pane beside the content and the bar of `MINIMAL`. Nothing if missing. |
+| `nav.pane.overlay` | no | Behind the pane over the content. Falls back to `nav.pane`, then `combobox.popup`. |
+| `nav.item.hovered` | no | Behind the hovered item. Falls back to `list.row.hovered`. |
+| `nav.item.selected` | yes | Behind the selected item |
+| `nav.indicator` | no | The strip down the selected item's left edge. Nothing if missing. |
+| `nav.item.text`, `nav.item.text.selected`, `nav.item.text.disabled` | no | Item text, and the color of arrows and the toggle's lines. The selected one falls back to `nav.item.text`, the disabled one to `textbox.text.disabled`. |
+| `nav.header.text` | no | Headers. Falls back to `nav.item.text.disabled`. |
+| `nav.title.text` | no | The title |
+| `nav.separator` | no | Separators. Falls back to `separator`. |
+| `nav.toggle`, `nav.toggle.hovered` | no | Behind the toggle. Nothing, and `nav.item.hovered`, if missing. |
+| `nav.focus` | no | The ring around the keyboard cursor's item. Falls back to `button.focus`. |
+| `nav.item.padding` | no | Around an item's icon and text. 6 at the sides and 5 at the top and bottom. |
+| `nav.pane.padding` | no | Between the pane's edges and what it holds. 2 on every side. |
+
+| Event | Kind | Fires |
+|---|---|---|
+| `Selection.SELECT` | Pre | When the user picks a selectable item that is not selected, with its index |
+| `Selection.SELECTED` | Post | After every change of the selection, including `select`, `selectItem` and items added or removed before it |
+| `Activatable.ACTIVATE` | Pre | For every pick of an enabled item, with its index. Cancel it to stop the pick, or set another index. |
+| `Activatable.ACTIVATED` | Post | After the pick, the selection or expansion it made included |
+| `NavigationView.EXPAND` | Pre | When the user opens or closes the pane over the content with the toggle, with whether it would be open |
+| `NavigationView.EXPANDED` | Post | After the pane over the content opened or closed, for any reason |
+| `NavigationView.EXPAND_ITEM` | Pre | When the user expands or collapses an item, with an `Expansion` of the item and its new state |
+| `NavigationView.ITEM_EXPANDED` | Post | After an item was expanded or collapsed, including `setExpanded` on the item |
 
 ## ScrollBar
 

@@ -19,6 +19,7 @@ import org.inspirenxe.strata.api.control.button.Button;
 import org.inspirenxe.strata.api.control.button.DropDownButton;
 import org.inspirenxe.strata.api.control.display.Avatar;
 import org.inspirenxe.strata.api.control.display.InfoBar;
+import org.inspirenxe.strata.api.control.pane.NavigationView;
 import org.inspirenxe.strata.api.control.field.ColorPicker;
 import org.inspirenxe.strata.api.control.field.DatePicker;
 import org.inspirenxe.strata.api.control.field.PasswordTextBox;
@@ -194,6 +195,24 @@ class ExamplesTest {
         saving[0] = false;
         host.key(Key.ENTER, KeyAction.PRESS, Modifiers.NONE);
         assertFalse(bar[0].isOpen());
+    }
+
+    @Test
+    void theSettingsNavigationShowsPagesAndSignsOut() {
+        final ScreenHost host = StrataCore.createScreenHost(new ToyPlatform(), Themes.flat());
+        host.resize(400, 300);
+        final List<String> signedOut = new ArrayList<>();
+        final NavigationView[] view = new NavigationView[1];
+        host.open(factory -> view[0] = ControlExamples.settings(factory, () -> signedOut.add("signed out")));
+        host.layout();
+        assertEquals(0, view[0].selectedIndex());
+        assertEquals(NavigationView.DisplayMode.EXPANDED, view[0].shownMode());
+        // The keyboard reaches Sign out, the last item, and Enter activates it without selecting it
+        view[0].requestFocus();
+        host.key(Key.END, KeyAction.PRESS, Modifiers.NONE);
+        host.key(Key.ENTER, KeyAction.PRESS, Modifiers.NONE);
+        assertEquals(List.of("signed out"), signedOut);
+        assertEquals(0, view[0].selectedIndex());
     }
 
     @Test
