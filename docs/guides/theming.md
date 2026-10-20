@@ -50,14 +50,15 @@ A key may have a paint, a text style, or both; `has(key)` is true for either. Lo
 
 ## Paints
 
-A `Paint` fills a rectangle. There are four kinds:
+A `Paint` fills a rectangle. There are five kinds:
 
 | Factory | Record | Draws |
 |---|---|---|
 | `Paint.solid(argb)` | `Paint.Solid` | One color |
 | `Paint.gradient(top, bottom)` | `Paint.Gradient` | A vertical gradient |
 | `Paint.sprite(id)` | `Paint.Sprite` | An image stretched over the rectangle |
-| `Paint.nineSlice(id, border)` | `Paint.NineSlice` | An image cut into a 3 by 3 grid |
+| `Paint.tiled(id, size)` | `Paint.Tiled` | An image repeated from the top left corner, one copy per `size` |
+| `Paint.nineSlice(id, border)`, `Paint.nineSlice(id, size, border)`, `Paint.tiledNineSlice(id, size, border)` | `Paint.NineSlice` | An image cut into a 3 by 3 grid |
 
 `Paint.NONE` draws nothing; it is the default background. The sprite factories make untinted paints. To tint, use the record constructor with an ARGB tint, which is multiplied with the image's pixels: `new Paint.NineSlice(id, border, 0xFFC0C0C0)` darkens it slightly. Opaque white leaves an image unchanged.
 
@@ -89,9 +90,15 @@ A `SpriteResolver` given to `SwingSprites` maps ids to any other layout. A missi
 
 ### Nine-slices
 
-A nine-slice keeps its corners at their size, stretches its edges along one axis and its center both ways, so one small image can frame a rectangle of any size. `border` gives the width of each fixed edge in the image's pixels.
+A nine-slice keeps its corners at their size, stretches its edges along one axis and its center both ways, so one small image can frame a rectangle of any size. With `Paint.nineSlice(id, border)`, `border` gives the width of each fixed edge in the image's pixels, and the image draws at one pixel per unit.
 
-Some engines store the slicing with the image and ignore `border`. Keep the two in agreement so every engine draws the same. When a rectangle is smaller than the borders, the Swing adapter shrinks the borders to fit.
+Give a size to say how many units the whole image stands for. `border` is then in those units, so an image with twice the pixels draws the same frame, only sharper. `Paint.tiledNineSlice` also repeats the edges and the center at their size instead of stretching them, and crops the last copy. `Paint.tiled` repeats a whole image the same way:
+
+```java
+--8<-- "theming/ThemeExamples.java:sized"
+```
+
+When a rectangle is smaller than the borders, they shrink in proportion. The borders must fit in the size, and a tiled nine-slice needs one. Strata draws sized and tiled paints itself, from pieces of the image, on every engine except one that stores slicing with its images, which uses its own. Keep the two in agreement so every engine draws the same.
 
 ## Text styles
 
@@ -145,7 +152,8 @@ A theme file sets only the keys it changes. Where the files live depends on the 
 | Color | `"#RRGGBB"` (opaque) or `"#AARRGGBB"` |
 | No paint | `"none"` |
 | Sprite | `{ "sprite": "ns:path" }`, with an optional `"tint"` color |
-| Nine-slice | `{ "nine_slice": "ns:path", "border": ... }`, with an optional `"tint"`. The border is one number, `[horizontal, vertical]` or `[left, top, right, bottom]` |
+| Nine-slice | `{ "nine_slice": "ns:path", "border": ... }`, with an optional `"tint"`, `"size": [width, height]` and `"tiled": true`, which needs a size. The border is one number, `[horizontal, vertical]` or `[left, top, right, bottom]` |
+| Tiled sprite | `{ "tiled": "ns:path", "size": [width, height] }`, with an optional `"tint"` |
 | Gradient | `{ "gradient": [top, bottom] }` |
 | Text style | Any of `color`, `bold`, `italic`, `underline`, `strikethrough`, `shadow` and `monospace`. Fields you leave out keep the inherited style for that key |
 

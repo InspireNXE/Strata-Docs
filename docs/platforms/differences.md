@@ -56,7 +56,7 @@ An Escape that no component consumes goes back to the engine, and some engines c
 
 ## Nine-slices
 
-Swing slices with the paint's `border`, in the image's own pixels, and stretches the edges and center. An engine that stores slicing with the image may use that instead, ignore `border`, and tile instead of stretching. To look the same on both, keep the image's own slicing in step with the border you pass to `Paint.nineSlice`, and design edges and centers that look the same tiled or stretched, such as flat colors.
+A nine-slice without a size is sliced by the canvas: Swing uses the paint's `border`, in the image's own pixels, and stretches the edges and center. With a size, and for tiled sprites, Strata draws the pieces itself, so engines without stored slicing, Swing among them, all draw the same. An engine that stores slicing with the image (its platform reports `Capabilities.slicesSprites`) uses that instead and ignores the paint's border, size and tiling. To look the same everywhere, give the paint the size, border and tiling the image's own slicing has.
 
 ## Screens and stacks
 

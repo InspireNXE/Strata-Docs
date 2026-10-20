@@ -41,6 +41,14 @@ Use the panel on the Swing event dispatch thread only, the same as any Swing com
 
 `SwingTextMetrics.defaults()` is the logical Dialog font at 9 units, with the logical Monospaced font at the same size for monospaced styles. Widths are the advances of a `TextLayout` with antialiasing and fractional metrics on, and the canvas draws that same layout, so text measures exactly as wide as it draws and spans side by side meet. The line height is the font's height. Underline, strikethrough and the shadow are drawn by the adapter and do not change widths.
 
+Behind `SwingTextMetrics` are two `SwingFont`s, one for normal text and one for monospaced styles. `AwtFont` is the AWT font described above. `BitmapFont` draws glyphs cut from images, to preview an engine whose font is a bitmap:
+
+```java
+--8<-- "swing/SwingExamples.java:bitmap"
+```
+
+Each sheet is split into a grid, one character per cell, row by row, with `U+0000` for an empty cell. A glyph advances by its rightmost column with any opaque pixel, plus one, scaled from the cell to the glyph's height and rounded, plus one unit of spacing. Bold draws each glyph again one unit to the right and adds a unit to every advance, and italic slants glyphs. Characters with no glyph come from a fallback font, the logical Dialog font unless the builder is given another. The first sheet or advance that names a character wins.
+
 Other adapters use other fonts with other widths. Layouts built on measured text adapt; layouts that assume widths will not.
 
 ## Translations
@@ -57,11 +65,17 @@ The adapter registers an [appearance](../guides/appearances.md) for `BufferedIma
 
 ## Sprites
 
-`SwingSprites` loads images from the classpath at `assets/<namespace>/sprites/<path>.png`. Pass a `SpriteResolver` to `SwingSprites`, and that to `StrataPanel` or `SwingSnapshot.render`, to read another layout. Images are loaded once and cached, including the fact that one is missing. A missing or unreadable image draws as solid magenta.
+`SwingSprites` loads images from the classpath at `assets/<namespace>/sprites/<path>.png`. Pass a `SpriteResolver` to `SwingSprites`, and that to `StrataPanel` or `SwingSnapshot.render`, to read another layout. For images that are not on the class path at all, such as files in a folder or a zip, give `SwingSprites` a `SpriteSource`, which returns the image for an id. Images are loaded once and cached, including the fact that one is missing, until `SwingSprites.clear()`. A missing or unreadable image draws as solid magenta.
+
+`StrataPanel.setSprites` swaps an open panel's images. With `screens().setTheme(...)` it changes a panel's look without closing its screens:
+
+```java
+--8<-- "swing/SwingExamples.java:source"
+```
 
 The panel and `SwingSnapshot` look images up through the class loader that loaded the Swing adapter. In an ordinary application, where everything shares one class path, that finds images in your own jar. Under a plugin system that gives each plugin its own class loader, it may not.
 
-Tints multiply each channel of the image, and tinted copies are cached per sprite and tint. Nine-slice borders are in the image's pixels; borders wider than the rectangle shrink in proportion so nothing draws outside it. Swing stretches the edges and the center of a nine-slice.
+Tints multiply each channel of the image, and tinted copies are cached per sprite and tint. Sprite edges snap to the nearest device pixel, as fills and clips do, so pieces that share an edge meet at any scale. A nine-slice without a size has its borders in the image's pixels; borders wider than the rectangle shrink in proportion so nothing draws outside it, and Swing stretches its edges and center. Swing stores no slicing with its images, so Strata draws sized nine-slices and tiled sprites itself, from clipped copies of the image.
 
 ## Clipboard
 
@@ -75,7 +89,7 @@ Tints multiply each channel of the image, and tinted copies are cached per sprit
 --8<-- "swing/SwingExamples.java:snapshot"
 ```
 
-Any pixel the screen does not draw stays transparent. The screen's `closed()` runs before `render` returns, and a theme missing a required key throws `ThemeException`. Set `-Djava.awt.headless=true` on build servers. Strata's own Swing tests and the gallery's `--snapshot` option use it.
+Any pixel the screen does not draw stays transparent. The screen's `closed()` runs before `render` returns, and a theme missing a required key throws `ThemeException`. Overloads take a `SwingPlatform`, for snapshots with other fonts, and a `ThemeRef`, resolved from that platform's theme source. `SwingThemeSource` reads `assets/<namespace>/themes/<path>.json` unless a `ThemePathResolver` names another place. Set `-Djava.awt.headless=true` on build servers. Strata's own Swing tests and the gallery's `--snapshot` option use it.
 
 Snapshots are a good way to test layouts: render a screen and compare pixels, or check that it renders at all with each of your themes.
 

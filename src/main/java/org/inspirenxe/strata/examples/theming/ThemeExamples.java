@@ -20,6 +20,7 @@ import org.inspirenxe.strata.api.control.button.Button;
 import org.inspirenxe.strata.api.control.display.Label;
 import org.inspirenxe.strata.api.control.field.TextBox;
 import org.inspirenxe.strata.api.geometry.Insets;
+import org.inspirenxe.strata.api.geometry.Size;
 import org.inspirenxe.strata.api.layout.Anchor;
 import org.inspirenxe.strata.api.layout.StackPanel;
 import org.inspirenxe.strata.api.screen.Screen;
@@ -98,6 +99,22 @@ public final class ThemeExamples {
                 .build();
         // --8<-- [end:sprites]
         return textured;
+    }
+
+    static Theme sized() {
+        // --8<-- [start:sized]
+        // A 400 by 40 image that stands for 200 by 20 units, with a 4-unit frame
+        final SpriteId button = SpriteId.of("examplemod", "button");
+        final SpriteId pattern = SpriteId.of("examplemod", "pattern");
+        final Theme sized = Themes.flat().toBuilder()
+                .paint(Button.STYLE_NORMAL, Paint.nineSlice(button, new Size(200, 20), Insets.of(4f)))
+                // Edges and center repeat at their size instead of stretching
+                .paint(Button.STYLE_HOVERED, Paint.tiledNineSlice(button, new Size(200, 20), Insets.of(4f)))
+                // One copy every 16 units, the last row and column cropped
+                .paint(Button.STYLE_PRESSED, Paint.tiled(pattern, new Size(16, 16)))
+                .build();
+        // --8<-- [end:sized]
+        return sized;
     }
 
     static void missing() {

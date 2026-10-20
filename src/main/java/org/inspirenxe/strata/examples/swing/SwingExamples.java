@@ -17,15 +17,23 @@ package org.inspirenxe.strata.examples.swing;
 
 import org.inspirenxe.strata.api.theme.Themes;
 import org.inspirenxe.strata.examples.quickstart.SettingsScreen;
+import org.inspirenxe.strata.swing.AwtFont;
+import org.inspirenxe.strata.swing.BitmapFont;
+import org.inspirenxe.strata.swing.SpriteSource;
 import org.inspirenxe.strata.swing.StrataPanel;
 import org.inspirenxe.strata.swing.SwingPlatform;
 import org.inspirenxe.strata.swing.SwingSnapshot;
+import org.inspirenxe.strata.swing.SwingSprites;
 import org.inspirenxe.strata.swing.SwingTextMetrics;
 
 import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -73,5 +81,39 @@ public final class SwingExamples {
         final StrataPanel panel = new StrataPanel(new SwingPlatform(metrics), Themes.flat(), 1.5f);
         // --8<-- [end:font]
         return panel;
+    }
+
+    static StrataPanel bitmapFont() throws IOException {
+        // --8<-- [start:bitmap]
+        // A 128 by 64 sheet of 16 by 8 cells, each 8 pixels square, drawn 8 units tall with its top 7 above the baseline
+        final BufferedImage sheet = ImageIO.read(new File("font/ascii.png"));
+        final BitmapFont font = BitmapFont.builder(9, 7)
+                .sheet(sheet, 8, 7, List.of(" !\"#$%&'()*+,-./", "0123456789:;<=>?", "@ABCDEFGHIJKLMNO",
+                        "PQRSTUVWXYZ[\\]^_", "`abcdefghijklmno", "pqrstuvwxyz{|}~\u0000", "\u0000".repeat(16),
+                        "\u0000".repeat(16)))
+                .advance(' ', 4)
+                .build();
+        final SwingTextMetrics metrics = new SwingTextMetrics(font,
+                new AwtFont(new Font(Font.MONOSPACED, Font.PLAIN, 9)));
+        final StrataPanel panel = new StrataPanel(new SwingPlatform(metrics), Themes.flat(), 2f);
+        // --8<-- [end:bitmap]
+        return panel;
+    }
+
+    static void source(final StrataPanel panel) {
+        // --8<-- [start:source]
+        // Images from a folder instead of the class path; a file that is missing or broken reads as empty
+        final Path folder = Path.of("art");
+        final SpriteSource source = sprite -> {
+            final Path file = folder.resolve(sprite.namespace()).resolve(sprite.path() + ".png");
+            try {
+                return Files.isRegularFile(file) ? Optional.ofNullable(ImageIO.read(file.toFile())) : Optional.empty();
+            } catch (final IOException e) {
+                return Optional.empty();
+            }
+        };
+        // Swap the images of an open panel; its screens stay open
+        panel.setSprites(new SwingSprites(source));
+        // --8<-- [end:source]
     }
 }

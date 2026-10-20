@@ -173,7 +173,7 @@ Wrapping is part of the label, not a public utility. A custom component that nee
 
 ## Fonts
 
-Strata has no font API, so each adapter picks its fonts. Swing draws with the font given to `SwingTextMetrics`. `SwingTextMetrics.defaults()` is the logical Dialog font at 9 units. See [Swing](../platforms/swing.md#fonts). Other adapters usually draw with the engine's own font.
+Strata has no font API, so each adapter picks its fonts. Swing draws with the fonts given to `SwingTextMetrics`, AWT fonts or a `BitmapFont` cut from images. `SwingTextMetrics.defaults()` is the logical Dialog font at 9 units. See [Swing](../platforms/swing.md#fonts). Other adapters usually draw with the engine's own font.
 
 ## Not supported yet
 
