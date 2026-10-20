@@ -30,7 +30,8 @@ The adapters, the gallery and these docs live in sibling repositories that build
 
 - `api`, `spi` and `core` never import an engine type. Everything engine-specific goes through the SPI.
 - `api` never imports `spi` or `core`.
-- New built-in components are written as `CustomComponent` or `CustomContainer` subclasses in `core`, the way a developer would write them.
+- New built-in components are written in `core` as subclasses of `BuiltInComponent`, `BuiltInComposite` or `BuiltInContainer` from `core.node`. They have the same hooks as the public `CustomComponent` classes, plus what only core may use. Anything new a built-in needs from core goes there, never onto the public extension classes.
+- Built-ins do not use the public extension classes, so core's tests cover them with components written the way a developer writes them.
 - Nothing in `core` reads the wall clock. Use the platform's clock, so tests stay deterministic.
 - Painting should not allocate. Cache spans and rectangles during layout.
 - Clip and transform pushes are balanced in `try`/`finally`.

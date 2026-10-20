@@ -8,7 +8,7 @@ There are three ways to extend Strata. Pick the lightest one that does the job.
 | [Compose](#compose-built-ins) | Package several components as one reusable piece | A plain class |
 | [Write a new component](#write-a-new-component) or [layout](#write-a-new-layout) | Make something that does not exist yet | A subclass of `CustomComponent` or `CustomContainer` |
 
-Strata's own controls and panels are written the third way, on the same public base classes, so you have everything they have.
+A subclass gets the same hooks Strata's own controls and panels are written with, so you can build anything they do. [Strata's components and yours](#stratas-components-and-yours) says how the two kinds differ.
 
 ![A custom switch and a custom wrapping layout](../assets/images/extending-custom.png)
 
@@ -70,7 +70,7 @@ The class is not a `Component`, so you add `field.component()` rather than `fiel
 
 ## Write a new component
 
-Subclass `CustomComponent<T>`. To let other code see your component as a type of its own, declare an interface that extends `Component<YourInterface>` and implement it. This example builds a small switch; Strata's own [`ToggleSwitch`](controls.md#toggleswitch) is written the same way in core.
+Subclass `CustomComponent<T>`. To let other code see your component as a type of its own, declare an interface that extends `Component<YourInterface>` and implement it. This example builds a small switch that works much like Strata's own [`ToggleSwitch`](controls.md#toggleswitch).
 
 ```java
 --8<-- "extending/ToggleSwitch.java:interface"
@@ -186,6 +186,12 @@ Everything required of a custom component applies, plus:
 - Handle the padding yourself: take it off the space you offer children, add it to the size you return, and place children inside `contentBox()`.
 - Keep per-child data, such as a grid cell, in your own map, and drop it in `onChildRemoved`.
 - Leave drawing the children to Strata. Your `paint` draws under them, and they are clipped to your bounds while `clipsChildren()` is true.
+
+## Strata's components and yours
+
+Strata provides the components `ComponentFactory` makes. You see them through the interfaces in `api.control` and `api.layout`, such as `Button`, `ListView` and `StackPanel`, and their implementations stay in core.
+
+You write subclasses of `CustomComponent`, `CustomComposite` and `CustomContainer`, and so does any other library that adds components. Strata's own components do not extend these classes, so a component that is an instance of `CustomComponent` was written outside Strata, and anything the factory made is Strata's. Both kinds go into the same containers and lay out, draw and fire events the same way, and either can hold the other.
 
 ## Things you cannot do
 
