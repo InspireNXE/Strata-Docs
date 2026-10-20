@@ -28,6 +28,7 @@ Use the panel on the Swing event dispatch thread only, the same as any Swing com
 - It takes keyboard focus when clicked, and turns off Swing's own Tab handling so Strata's tab order applies.
 - AWT reports held keys as repeated presses. The panel turns them into `REPEAT`s, and forgets held keys when it loses focus.
 - Characters come from AWT's key-typed events, with surrogate pairs joined into one code point and control characters dropped.
+- While a password box, or any field that asks for `TextInputKind.SECRET` text, has focus, the panel turns input methods off on itself, as Swing's own password field does, so no composition window shows what is typed. They come back on for the next ordinary field or when focus leaves the fields.
 - Shift plus the vertical wheel scrolls horizontally. A whole wheel rotation counts as `WHEEL`, a fractional one as `PRECISE`.
 - Cursors map to AWT's predefined cursors. AWT has no "not allowed" cursor, so `NOT_ALLOWED` shows the default arrow.
 

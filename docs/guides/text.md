@@ -165,7 +165,7 @@ A label draws styled text one part after another, each in its own style, and wra
 - Derive each run's style from `base`, with the `with` methods or `merge`, so highlighted text keeps what the theme gives the field, such as the vanilla theme's shadow.
 - Return runs in order and not overlapping. A run that breaks that, or runs past the end of the text, is ignored, and text no run covers draws in `base`.
 - The field calls the highlighter when its text or its base style changes, from code or the user, and never while painting. Keep it a quick, pure function of its arguments.
-- A disabled field ignores the runs and draws in its disabled style. A read-only field keeps them, and a password box ignores them. Runs do not change the line height.
+- A disabled field ignores the runs and draws in its disabled style. A read-only field keeps them. Runs do not change the line height. A password box has no highlighter.
 
 Strata ships no highlighters. The [gallery](https://github.com/InspireNXE/Strata-Gallery) has a small Java one, `JavaHighlighter`, as sample code: it colors keywords, strings, comments, numbers and annotations, and makes the whole text monospaced so indentation lines up.
 

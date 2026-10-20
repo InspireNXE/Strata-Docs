@@ -81,7 +81,7 @@ A key press and its character are separate events: typing "a" produces a `KEY` p
 
 Some engines send no characters at all until a text field asks for them, as SDL-based engines do. Others use the signal to show an on-screen keyboard or input method window.
 
-Strata handles this through focus. When a component that accepts text input gains focus, the host tells the engine to start text input, at the component's bounds. When focus leaves the last such component, it tells the engine to stop. The built-in text box accepts text input; a custom component opts in by overriding `acceptsTextInput()` to return true.
+Strata handles this through focus. When a component that accepts text input gains focus, the host tells the engine to start text input, at the component's bounds. When focus leaves the last such component, it tells the engine to stop. The built-in text fields accept text input; a custom component opts in by overriding `acceptsTextInput()` to return true. The host also says what kind of text the field takes: a password box asks for `TextInputKind.SECRET`, so an engine can turn off input method composition, prediction and on-screen keyboard suggestions, and a custom component asks for it by overriding `textInputKind()`.
 
 ## Focus
 

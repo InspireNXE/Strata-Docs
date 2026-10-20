@@ -9,5 +9,7 @@ Strata's built-in controls show these keys through [translated text](../guides/t
 | `strata.button.yes` | Yes | Message box buttons |
 | `strata.button.no` | No | Message box buttons |
 | `strata.button.close` | Close | Message box buttons |
+| `strata.password.show` | Show password | The password box's eye while the text is hidden |
+| `strata.password.hide` | Hide password | The password box's eye while the text shows |
 
 `MessageBox.setButtonText` replaces a button's text with your own.

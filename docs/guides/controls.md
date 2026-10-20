@@ -1,6 +1,6 @@
 # Controls
 
-Strata's built-in controls are interfaces in the subpackages of `org.inspirenxe.strata.api.control`, made by the factory: `display` (`Label`, `Image`, `ProgressBar`, `BusyIndicator`, `Separator`), `button` (`Button`, `CycleButton`, `CheckBox`, `RadioButton`, `RadioGroup`, `ToggleSwitch`), `field` (`TextBox`, `TextArea`, `Spinner`, `Slider`, `ColorPicker`), `collection` (`ListView`, `ComboBox`, `TableView`, `TreeView`, `GridView`), `menu` (`Menu`, `MenuBar`), `pane` (`TabBar`, `Expander`, `SplitPane`, `ScrollBar`) and `window` (`Window`, `MessageBox`). Each one has [events](events.md): a request (Pre) for each change the user can make, which a handler can cancel or rewrite, and a report (Post) for each change from any source. Each section below lists them in an Events table. Their theme keys are listed on each control below and in the [theme key reference](../reference/theme-keys.md). Scrolling is a container, [`ScrollPanel`](layout.md#scrollpanel), and popups, dialogs and tooltips are in [Overlays and tooltips](overlays.md).
+Strata's built-in controls are interfaces in the subpackages of `org.inspirenxe.strata.api.control`, made by the factory: `display` (`Label`, `Image`, `ProgressBar`, `BusyIndicator`, `Separator`), `button` (`Button`, `CycleButton`, `CheckBox`, `RadioButton`, `RadioGroup`, `ToggleSwitch`), `field` (`TextBox`, `PasswordTextBox`, `TextArea`, `Spinner`, `Slider`, `ColorPicker`), `collection` (`ListView`, `ComboBox`, `TableView`, `TreeView`, `GridView`), `menu` (`Menu`, `MenuBar`), `pane` (`TabBar`, `Expander`, `SplitPane`, `ScrollBar`) and `window` (`Window`, `MessageBox`). Each one has [events](events.md): a request (Pre) for each change the user can make, which a handler can cancel or rewrite, and a report (Post) for each change from any source. Each section below lists them in an Events table. Their theme keys are listed on each control below and in the [theme key reference](../reference/theme-keys.md). Scrolling is a container, [`ScrollPanel`](layout.md#scrollpanel), and popups, dialogs and tooltips are in [Overlays and tooltips](overlays.md).
 
 ## Attributes
 
@@ -10,7 +10,8 @@ Controls that do the same kind of thing share small interfaces called attributes
 |---|---|---|---|---|
 | `HasText` | `text` | `text()`, `setText` | | `Button`, `CycleButton`, `CheckBox`, `RadioButton`, `ToggleSwitch`, `Label`, `ProgressBar`, `BusyIndicator`, and through `TextInput` the text fields |
 | `Titled` | `text` | `title()`, `setTitle` | | `Window`, `Expander` |
-| `TextInput` | `text` | the caret, the selection, `setMaxLength`, `setReadOnly`, `setTextPadding` | `EDIT`, `EDITED` | `TextBox`, `TextArea` |
+| `TextEntry` | `text` | `length()`, `isEmpty()`, `clear()`, the caret, the selection, `setMaxLength`, `setReadOnly`, `setTextPadding`; nothing that carries the text | `MODIFY`, `MODIFIED` | `TextBox`, `TextArea`, `PasswordTextBox` |
+| `TextInput` | `text` | `TextEntry` plus `text()`, `setText`, `selectedText()` and the highlighter | `EDIT`, `EDITED` | `TextBox`, `TextArea` |
 | `Toggle` | `value` | `isSelected()`, `setSelected`, `toggle()` | `TOGGLE`, `TOGGLED` | `CheckBox`, `ToggleSwitch`, `RadioButton` |
 | `Ranged` | `value` | `value()`, `setValue`, `min()`, `max()`, `setRange` | `CHANGE`, `CHANGED` | `Slider`, `Spinner`, `ProgressBar`, `ScrollBar` |
 | `Stepped` | `value` | `Ranged` plus `step()`, `setStep` | | `Slider`, `Spinner` |
@@ -290,9 +291,7 @@ name.setAlignment(HorizontalAlignment.STRETCH, VerticalAlignment.TOP);
 |---|---|---|
 | `setText(text)` | empty | Removes line breaks, cuts to the length limit and puts the caret at the end. Fires `EDITED` if the text changed, but no `EDIT` request. |
 | `setMaxLength(n)` | `Integer.MAX_VALUE` | Counted in code points. Longer text is cut at once, which fires `EDITED`. Negative throws. |
-| `setPlaceholder(text)` | none | A hint drawn in `textbox.placeholder` while the box is empty, focused or not. It is never part of `text()`, and password mode does not mask it. |
-| `setPassword(boolean)` | off | Draws every code point as the mask character and disables copy and cut. `text()` still returns the real text. |
-| `setMaskCodePoint(cp)` | `'*'` | The mask character |
+| `setPlaceholder(text)` | none | A hint drawn in `textbox.placeholder` while the box is empty, focused or not. It is never part of `text()`. |
 | `setTextPadding(Insets)` and its number forms | the theme's `textbox.padding`, else 4 left and right, 5 top and bottom | Space between the text and the edges; `null` follows the theme again |
 | `setReadOnly(boolean)` | off | The box still focuses, selects and copies, but does not edit, and shows no caret. Its text uses `textbox.text.readonly`. |
 | `setHighlighter(h)` | none | Draws parts of the text in their own styles, for syntax coloring, highlighted matches or colored input. See [Styled text in fields](text.md#styled-text-in-fields). |
@@ -329,7 +328,7 @@ Indexes count UTF-16 chars, like `String` indexes, but never fall inside a surro
 | Ctrl+Backspace, Ctrl+Delete | Delete the selection, or one word |
 | Shift with any movement | Extend the selection |
 | Ctrl+A | Select all |
-| Ctrl+C, Ctrl+X | Copy, cut. Nothing happens in password mode. |
+| Ctrl+C, Ctrl+X | Copy, cut |
 | Ctrl+V | Paste. Line breaks in the pasted text are removed. |
 | Typing | Replaces the selection. Text past the length limit is dropped. |
 
@@ -389,7 +388,7 @@ box.setSuggestionProvider((text, caret) -> text.startsWith("/")
 
 `SuggestionProvider.words(list)` completes the word around the caret from a list, matching what is typed before the caret and ignoring case. It suggests nothing for a caret with no word before it.
 
-The box asks the provider after each edit by the user that changes the text, and on Ctrl+Space. If there are suggestions, the list shows them with the first highlighted, at least as wide as the box and up to `setMaxVisibleSuggestions(n)` rows tall (8 by default) before it scrolls. If there are none, the list closes. A read-only or disabled box and one in password mode never ask.
+The box asks the provider after each edit by the user that changes the text, and on Ctrl+Space. If there are suggestions, the list shows them with the first highlighted, at least as wide as the box and up to `setMaxVisibleSuggestions(n)` rows tall (8 by default) before it scrolls. If there are none, the list closes. A read-only or disabled box never asks.
 
 | Keys or input | While the list is open |
 |---|---|
@@ -405,8 +404,10 @@ Accepting closes the list, then replaces the suggestion's range with its text an
 
 | Event | Kind | Fires |
 |---|---|---|
-| `TextInput.EDIT` | Pre | When the user's typing, deleting, cutting or pasting would change the text, with the whole text it would produce. Cancel to reject the edit, or set another text, which is cleaned of line breaks and cut to the length limit. |
+| `TextEntry.MODIFY` | Pre | When the user's typing, deleting, cutting or pasting would change the text, before `TextInput.EDIT`. It carries no value. Cancel to reject the edit; `EDIT` then does not fire. |
+| `TextInput.EDIT` | Pre | For the same edits, unless `MODIFY` was canceled, with the whole text the edit would produce. Cancel to reject the edit, or set another text, which is cleaned of line breaks and cut to the length limit. |
 | `TextInput.EDITED` | Post | After every change of the text, with the new and previous text, including `setText` and `setMaxLength` cutting |
+| `TextEntry.MODIFIED` | Post | After `EDITED`, for every change, with the new and previous length in code points |
 | `TextBox.SUBMIT` | Pre | When the user presses Enter or keypad Enter. Cancel to ignore it. |
 | `TextBox.SUBMITTED` | Post | After a submit nobody canceled, with the text |
 | `TextBox.COMPLETE` | Pre | When the user accepts a suggestion, with the suggestion. Cancel to keep the text, or set another suggestion to apply instead. |
@@ -433,7 +434,109 @@ amount.onEvent(TextInput.EDIT, event -> {
 });
 ```
 
-React to each change: `TextInput.EDITED`. React only when the user leaves the field: handle `Focusable.FOCUS_LOST`.
+React to each change: `TextInput.EDITED`. React only when the user leaves the field: handle `Focusable.FOCUS_LOST`. React to any field of a form changing, password boxes included, without reading text: `TextEntry.MODIFIED`.
+
+## PasswordTextBox
+
+A single-line field for a password, a PIN or another secret. It edits like a [`TextBox`](#textbox) and keeps its text from showing up where nobody meant it to: on screen, on the clipboard, in a form's event handlers, in snapshots, in `toString` and log lines, and in `String`s left on the heap after the screen closes.
+
+```java
+--8<-- "controls/ControlExamples.java:password"
+```
+
+It cannot hide the text from code in the same process that sets out to read it. A `CHAR` handler on the box sees each typed code point, the engine delivers them, and any mod can read the heap.
+
+### Reading the password
+
+The box holds its text in a `char[]` that Strata zeroes, and makes a `String` of it only to show it while revealed.
+
+| Method | What it does |
+|---|---|
+| `withPassword(reader)` | Hands the reader a copy of the text and zeroes the copy when the reader returns or throws. A reader that keeps the array sees zeros later. |
+| `copyPassword()` | Returns a new copy on each call. You own it; zero it with `Arrays.fill(chars, '\0')` when done. |
+| `matches(other)` | Whether two boxes hold the same text, compared in constant time without copying either, for a confirm field |
+| `setPassword(char[])` | Copies the array with its line breaks removed, cut to the length limit. Your array is not kept. The caret goes to the end, and the text hides if it showed. |
+| `clear()` | Zeroes and empties the box |
+| `length()`, `isEmpty()` | The length in code points |
+
+There is no `setPassword(String)`. Code that has a `String` passes `toCharArray()`, which keeps the conversion in sight, and code that needs a `String`, such as a network library, makes one itself with `new String(chars)`.
+
+The box also zeroes and empties itself, firing nothing, after the screen that holds it closes or rebuilds and after the overlay that holds it closes. `Screen.closed()` runs first, so a screen can still read the box there. A collapsed expander or a swapped tab page keeps its boxes' text, since the content comes back.
+
+### Settings
+
+| Method | Default | Notes |
+|---|---|---|
+| `setMaskCodePoint(cp)` | `'*'` | What every code point draws as. Every font has `*`; `•` looks like other platforms but may be missing from bitmap fonts. Throws for an invalid code point. |
+| `setRevealable(boolean)` | on | Off removes the eye, ignores Alt+F8 and hides the text if it showed |
+| `setRevealed(boolean)` | off | Shows or hides the text from code, revealable or not |
+| `setCodePointFilter(filter)` | none | Which code points the user may type or paste. It sees one code point at a time and belongs to the box; it does not bubble. |
+| `setMaxLength(n)` | `Integer.MAX_VALUE` | Counted in code points, as on a text box |
+| `setPlaceholder(text)` | none | Drawn in `textbox.placeholder` while the box is empty. The mask does not cover it. |
+| `setReadOnly(boolean)`, `setSelectAllOnFocus(boolean)`, `setTextPadding(insets)` | off, off, the theme's `textbox.padding` | As on a text box |
+
+```java
+--8<-- "controls/ControlExamples.java:pin"
+```
+
+### Peeking
+
+An eye at the right end of the box shows the text on a click and hides it on the next, and Alt+F8 does the same while the box has focus, as in Windows' own password fields. The eye cannot take focus, so Tab order is the same with or without it, and a click on it leaves focus and the caret in the box. It shows while the box is revealable, enabled and not empty, and the text always keeps room for it, so nothing moves when it appears. Its tooltip reads "Show password" or "Hide password", from the [translation keys](../reference/translation-keys.md) `strata.password.show` and `strata.password.hide`.
+
+- Text set from code cannot be revealed by the user until they clear the box or replace all of it, so someone at an unlocked screen cannot read a remembered password. The eye draws disabled until then. `setRevealed(true)` still works from code.
+- The box hides the text again when it loses focus, is disabled or is made unrevealable, and when code sets its text.
+- While revealed, the box makes a `String` of its text once per edit to measure and draw it, and drops it when the text hides. A project that cannot accept that calls `setRevealable(false)`.
+
+### What differs from a text box
+
+| Path | In a password box |
+|---|---|
+| `text()`, `selectedText()`, `setText` | Not there. Use `withPassword`, `copyPassword`, `setPassword` and `clear`. |
+| `TextInput.EDIT`, `EDITED` | Not fired. `TextEntry.MODIFY` carries no value and `MODIFIED` carries lengths. A `TextInput<?>` parameter does not take a password box. |
+| Snapshots | `PasswordTextBox.State` holds the length, caret, anchor, length limit and reveal state, never the text |
+| Ctrl+C, Ctrl+X | Do nothing, read-only or not, revealed or not |
+| Ctrl+V | Pastes with line breaks removed. A paste that the length limit or the filter would change is refused whole, since a password silently cut short is worse than none. |
+| Word movement | Ctrl+Left, Ctrl+Right, Ctrl+Backspace and Ctrl+Delete treat the whole text as one word, and a double click selects everything, so the caret does not show where spaces are |
+| Suggestions, highlighter | Not there |
+| Typed characters | Consumed while the box has focus, read-only included, so they never reach an ancestor's `CHAR` handler. Control characters are not typed. |
+| Text input | The box asks the engine for `TextInputKind.SECRET` text, so it can turn off input methods and suggestions. Swing turns input methods off while the box has focus. |
+| Tooltips | Only what code sets, and the eye's |
+| `toString()` | The class name |
+
+The caret and the selection sit on the mask glyphs. Every glyph of the mask is as wide as the next, so the boundary after the k-th of n code points is at k over n of the mask's width.
+
+### Drawing
+
+A password box reads the [`TextBox` keys](#drawing) for its face, text, selection, caret, placeholder and padding, so any theme that styles text boxes styles it too. Its own keys are optional:
+
+| Key | Required | Used for |
+|---|---|---|
+| `passwordbox.mask` | no | The mask while enabled and editable. Falls back to `textbox.text`. A disabled or read-only box draws the mask in `textbox.text.disabled` or `textbox.text.readonly`. |
+| `passwordbox.reveal` | no | The eye while the text is hidden. Falls back to an eye drawn in the placeholder's color. |
+| `passwordbox.reveal.hovered` | no | The eye under the pointer. Falls back to `passwordbox.reveal`, else an eye in the text color. |
+| `passwordbox.reveal.active` | no | The eye while the text shows, offering to hide it. Falls back to an eye with a slash, in the text color. |
+| `passwordbox.reveal.disabled` | no | The eye while the user cannot reveal the text. Falls back to `passwordbox.reveal`, else an eye in the disabled text color. |
+
+The eye is a square one line tall at the right of the text area, 2 units from the text. `Themes.flat()` sets none of these keys.
+
+### Events
+
+| Event | Kind | Fires |
+|---|---|---|
+| `TextEntry.MODIFY` | Pre | When the user's typing, deleting, cutting or pasting would change the text. It carries no value; cancel it to refuse the edit. |
+| `TextEntry.MODIFIED` | Post | After every change, with the new and previous length in code points, including `setPassword`, `clear` and `setMaxLength` cutting. A wipe on close fires nothing. |
+| `PasswordTextBox.REVEAL` | Pre | When the user clicks the eye or presses Alt+F8, with the state it would set. Cancel it, for example to ask for the account password first, or set another value. |
+| `PasswordTextBox.REVEALED` | Post | After the text was shown or hidden, by the user, by `setRevealed`, or by the box hiding itself |
+| `PasswordTextBox.SUBMIT` | Pre | When the user presses Enter or keypad Enter. Cancel it to ignore the key. |
+| `PasswordTextBox.SUBMITTED` | Post | After a submit nobody canceled. It carries no value; read the box with `withPassword`. |
+
+### Moving from `setPassword(true)`
+
+Text boxes had a password mode until Strata gained this control. `TextBox.isPassword`, `setPassword(boolean)` and `setMaskCodePoint` are gone, and `TextBox.State` lost its `password` component. Make the field with `factory.passwordTextBox()`, read it with `withPassword`, and listen for `TextEntry.MODIFIED` where you listened for `TextInput.EDITED`.
+
+### Size
+
+As a text box: 120 units wide and one line plus the text padding tall, at least 20 by 20.
 
 ## ListView
 
@@ -777,8 +880,10 @@ The area asks for 160 units of width. Text taller than the view scrolls with the
 
 | Event | Kind | Fires |
 |---|---|---|
-| `TextInput.EDIT` | Pre | When an edit of the user's, Enter included, would change the text, with the whole text it would produce. Cancel or set another text. |
+| `TextEntry.MODIFY` | Pre | When an edit of the user's, Enter included, would change the text, before `TextInput.EDIT`. No value; cancel to reject the edit. |
+| `TextInput.EDIT` | Pre | For the same edits, unless `MODIFY` was canceled, with the whole text the edit would produce. Cancel or set another text. |
 | `TextInput.EDITED` | Post | After every change of the text, including `setText` |
+| `TextEntry.MODIFIED` | Post | After `EDITED`, with the new and previous length in code points, line breaks included |
 
 ## TableView
 

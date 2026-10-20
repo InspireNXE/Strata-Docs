@@ -15,6 +15,7 @@ Strata hides most engine differences, but the SPI leaves some decisions to each 
 | Modifiers with button presses and keys | Reported | Reported |
 | Key repeat | Reported by the engine, or made by the host for navigation and delete keys | Held keys repeat at the system rate |
 | Typed characters | Only after the adapter's `TextInputSink` starts text input, if the engine needs that | Always |
+| Secret text input | Input methods and suggestions turned off where the engine allows, or nothing | Input methods off on the panel while a secret field has focus |
 | Horizontal scrolling | From the device, in Strata's direction | Shift plus the vertical wheel |
 | Escape | Passed on to the engine when no component consumes it | Does nothing unless you handle it |
 | Clipboard | The engine's, or `Clipboard.NONE` | The system clipboard; none when headless |

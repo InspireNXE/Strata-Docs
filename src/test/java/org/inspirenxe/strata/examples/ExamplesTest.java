@@ -16,6 +16,11 @@
 package org.inspirenxe.strata.examples;
 
 import org.inspirenxe.strata.api.control.button.Button;
+import org.inspirenxe.strata.api.control.field.PasswordTextBox;
+import org.inspirenxe.strata.api.input.Key;
+import org.inspirenxe.strata.api.input.KeyAction;
+import org.inspirenxe.strata.api.input.Modifiers;
+import org.inspirenxe.strata.api.layout.StackPanel;
 import org.inspirenxe.strata.api.control.window.Window;
 import org.inspirenxe.strata.api.event.Subscription;
 import org.inspirenxe.strata.api.theme.Paint;
@@ -24,7 +29,9 @@ import org.inspirenxe.strata.api.theme.ThemeException;
 import org.inspirenxe.strata.api.theme.ThemeId;
 import org.inspirenxe.strata.api.theme.ThemeRef;
 import org.inspirenxe.strata.api.theme.Themes;
+import org.inspirenxe.strata.core.StrataCore;
 import org.inspirenxe.strata.examples.adapter.ToyAdapter;
+import org.inspirenxe.strata.examples.adapter.ToyPlatform;
 import org.inspirenxe.strata.examples.controls.ControlExamples;
 import org.inspirenxe.strata.examples.events.EventExamples;
 import org.inspirenxe.strata.examples.extending.ExtendingExamples;
@@ -33,13 +40,17 @@ import org.inspirenxe.strata.examples.quickstart.SettingsScreen;
 import org.inspirenxe.strata.examples.screens.ScreenExamples;
 import org.inspirenxe.strata.examples.theming.ThemeExamples;
 import org.inspirenxe.strata.swing.SwingSnapshot;
+import org.inspirenxe.strata.spi.ScreenHost;
 import org.inspirenxe.strata.swing.SwingThemeSource;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -99,6 +110,34 @@ class ExamplesTest {
                 () -> SwingSnapshot.render(ExtendingExamples.customComponents(), Themes.flat(), 320, 200, 1f));
         assertEquals(java.util.Set.of("examplemod.switch.track", "examplemod.switch.track.on", "examplemod.switch.knob"),
                 e.missingKeys());
+    }
+
+    @Test
+    void thePasswordFormSavesOnlyMatchingPasswordsAndZeroesWhatItGave() {
+        final ScreenHost host = StrataCore.createScreenHost(new ToyPlatform(), Themes.flat());
+        host.resize(320, 200);
+        final List<char[]> given = new ArrayList<>();
+        final StackPanel[] form = new StackPanel[1];
+        host.open(factory -> form[0] = ControlExamples.passwordForm(factory, chars -> {
+            given.add(chars);
+            return new String(chars).equals("pears");
+        }));
+        host.layout();
+        final PasswordTextBox password = (PasswordTextBox) form[0].children().get(0);
+        final PasswordTextBox confirm = (PasswordTextBox) form[0].children().get(1);
+        final Button save = (Button) form[0].children().get(3);
+
+        password.requestFocus();
+        "pears".codePoints().forEach(codePoint -> host.charTyped(codePoint, Modifiers.NONE));
+        assertFalse(save.isEnabled());
+        confirm.requestFocus();
+        "pears".codePoints().forEach(codePoint -> host.charTyped(codePoint, Modifiers.NONE));
+        assertTrue(save.isEnabled());
+
+        save.requestFocus();
+        host.key(Key.ENTER, KeyAction.PRESS, Modifiers.NONE);
+        assertEquals(1, given.size());
+        assertArrayEquals(new char[5], given.getFirst(), "the chars handed out are zeroed afterwards");
     }
 
     @Test

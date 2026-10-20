@@ -81,7 +81,6 @@ Every number Strata picks for you.
 | | Text padding | the theme's `textbox.padding`, else 4 left and right and 5 top and bottom |
 | | Minimum size | 20 by 20 |
 | | Maximum length | `Integer.MAX_VALUE` code points |
-| | Mask character | `*` |
 | | Placeholder | none |
 | | Caret width | 1 unit |
 | | Caret blink | every 500 ms |
@@ -90,6 +89,18 @@ Every number Strata picks for you.
 | | Suggestion provider | none |
 | | Suggestions shown before scrolling | 8 |
 | | Suggestion rows | one line plus 4, text 4 in from the left; the list at least as wide as the box |
+| `PasswordTextBox` | Desired width | 120 |
+| | Text padding | the theme's `textbox.padding`, else 4 left and right and 5 top and bottom |
+| | Minimum size | 20 by 20 |
+| | Mask | `*` |
+| | Revealable | on |
+| | Reveal shortcut | Alt+F8 |
+| | Eye | a square one line tall at the right of the text, 2 units from it; shown while revealable, enabled and not empty |
+| | Maximum length | `Integer.MAX_VALUE` code points |
+| | Code point filter | none |
+| | Placeholder | none |
+| | Read-only, select all on focus | off, off |
+| | Cursor | `TEXT`, and the arrow over the eye |
 | `ListView` | Row height and spacing | 20 and 0 |
 | | Selection | none; deselecting by pressing off; activation by double click |
 | | Smallest desired width | 40 |

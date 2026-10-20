@@ -17,6 +17,7 @@ package org.inspirenxe.strata.examples.layout;
 
 import org.inspirenxe.strata.api.control.button.Button;
 import org.inspirenxe.strata.api.control.display.Label;
+import org.inspirenxe.strata.api.control.field.PasswordTextBox;
 import org.inspirenxe.strata.api.control.field.TextBox;
 import org.inspirenxe.strata.api.layout.AbsolutePanel;
 import org.inspirenxe.strata.api.layout.Anchor;
@@ -109,7 +110,7 @@ public final class LayoutExamples {
             // --8<-- [start:grid]
             final TextBox name = factory.textBox();
             name.setAlignment(HorizontalAlignment.STRETCH, VerticalAlignment.TOP);
-            final TextBox password = factory.textBox().setPassword(true);
+            final PasswordTextBox password = factory.passwordTextBox();
             password.setAlignment(HorizontalAlignment.STRETCH, VerticalAlignment.TOP);
 
             final GridPanel form = factory.gridPanel()

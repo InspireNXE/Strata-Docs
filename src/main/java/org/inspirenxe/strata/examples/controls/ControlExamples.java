@@ -18,6 +18,7 @@ package org.inspirenxe.strata.examples.controls;
 import org.inspirenxe.strata.api.ComponentFactory;
 import org.inspirenxe.strata.api.component.Component;
 import org.inspirenxe.strata.api.control.attribute.item.SingleSelection;
+import org.inspirenxe.strata.api.control.attribute.text.TextEntry;
 import org.inspirenxe.strata.api.control.attribute.value.Ranged;
 import org.inspirenxe.strata.api.control.attribute.value.Toggle;
 import org.inspirenxe.strata.api.control.button.Button;
@@ -25,6 +26,7 @@ import org.inspirenxe.strata.api.control.button.CheckBox;
 import org.inspirenxe.strata.api.control.collection.ListView;
 import org.inspirenxe.strata.api.control.display.Image;
 import org.inspirenxe.strata.api.control.display.Label;
+import org.inspirenxe.strata.api.control.field.PasswordTextBox;
 import org.inspirenxe.strata.api.control.field.Slider;
 import org.inspirenxe.strata.api.control.field.TextBox;
 import org.inspirenxe.strata.api.layout.Anchor;
@@ -40,11 +42,12 @@ import org.inspirenxe.strata.api.theme.SpriteId;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * The controls guide's examples for images, checkboxes, sliders and rows of controls in a list.
+ * The controls guide's examples for images, checkboxes, sliders, password boxes and rows of controls in a list.
  */
 public final class ControlExamples {
 
@@ -145,6 +148,53 @@ public final class ControlExamples {
                 .setHighlighter(mentions);
         // --8<-- [end:highlighter]
         return message;
+    }
+
+    /**
+     * A form that sets a password: a box, a confirm box, a status line and a Save button that is enabled while both
+     * boxes hold the same text.
+     *
+     * @param factory the factory
+     * @param save takes the new password's chars and returns whether it was saved; the chars are zeroed after it
+     *     returns
+     * @return the form
+     */
+    public static StackPanel passwordForm(final ComponentFactory factory, final Predicate<char[]> save) {
+        // --8<-- [start:password]
+        final PasswordTextBox password = factory.passwordTextBox().setPlaceholder("Password").setMaxLength(64);
+        final PasswordTextBox confirm = factory.passwordTextBox()
+                .setPlaceholder("Repeat password")
+                .setRevealable(false);
+        final Label status = factory.label("");
+        final Button saveButton = factory.button("Save").setEnabled(false);
+        final StackPanel form = factory.stackPanel().setSpacing(4)
+                .add(password).add(confirm).add(status).add(saveButton);
+        // MODIFIED carries lengths, never text, so one handler can watch every field of the form
+        form.onEvent(TextEntry.MODIFIED, event ->
+                saveButton.setEnabled(!password.isEmpty() && password.matches(confirm)));
+        // The reader gets a copy of the chars, which is zeroed as soon as it returns
+        saveButton.onEvent(Button.PRESSED, event ->
+                status.setText(password.withPassword(save::test) ? "Saved" : "Not saved"));
+        // --8<-- [end:password]
+        return form;
+    }
+
+    /**
+     * A box for a six-digit PIN.
+     *
+     * @param factory the factory
+     * @return the box
+     */
+    static PasswordTextBox pin(final ComponentFactory factory) {
+        // --8<-- [start:pin]
+        // Only digits, at most six; a paste with anything else, or one that would not fit, is refused whole
+        final PasswordTextBox pin = factory.passwordTextBox()
+                .setMaxLength(6)
+                .setCodePointFilter(Character::isDigit)
+                .setMaskCodePoint('\u2022')
+                .setPlaceholder("PIN");
+        // --8<-- [end:pin]
+        return pin;
     }
 
     static Slider integerSlider(final ComponentFactory factory, final Settings settings) {

@@ -80,6 +80,20 @@ A style set with `Label.setStyle` overrides the key.
 
 The suggestion list also uses the `ListView` and `ScrollPanel` keys.
 
+## PasswordTextBox
+
+A password box reads the `TextBox` keys above for its face, text, selection, caret, placeholder and padding. Its own keys are optional.
+
+| Key | Constant | Kind | Required | Fallback |
+|---|---|---|---|---|
+| `passwordbox.mask` | `PasswordTextBox.STYLE_MASK` | text style | no | `textbox.text`; a disabled or read-only box uses `textbox.text.disabled` or `textbox.text.readonly` instead |
+| `passwordbox.reveal` | `PasswordTextBox.STYLE_REVEAL` | paint | no | An eye drawn from fills in the placeholder's color |
+| `passwordbox.reveal.hovered` | `PasswordTextBox.STYLE_REVEAL_HOVERED` | paint | no | `passwordbox.reveal`, else the eye in the text color |
+| `passwordbox.reveal.active` | `PasswordTextBox.STYLE_REVEAL_ACTIVE` | paint | no | The eye with a slash, in the text color |
+| `passwordbox.reveal.disabled` | `PasswordTextBox.STYLE_REVEAL_DISABLED` | paint | no | `passwordbox.reveal`, else the eye in the disabled text color |
+
+`reveal` and `reveal.hovered` draw while the text is hidden, offering to show it; `reveal.active` draws while it shows, offering to hide it; `reveal.disabled` draws while the user cannot reveal text that code set. `Themes.flat()` sets none of them.
+
 ## ScrollPanel
 
 `ListView` and `ComboBox` use these keys for their scroll bars too.

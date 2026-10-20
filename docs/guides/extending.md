@@ -122,6 +122,7 @@ Fire requests only for what the user does, and reports after every change, whoev
 | `requiredStyleKeys()` | When the component joins a host, and when the theme changes | None |
 | `onApplyTheme(theme)` | On attach and whenever the theme changes, before the next layout | Nothing |
 | `acceptsTextInput()` | When it gains focus | false |
+| `textInputKind()` | When it gains focus, if it accepts text input. Return `SECRET` for a secret, so the engine can turn off input methods and suggestions. | `TEXT` |
 | `snapshotState()` | When an event with [snapshots](snapshots.md#your-own-components) captures it | null |
 | `onClick(event)` and the other `on...` hooks | The default-behavior step of each input event, after the handlers, unless canceled | Nothing |
 | `onOtherEvent(type, event)` | For event types not in `InputEvents` | Nothing |

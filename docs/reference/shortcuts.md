@@ -42,8 +42,8 @@ Every key the built-in controls and hosts respond to. Control means Control with
 | Backspace, Delete | Delete the selection, or one code point |
 | Ctrl+Backspace, Ctrl+Delete | Delete the selection, or one word |
 | Ctrl+A | Select all |
-| Ctrl+C | Copy (not in password mode) |
-| Ctrl+X | Cut (not in password mode) |
+| Ctrl+C | Copy |
+| Ctrl+X | Cut |
 | Ctrl+V | Paste, with line breaks removed |
 
 Not handled, so they bubble to ancestors and the engine: Tab, Escape, Enter, Up, Down, Page Up, Page Down, and every Control combination not listed above.
@@ -55,6 +55,20 @@ With a suggestion provider, Ctrl+Space shows the suggestions. While the suggesti
 | Up, Down | Move the highlight, wrapping at either end |
 | Tab, Enter, keypad Enter | Accept the highlighted suggestion |
 | Escape | Close the list |
+
+## PasswordTextBox, while focused
+
+The `TextBox` keys above, with these differences:
+
+| Keys | Action |
+|---|---|
+| Ctrl+C, Ctrl+X | Nothing |
+| Ctrl+Left, Ctrl+Right, Ctrl+Backspace, Ctrl+Delete | Move or delete to the start or end, since the whole text counts as one word |
+| Ctrl+V | Paste, unless the length limit or the code point filter would change the pasted text |
+| Alt+F8 | Show or hide the text, while the box is revealable |
+| Enter, keypad Enter | Submit, consumed when a `SUBMIT` or `SUBMITTED` handler is on the box's path |
+
+A double click selects everything. The box consumes every typed character while it has focus.
 
 ## Mouse in a TextBox
 

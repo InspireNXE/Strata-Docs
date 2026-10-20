@@ -70,7 +70,8 @@ The `state` is what the component's kind adds. The built-ins record a nested `St
 
 | Component | State record | Fields |
 |---|---|---|
-| `TextBox` | `TextBox.State` | `text` (unmasked even in password mode), `caret`, `anchor`, `maxLength`, `password`, plus `selectionStart()`, `selectionEnd()` and `hasSelection()` |
+| `TextBox` | `TextBox.State` | `text`, `caret`, `anchor`, `maxLength`, plus `selectionStart()`, `selectionEnd()` and `hasSelection()` |
+| `PasswordTextBox` | `PasswordTextBox.State` | `length`, `caret`, `anchor`, `maxLength`, `revealed`, plus `selectionStart()`, `selectionEnd()` and `hasSelection()`. Never the text. |
 | `Button` | `Button.State` | `text` |
 | `CheckBox` | `CheckBox.State` | `checked`, `text` |
 | `Slider` | `Slider.State` | `value`, `min`, `max`, `step` |
