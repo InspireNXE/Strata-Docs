@@ -109,6 +109,7 @@ nav:
       - Screens: guides/screens.md
       - Themes: guides/theming.md
       - Text: guides/text.md
+      - Appearances: guides/appearances.md
       - Extending Strata: guides/extending.md
   - Platforms:
       - platforms/index.md

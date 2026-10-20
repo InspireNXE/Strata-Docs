@@ -51,6 +51,10 @@ Swing has no language files of its own, so translated text reads through a trans
 SwingTranslations.use(ResourceBundle.getBundle("shop.messages", Locale.GERMAN));
 ```
 
+## Appearances
+
+The adapter registers an [appearance](../guides/appearances.md) for `BufferedImage`: the image as its own icon, at its pixel size. A list of images needs no cell factory, and `factory.image(bufferedImage)` shows one.
+
 ## Sprites
 
 `SwingSprites` loads images from the classpath at `assets/<namespace>/sprites/<path>.png`. Pass a `SpriteResolver` to `SwingSprites`, and that to `StrataPanel` or `SwingSnapshot.render`, to read another layout. Images are loaded once and cached, including the fact that one is missing. A missing or unreadable image draws as solid magenta.
