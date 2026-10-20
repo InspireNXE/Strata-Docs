@@ -147,6 +147,8 @@ The open list also uses the `ListView` and `ScrollPanel` keys.
 | `tab.text` | `TabBar.STYLE_TEXT` | text style | no | `TextStyle.DEFAULT` |
 | `tab.text.selected` | `TabBar.STYLE_TEXT_SELECTED` | text style | no | `tab.text` |
 | `tab.text.disabled` | `TabBar.STYLE_TEXT_DISABLED` | text style | no | `tab.text` |
+| `tab.padding` | `TabBar.STYLE_PADDING` | insets | no | 8, 4, 8 and 3 |
+| `tab.padding.selected` | `TabBar.STYLE_PADDING_SELECTED` | insets | no | `tab.padding` |
 
 ## ProgressBar and Separator
 

@@ -46,7 +46,7 @@ A host checks the theme before it shows anything. When it opens a screen, it col
 
 Your own components declare required keys through `requiredStyleKeys()`. Remember to add them to the theme you use, as the [switch example](extending.md#write-a-new-component) does.
 
-A key may have a paint, a text style, or both; `has(key)` is true for either. Look keys up with `paint(key)` and `textStyle(key)`, which return `Optional`, or with `paintOr` and `textStyleOr`, which take a fallback.
+A key may have a paint, a text style, [insets](#insets), or any mix; `has(key)` is true for any of them. Look keys up with `paint(key)`, `textStyle(key)` and `insets(key)`, which return `Optional`, or with `paintOr`, `textStyleOr` and `insetsOr`, which take a fallback.
 
 ## Paints
 
@@ -104,6 +104,18 @@ When a rectangle is smaller than the borders, they shrink in proportion. The bor
 
 A `TextStyle` sets color, bold, italic, underline, strikethrough, a shadow and the monospaced font. Themes map text keys to styles; labels can also take one directly. See [Text](text.md).
 
+## Insets
+
+Paints and text styles say what a control looks like. Insets, the third kind of theme value, say where it puts its content, in UI units. A tab bar reads `tab.padding` for the space around an unselected tab's text and `tab.padding.selected` for the selected tab's, so a theme whose unselected tab image is drawn shorter than the tab can move that tab's text down to match:
+
+```java
+Theme theme = Themes.flat().toBuilder()
+        .insets(TabBar.STYLE_PADDING, new Insets(8, 5, 8, 2))
+        .build();
+```
+
+`theme.insets(key)` and `insetsOr(key, fallback)` look them up, and `ThemeRef.override(key, insets)` overrides them like paints. A control that reads insets for several states sizes itself for the largest, so selecting a tab never moves its neighbors. [Theme keys](../reference/theme-keys.md) lists the insets keys with their defaults.
+
 ## Per-component overrides
 
 Backgrounds and label text styles can be set per component, outside the theme:
@@ -143,6 +155,9 @@ A theme file sets only the keys it changes. Where the files live depends on the 
   },
   "text": {
     "button.text": { "color": "#FFFFFF", "shadow": true }
+  },
+  "insets": {
+    "tab.padding": [8, 5, 8, 2]
   }
 }
 ```
@@ -156,6 +171,7 @@ A theme file sets only the keys it changes. Where the files live depends on the 
 | Tiled sprite | `{ "tiled": "ns:path", "size": [width, height] }`, with an optional `"tint"` |
 | Gradient | `{ "gradient": [top, bottom] }` |
 | Text style | Any of `color`, `bold`, `italic`, `underline`, `strikethrough`, `shadow` and `monospace`. Fields you leave out keep the inherited style for that key |
+| Insets | One number, `[horizontal, vertical]` or `[left, top, right, bottom]`, in UI units |
 
 A misspelled member, a bad color or broken JSON makes the whole file invalid. The engine logs it and skips that file, and the other packs still apply.
 
