@@ -32,20 +32,25 @@ theme:
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: blue grey
-      accent: indigo
+      primary: custom
+      accent: custom
       toggle:
         icon: material/weather-night
         name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: blue grey
-      accent: indigo
+      primary: custom
+      accent: custom
       toggle:
         icon: material/weather-sunny
         name: Switch to light mode
+  logo: assets/brand/logo.svg
+  favicon: assets/brand/logo.svg
   icon:
     repo: fontawesome/brands/github
+
+extra_css:
+  - assets/stylesheets/strata.css
 
 markdown_extensions:
   - admonition

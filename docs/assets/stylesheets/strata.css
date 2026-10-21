@@ -1,0 +1,53 @@
+/* Strata's brand colors, the teal of the logo in every repository's .github/assets */
+:root {
+  --strata-teal-900: #134E4A;
+  --strata-teal-700: #0F766E;
+  --strata-teal-500: #14B8A6;
+  --strata-teal-400: #2DD4BF;
+  --strata-teal-300: #5EEAD4;
+}
+
+/* Light: a white header, so the logo shows in its own colors, with teal text and links */
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: #FFFFFF;
+  --md-primary-fg-color--light: #F0FDFA;
+  --md-primary-fg-color--dark: var(--strata-teal-700);
+  --md-primary-bg-color: var(--strata-teal-700);
+  --md-primary-bg-color--light: var(--strata-teal-500);
+  --md-accent-fg-color: var(--strata-teal-500);
+  --md-accent-fg-color--transparent: rgba(20, 184, 166, 0.1);
+  --md-typeset-a-color: var(--strata-teal-700);
+}
+
+/* Dark: a deep teal header, with the logo's dark colors */
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: var(--strata-teal-900);
+  --md-primary-fg-color--light: var(--strata-teal-700);
+  --md-primary-fg-color--dark: var(--strata-teal-900);
+  --md-primary-bg-color: #F0FDFA;
+  --md-primary-bg-color--light: var(--strata-teal-300);
+  --md-accent-fg-color: var(--strata-teal-400);
+  --md-accent-fg-color--transparent: rgba(45, 212, 191, 0.1);
+  --md-typeset-a-color: var(--strata-teal-400);
+}
+
+/* The white header needs an edge against the page */
+[data-md-color-scheme="default"] .md-header,
+[data-md-color-scheme="default"] .md-tabs {
+  border-bottom: 1px solid rgba(15, 118, 110, 0.15);
+}
+
+.md-header__button.md-logo img {
+  height: 1.8rem;
+}
+
+/* Platform and loader icons in tables */
+.md-typeset img.strata-icon {
+  height: 1.6em;
+  vertical-align: middle;
+}
+
+/* A repository's logo at the top of its platform page */
+.md-typeset img.strata-logo {
+  height: 4rem;
+}
