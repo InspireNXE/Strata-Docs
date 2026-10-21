@@ -111,7 +111,7 @@ Label name = factory.label(item.name()).setOverflow(TextOverflow.ELLIPSIS);
 name.setAlignment(HorizontalAlignment.STRETCH, VerticalAlignment.MIDDLE);
 ```
 
-A label is not focusable and has no default behavior for input, so clicks and keys pass through to its ancestors. That makes labels handy click targets for a container-level handler; see [Handling events on a container](events.md#handling-events-on-a-container).
+A label is not focusable and has no default behavior for input, so clicks and keys pass through to its ancestors. That makes labels handy click targets for a container-level handler; see [Handling input on a container](events.md#handling-input-on-a-container).
 
 `style()` returns the style the label draws with: the one you set, or the theme's.
 
