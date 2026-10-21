@@ -221,8 +221,8 @@ The default is vertical `AUTO`, horizontal `NEVER`. The panel asks for its conte
 | Input | Scrolls |
 |---|---|
 | Wheel | 10 units a notch, set with `setScrollRate`. A scroll past the end is not consumed, so it reaches an outer panel. A panel that scrolls only sideways takes the vertical wheel too. |
-| The bar | Drag the thumb, or press the track to page |
-| Up, Down, Page Up, Page Down, Home, End | When no focused descendant used them |
+| The bar | Drag the thumb with the left button, or press the track to page |
+| Up, Down, Page Up, Page Down, Home, End | Vertically, by the rate, by the viewport less one rate, or to the ends, when no focused descendant used them. Held keys repeat. Not with Control or Alt, nor while the vertical policy is `NEVER`, and consumed only when the offset changed. |
 | Focus | A descendant that gains focus is scrolled into view |
 
 `setScroll(x, y)`, `scrollBy` and `scrollToVisible(component)` work from code, `scrollX()`, `scrollY()`, `maxScrollX()` and `maxScrollY()` read the offsets, and `ScrollPanel.SCROLLED` reports every change of offset with a `ScrollPanel.State`. The offset is clamped to its range on every change and after every layout, and children move by it rounded to whole units, so engines that draw whole pixels do not shimmer. A scroll panel is `Focusable` but starts unfocusable; call `setFocusable(true)` to let it take focus and its keys by itself. Scrolling moves the children's real bounds without measuring them again, so pointer positions and `bounds()` stay in host coordinates inside a scroll panel. Children are clipped to the viewport, the bounds less the padding and the bar's gutter. For long lists of similar rows, use a [`ListView`](controls.md#listview), which builds only the rows in view.

@@ -61,9 +61,9 @@ An attribute's events serve every control that has the attribute. Requests (`Req
 | `MultiSelection.SELECTED_MANY` | `ValueEvent` | `List<Integer>`, the selected indexes | `ListView`, `TableView`, `TreeView` |
 | `Activatable.ACTIVATE` | `ValueRequestEvent` | `Integer`, the entry's index | `ListView`, `TableView`, `TreeView`, `GridView`, `NavigationView` |
 | `Activatable.ACTIVATED` | `ValueEvent` | `Integer`, the entry's index; user only | The same |
-| `Openable.OPEN` | `RequestEvent` | none | `ComboBox`, `DropDownButton`, `InfoBar`, `DatePicker`, `TimePicker`, `DateTimePicker`, `Menu`, `Flyout` |
-| `Openable.OPENED` | `ControlEvent` | none | The same |
-| `Closable.CLOSE` | `RequestEvent` | none | `Window`, and the controls with `Openable`, where each says the user can close it |
+| `Openable.OPEN` | `RequestEvent` | none | `ComboBox`, `DropDownButton`, `DatePicker`, `TimePicker`, `DateTimePicker` |
+| `Openable.OPENED` | `ControlEvent` | none | The same, and `InfoBar`, `Menu` and `Flyout`, which only code or another control opens |
+| `Closable.CLOSE` | `RequestEvent` | none | `Window` and `InfoBar`. The other controls with `Openable` close without asking. |
 | `Closable.CLOSED` | `ControlEvent` | none | `Window`, the controls with `Openable`, and `Overlay` |
 
 ## Control events by control

@@ -22,7 +22,7 @@ An appearance says how values of one type look to a user: an icon, a name and a 
 
 `Appearance.builder()` makes one from functions. The icon and tooltip functions may return null for none, and the name function must return a name. Parts you leave unset keep the defaults above. `Appearance.as(mapping)` makes a type look like another value it leads to, such as a listing like its item, and looks that value's appearance up anew each time.
 
-You can also implement `Appearance` yourself. Each method must be a pure function of the value as it is at the call. Controls call them often, on the UI thread, so keep them quick. An icon made from a mutable object should copy it; see [Visuals and icons](#visuals-and-icons).
+You can also implement `Appearance` yourself. Each method must be a pure function of the value as it is at the call. Controls call them often, on the UI thread, so keep them quick. An icon follows the adapter's rules for snapshots and live visuals; see [Visuals and icons](#visuals-and-icons).
 
 `register` returns a `Subscription`. A later registration for the same type hides an earlier one until you remove it, so you can replace an engine adapter's default look for a type.
 
@@ -54,4 +54,4 @@ A control that only shows a value differently, such as a slot with an item and i
 
 ## Visuals and icons
 
-An icon is a `Visual`, something only the engine can draw, such as a loaded image. Adapters make visuals in classes of their own, such as `SwingVisuals.image` on [Swing](../platforms/swing.md#appearances), and draw a placeholder for a visual another adapter made. Treat a visual as a snapshot: to show a change to the object behind it, make a new visual. Adapters copy mutable engine objects when they make one, except where their documentation says otherwise; `SwingVisuals.image` keeps the image itself, so do not draw into an image while it is shown. Two visuals of the same thing are equal.
+An icon is a `Visual`, something only the engine can draw, such as a loaded image. Adapters make visuals in classes of their own, such as `SwingVisuals.image` on [Swing](../platforms/swing.md#appearances), and draw a placeholder for a visual another adapter made. A visual is a snapshot or live, and the adapter method that makes it says which. A snapshot copies the object when it is made, such as an engine object the engine itself keeps changing; to show a change, make a new visual, and two snapshots of the same thing are equal. A live visual holds an object you made and own, such as an image you draw into, and shows each change on the next paint; two live visuals are equal only when they hold the same object. `SwingVisuals.image` makes live visuals.

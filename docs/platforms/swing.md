@@ -75,7 +75,7 @@ SwingTranslations.use(ResourceBundle.getBundle("shop.messages", Locale.GERMAN));
 
 The adapter registers an [appearance](../guides/appearances.md) for `BufferedImage` when the first `SwingPlatform` is made: the image as its own icon, at its pixel size. A list of images needs no cell factory, and `factory.image(bufferedImage)` shows one.
 
-`SwingVisuals.image(image)` makes a [visual](../guides/appearances.md#visuals-and-icons) of an image at its pixel size, one UI unit per pixel, and `SwingVisuals.image(image, width, height)` one with a size of its own, for an image meant to draw smaller or larger than its pixels. The image is not copied, so do not draw into it while it is shown. The canvas draws a visual another adapter made as magenta.
+`SwingVisuals.image(image)` makes a [visual](../guides/appearances.md#visuals-and-icons) of an image at its pixel size, one UI unit per pixel, and `SwingVisuals.image(image, width, height)` one with a size of its own, for an image meant to draw smaller or larger than its pixels. These visuals are live: the image is kept without copying, and the canvas draws what it holds at each paint, so drawing into the image on the Swing event thread shows on the next frame. Two visuals are equal only when they hold the same image object at the same size. The canvas draws a visual another adapter made as magenta.
 
 ## Sprites
 
