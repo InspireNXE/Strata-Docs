@@ -55,11 +55,48 @@ A control's Pre events are its requests and its Post events are its reports. To 
 --8<-- "events/EventExamples.java:react"
 ```
 
-Changes made from code, through setters such as `setText` and methods such as `select` or `close`, fire no request: code does not need permission. They still fire reports, so a label or a binding hears about every change.
+Changes made from code, through setters such as `setText` and methods such as `select` or `close`, fire no request: code does not need permission. Neither do changes a [binding](binding.md) writes or that another person made through the server. They all still fire reports, so a label or a binding hears about every change, and each report says [who caused it](#who-caused-it).
 
 A rewritten value goes through the same checks as one set from code, so a slider still clamps a value a handler set out of range, and a text box still applies its length limit. Each event type's Javadoc says what it accepts and whether null is allowed.
 
 A control fires a request or a report only when something on its path has a handler for that type. Otherwise it makes the change without creating an event, so the events you do not listen to cost nothing.
+
+## Who caused it
+
+Every event has an origin, which says who caused it:
+
+| Origin | Who | Put by |
+|---|---|---|
+| `Origin.User` | The person at this screen, through input. Its `identity()` is the platform's object for them, such as a user profile, or null where the platform names nobody. | The host, for every input it dispatches |
+| `Origin.Remote` | Another person, whose change reached this screen through a server or another channel | Your code, around the change it applies |
+| `Origin.Binding` | A [data binding](binding.md), with the source it reads | The binding, while it writes |
+| `Origin.CODE` | A plain call from code | Nobody: it is what an event reports when no frame put an origin |
+
+`event.origin()` reads it. Requests fire only when the origin is the user, so a handler on a request can rely on that. Reports fire for every origin, which is where telling them apart pays off:
+
+```java
+--8<-- "events/EventExamples.java:origin"
+```
+
+The origin is one value of the event's cause. `event.cause()` gives the rest: a chain of the objects the change passed through, most recent first, and a context of values under `CauseKeys`. For input the host puts the device (`DEVICE`, `MOUSE` or `KEYBOARD`), the modifiers held, the screen, and for pointer presses and releases the button and the click count, so every event one click causes shares them. A control that acts on another pushes itself on the chain: when a radio group deselects a button, the button's `TOGGLED` still reports the user's click as its origin, and the group is on its chain.
+
+```java
+--8<-- "events/EventExamples.java:chain-of-causes"
+```
+
+Strata makes the cause only when a handler calls `cause()`, and `origin()` reads the origin without making it, so neither costs anything when nobody asks.
+
+### Applying a change for someone else
+
+Code that applies a change on another person's behalf, such as a market update the server sent, opens a frame with that person as the origin. Every event fired inside it reports them, and the controls' requests stay quiet:
+
+```java
+--8<-- "events/EventExamples.java:remote"
+```
+
+A frame belongs to the UI thread. Work from another thread, such as a network handler, opens its frame inside the task it hands to the UI thread, where the change is applied. Close frames in a `try`-with-resources block, so they close however the block ends; closing a frame also closes any frame opened inside it that is still open. Objects you `push` go on the chain, and you can put values of your own under keys made with `CauseKey.of`.
+
+On an engine with a cause stack of its own, such as Sponge, the adapter can make Strata's stack the engine's: frames you open are then the engine's frames, objects you push are on the cause of the engine's own events fired inside them, and a Strata event's chain is the engine's current cause.
 
 ## Event interfaces
 
@@ -67,7 +104,7 @@ Each event type names the interface its handlers receive. They all extend `Event
 
 | Interface | Kind | Adds | Used by |
 |---|---|---|---|
-| `Event` | Both | `target()`, `current()`, `stopPropagation()`, `isPropagationStopped()`, and the [snapshots](snapshots.md) | Every event |
+| `Event` | Both | `target()`, `current()`, `origin()`, `cause()`, `stopPropagation()`, `isPropagationStopped()`, and the [snapshots](snapshots.md) | Every event |
 | `Cancelable` | Pre | `cancel()`, `isCancelled()`, `consume()`, `isHandled()` | Input and requests |
 | `PointerEvent` and its subtypes, `KeyEvent`, `CharEvent`, `FocusEvent`, `ModifiersEvent` | Pre | What the user did; see [Clicks](#clicks) and below | `InputEvents`, `Focusable.FOCUS_GAINED`, `Focusable.FOCUS_LOST` |
 | `RequestEvent<C>` | Pre | `control()` | Requests with no value, such as `Button.PRESS` and `Closable.CLOSE` |

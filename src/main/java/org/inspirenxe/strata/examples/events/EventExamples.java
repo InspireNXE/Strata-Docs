@@ -21,12 +21,18 @@ import org.inspirenxe.strata.api.control.attribute.text.TextInput;
 import org.inspirenxe.strata.api.control.attribute.value.Ranged;
 import org.inspirenxe.strata.api.control.attribute.value.Toggle;
 import org.inspirenxe.strata.api.control.button.Button;
+import org.inspirenxe.strata.api.control.button.CheckBox;
+import org.inspirenxe.strata.api.control.button.RadioGroup;
 import org.inspirenxe.strata.api.control.display.Label;
 import org.inspirenxe.strata.api.control.field.Slider;
 import org.inspirenxe.strata.api.control.field.TextArea;
 import org.inspirenxe.strata.api.control.field.TextBox;
 import org.inspirenxe.strata.api.event.EventHandler;
 import org.inspirenxe.strata.api.event.Subscription;
+import org.inspirenxe.strata.api.event.cause.CauseFrame;
+import org.inspirenxe.strata.api.event.cause.CauseKeys;
+import org.inspirenxe.strata.api.event.cause.Device;
+import org.inspirenxe.strata.api.event.cause.Origin;
 import org.inspirenxe.strata.api.event.control.ValueRequestEvent;
 import org.inspirenxe.strata.api.event.input.InputEvents;
 import org.inspirenxe.strata.api.geometry.Rect;
@@ -82,6 +88,38 @@ public final class EventExamples {
             save.setEnabled(true);
         });
         // --8<-- [end:kinds]
+    }
+
+    static void origin(final CheckBox notify, final Label status) {
+        // --8<-- [start:origin]
+        notify.onEvent(Toggle.TOGGLED, event -> {
+            switch (event.origin()) {
+                case Origin.User _ -> status.setText("You turned notifications " + (event.value() ? "on" : "off"));
+                case Origin.Remote(final Object who) -> status.setText(who + " changed your notifications");
+                case Origin.Binding _, Origin.Code _ -> { }     // the model or code set it; nothing to say
+            }
+        });
+        // --8<-- [end:origin]
+    }
+
+    static void chainOfCauses(final StackPanel options) {
+        // --8<-- [start:chain-of-causes]
+        options.onEvent(Toggle.TOGGLED, event -> {
+            final boolean byGroup = event.cause().first(RadioGroup.class).isPresent();
+            final boolean byKeyboard = event.cause().context(CauseKeys.DEVICE).orElse(null) == Device.KEYBOARD;
+            System.out.println(event.target() + " toggled" + (byGroup ? " by its group" : "")
+                    + (byKeyboard ? " from the keyboard" : ""));
+        });
+        // --8<-- [end:chain-of-causes]
+    }
+
+    static void remote(final ComponentFactory factory, final TextBox price, final Object buyer, final String newPrice) {
+        // --8<-- [start:remote]
+        // On the UI thread, applying an update the server sent about another person's purchase
+        try (CauseFrame _ = factory.causes().pushFrame().put(CauseKeys.ORIGIN, new Origin.Remote(buyer))) {
+            price.setText(newPrice);                    // its EDITED report says the buyer did it
+        }
+        // --8<-- [end:remote]
     }
 
     static void veto(final ComponentFactory factory, final TextBox confirmation) {

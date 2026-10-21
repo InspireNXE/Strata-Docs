@@ -49,7 +49,7 @@ Whether a binding is two way depends on its source and key:
 
 In a two-way binding, a change the user makes still asks the control's request first, so a handler on `TextInput.EDIT` or `Ranged.CHANGE` can refuse it or rewrite it as before. The state gets the value the control accepted, when the control reports it. Changes made from code with a setter report too, so they also reach the state. The binding handles the report on the control after the control's own handlers, so those still see the state's old value, while handlers on its ancestors and code that runs once the report is over see the new one. Other controls bound to the same state catch up at the next frame.
 
-A change to the state sets the control the way its setter does: the control reports the change and fires no request. The binding does not write back a report it caused itself, and never writes a value equal to the one already there, so a binding cannot loop. If the control adjusts a value as the binding sets it, such as a slider clamping 1.5 to its maximum of 1, the control keeps the adjusted value and the state keeps its own.
+A change to the state sets the control the way its setter does: the control reports the change and fires no request. The report's [origin](events.md#who-caused-it) is `Origin.Binding`, with the state as its source. The binding does not write back a report it caused itself, and never writes a value equal to the one already there, so a binding cannot loop. If the control adjusts a value as the binding sets it, such as a slider clamping 1.5 to its maximum of 1, the control keeps the adjusted value and the state keeps its own.
 
 ## Computed sources
 
