@@ -2,7 +2,7 @@
 
 # Strata-Docs
 
-The source of the [documentation site](https://inspirenxe.github.io/Strata/) for [Strata](https://github.com/InspireNXE/Strata). It is a MkDocs Material site whose Java examples are compiled and tested, and whose reference links into Javadoc built from Strata.
+The source of the [documentation site](https://inspirenxe.github.io/Strata-Docs/) for [Strata](https://github.com/InspireNXE/Strata). It is a MkDocs Material site whose Java examples are compiled and tested, and whose reference links into Javadoc built from Strata.
 
 | Path | What it is |
 |---|---|
