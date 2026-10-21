@@ -66,6 +66,12 @@ Control events bubble, so one handler on a panel hears the controls inside it:
 --8<-- "events/EventExamples.java:form"
 ```
 
+Where a handler only copies a value between a control and your data, a [binding](binding.md) says the same in one call. Each attribute declares keys beside its events, such as `Toggle.SELECTED` beside `Toggle.TOGGLED`, and a two-way binding still goes through the control's request, so the handlers on this page keep working:
+
+```java
+music.bind(Toggle.SELECTED, model.music);       // instead of a TOGGLED handler and a setSelected call
+```
+
 The events of a control's private parts stop at that control. A table is built from an inner list, but a handler on your form for `Selection.SELECTED` hears only the table: the event's `control()` is the table, never the list inside it.
 
 ## Canceling and stopping

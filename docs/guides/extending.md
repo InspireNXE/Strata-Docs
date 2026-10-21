@@ -111,7 +111,7 @@ Declare your control's events as constants on its interface, a Pre request for e
 | `EventType.report(name)` | Post, no value | `report(type)` |
 | `EventType.valueReport(name)` | Post, with a value | `report(type, value, previous)` |
 
-Fire requests only for what the user does, and reports after every change, whoever made it, as the built-ins do. With no handler for a type on the path, `request` and `report` fire nothing and allocate nothing, and `request(type, value, apply)` just calls `apply`. `isHandled(type)` tells you whether anything listens, for work only an event needs. If your component is a `CustomComposite`, the events of the controls you add with `addChild` stop at it, so fire your own types for what the outside should hear. Events from content added with `addContent` pass through.
+Declare a `PropertyKey` beside the events for each property, as `ON` is above, and the control can be [bound](binding.md#binding-your-own-control) to a state like a built-in. Fire requests only for what the user does, and reports after every change, whoever made it, as the built-ins do. With no handler for a type on the path, `request` and `report` fire nothing and allocate nothing, and `request(type, value, apply)` just calls `apply`. `isHandled(type)` tells you whether anything listens, for work only an event needs. If your component is a `CustomComposite`, the events of the controls you add with `addChild` stop at it, so fire your own types for what the outside should hear. Events from content added with `addContent` pass through.
 
 ### The hooks
 

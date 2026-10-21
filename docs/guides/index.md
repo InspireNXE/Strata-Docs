@@ -10,6 +10,7 @@ Each guide covers one part of Strata in depth: the rules, the defaults, the edge
 | [Appearances](appearances.md) | How values of one type show their icon, name and tooltip in every list, table and combo box |
 | [Overlays and tooltips](overlays.md) | Popups, modal dialogs, tooltips and held modifiers |
 | [Events](events.md) | Handlers, priorities, Pre and Post events, cancellation, bubbling, clicks and drags |
+| [Data binding](binding.md) | Keeping controls in step with states in a model, one way or two |
 | [Event snapshots](snapshots.md) | Comparing a component's state when an event fired with its state now |
 | [Input and focus](input-focus.md) | Keys, modifiers, shortcuts, focus rules, tab order, text input |
 | [Screens](screens.md) | The screen lifecycle, rebuilding, closing and stacks |

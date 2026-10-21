@@ -6,27 +6,27 @@ Strata's built-in controls are interfaces in the subpackages of `org.inspirenxe.
 
 Controls that do the same kind of thing share small interfaces called attributes, in `org.inspirenxe.strata.api.control.attribute`. A control has every attribute that fits it, so the same thing has the same name on every control, and code written against an attribute works for all of them.
 
-| Attribute | Package | What it adds | Events | Controls |
-|---|---|---|---|---|
-| `HasText` | `text` | `text()`, `setText` | | `Button`, `DropDownButton`, `CycleButton`, `CheckBox`, `RadioButton`, `ToggleSwitch`, `Label`, `InfoBar` and `MessageBox` (the message), `ProgressBar`, `BusyIndicator`, and through `TextInput` the text fields |
-| `Titled` | `text` | `title()`, `setTitle` | | `Window`, `MessageBox`, `Expander`, `InfoBar`, `NavigationView` |
-| `TextEntry` | `text` | `length()`, `isEmpty()`, `clear()`, the caret, the selection, `setMaxLength`, `setReadOnly`, `setTextPadding`; nothing that carries the text | `MODIFY`, `MODIFIED` | `TextBox`, `TextArea`, `PasswordTextBox` |
-| `TextInput` | `text` | `TextEntry` plus `text()`, `setText`, `selectedText()` and the highlighter | `EDIT`, `EDITED` | `TextBox`, `TextArea` |
-| `Toggle` | `value` | `isSelected()`, `setSelected`, `toggle()` | `TOGGLE`, `TOGGLED` | `CheckBox`, `ToggleSwitch`, `RadioButton` |
-| `Ranged` | `value` | `value()`, `setValue`, `min()`, `max()`, `setRange` | `CHANGE`, `CHANGED` | `Slider`, `Spinner`, `ProgressBar`, `ScrollBar` |
-| `Stepped` | `value` | `Ranged` plus `step()`, `setStep` | | `Slider`, `Spinner` |
-| `HasDate` | `value` | `date()`, `setDate`, `clearDate()`, `minDate()`, `maxDate()`, `setDateRange`, `setDateFilter`, `firstDayOfWeek()`, `setFirstDayOfWeek` | `PICK_DATE`, `DATE_PICKED` | `CalendarView`, `DatePicker`, `DateTimePicker` |
-| `HasTime` | `value` | `time()`, `setTime`, `clearTime()`, `clockFormat()`, `setClockFormat`, `isSecondsShown()`, `setSecondsShown`, `minuteStep()`, `setMinuteStep` | `PICK_TIME`, `TIME_PICKED` | `TimePicker`, `DateTimePicker` |
-| `ItemSource` | `item` | `items()`, `setItems`, `refresh()`, `setKeyFunction` | | `ListView`, `TableView`, `TreeView`, `ComboBox`, `GridView`, `CycleButton` |
-| `CellSource` | `item` | `setCellFactory` | | `ListView`, `TreeView`, `GridView` |
-| `Selection` | `item` | `selectedIndex()`, `selected()`, `select(index)`, `selectItem(item)`, `clearSelection()`: the current entry | `SELECT`, `SELECTED` | every control below that selects |
-| `SingleSelection` | `item` | `Selection` and nothing more: the control only ever selects one entry | | `ComboBox`, `GridView`, `CycleButton`, `TabBar`, `MenuBar`, `RadioGroup`, `NavigationView` |
-| `MultiSelection` | `item` | `Selection` plus `setSelectionMode`, `selectedIndexes()`, `selectedItems()`, `selectIndexes`, `selectAll()` | `SELECT_MANY`, `SELECTED_MANY` | `ListView`, `TableView`, `TreeView` |
-| `Activatable` | `item` | `setActivateOnClick` | `ACTIVATE`, `ACTIVATED` | `ListView`, `TableView`, `TreeView`, `GridView`, `NavigationView` |
-| `RowView` | `item` | row height and spacing, the placeholder, scrolling, `setDeselectable` | | `ListView`, `TableView`, `TreeView` |
-| `Closable` | `popup` | `close()` | `CLOSE`, `CLOSED` | `Window`, `Overlay`, and through `Openable` the others |
-| `Openable` | `popup` | `Closable` plus `isOpen()` | `OPEN`, `OPENED` | `ComboBox`, `DropDownButton`, `DatePicker`, `TimePicker`, `DateTimePicker`, `InfoBar`, and through `Popup` the popups |
-| `Popup` | `popup` | `Openable` plus `open(rect)` and `openAt(x, y)`: a component that opens itself in an overlay | | `Menu`, `Flyout` |
+| Attribute | Package | What it adds | Events | Binding keys | Controls |
+|---|---|---|---|---|---|
+| `HasText` | `text` | `text()`, `setText` | | `TEXT` | `Button`, `DropDownButton`, `CycleButton`, `CheckBox`, `RadioButton`, `ToggleSwitch`, `Label`, `InfoBar` and `MessageBox` (the message), `ProgressBar`, `BusyIndicator`, and through `TextInput` the text fields |
+| `Titled` | `text` | `title()`, `setTitle` | | `TITLE` | `Window`, `MessageBox`, `Expander`, `InfoBar`, `NavigationView` |
+| `TextEntry` | `text` | `length()`, `isEmpty()`, `clear()`, the caret, the selection, `setMaxLength`, `setReadOnly`, `setTextPadding`; nothing that carries the text | `MODIFY`, `MODIFIED` | | `TextBox`, `TextArea`, `PasswordTextBox` |
+| `TextInput` | `text` | `TextEntry` plus `text()`, `setText`, `selectedText()` and the highlighter | `EDIT`, `EDITED` | `TEXT` | `TextBox`, `TextArea` |
+| `Toggle` | `value` | `isSelected()`, `setSelected`, `toggle()` | `TOGGLE`, `TOGGLED` | `SELECTED` | `CheckBox`, `ToggleSwitch`, `RadioButton` |
+| `Ranged` | `value` | `value()`, `setValue`, `min()`, `max()`, `setRange` | `CHANGE`, `CHANGED` | `VALUE` | `Slider`, `Spinner`, `ProgressBar`, `ScrollBar` |
+| `Stepped` | `value` | `Ranged` plus `step()`, `setStep` | | | `Slider`, `Spinner` |
+| `HasDate` | `value` | `date()`, `setDate`, `clearDate()`, `minDate()`, `maxDate()`, `setDateRange`, `setDateFilter`, `firstDayOfWeek()`, `setFirstDayOfWeek` | `PICK_DATE`, `DATE_PICKED` | | `CalendarView`, `DatePicker`, `DateTimePicker` |
+| `HasTime` | `value` | `time()`, `setTime`, `clearTime()`, `clockFormat()`, `setClockFormat`, `isSecondsShown()`, `setSecondsShown`, `minuteStep()`, `setMinuteStep` | `PICK_TIME`, `TIME_PICKED` | | `TimePicker`, `DateTimePicker` |
+| `ItemSource` | `item` | `items()`, `setItems`, `refresh()`, `setKeyFunction` | | `itemsKey()` | `ListView`, `TableView`, `TreeView`, `ComboBox`, `GridView`, `CycleButton` |
+| `CellSource` | `item` | `setCellFactory` | | | `ListView`, `TreeView`, `GridView` |
+| `Selection` | `item` | `selectedIndex()`, `selected()`, `select(index)`, `selectItem(item)`, `clearSelection()`: the current entry | `SELECT`, `SELECTED` | `SELECTED_INDEX`, `selectedItem()` | every control below that selects |
+| `SingleSelection` | `item` | `Selection` and nothing more: the control only ever selects one entry | | | `ComboBox`, `GridView`, `CycleButton`, `TabBar`, `MenuBar`, `RadioGroup`, `NavigationView` |
+| `MultiSelection` | `item` | `Selection` plus `setSelectionMode`, `selectedIndexes()`, `selectedItems()`, `selectIndexes`, `selectAll()` | `SELECT_MANY`, `SELECTED_MANY` | | `ListView`, `TableView`, `TreeView` |
+| `Activatable` | `item` | `setActivateOnClick` | `ACTIVATE`, `ACTIVATED` | | `ListView`, `TableView`, `TreeView`, `GridView`, `NavigationView` |
+| `RowView` | `item` | row height and spacing, the placeholder, scrolling, `setDeselectable` | | | `ListView`, `TableView`, `TreeView` |
+| `Closable` | `popup` | `close()` | `CLOSE`, `CLOSED` | | `Window`, `Overlay`, and through `Openable` the others |
+| `Openable` | `popup` | `Closable` plus `isOpen()` | `OPEN`, `OPENED` | | `ComboBox`, `DropDownButton`, `DatePicker`, `TimePicker`, `DateTimePicker`, `InfoBar`, and through `Popup` the popups |
+| `Popup` | `popup` | `Openable` plus `open(rect)` and `openAt(x, y)`: a component that opens itself in an overlay | | | `Menu`, `Flyout` |
 
 An attribute owns its events, so `Toggle.TOGGLED` fires for a checkbox, a switch and a radio button alike, and one handler on a container hears every control inside it that has the attribute:
 
@@ -36,6 +36,12 @@ settings.onEvent(Toggle.TOGGLED, event -> save());
 
 // Refresh the buttons whenever any list, table, tree, combo box or grid in the form changes selection
 form.onEvent(Selection.SELECTED, event -> updateButtons());
+```
+
+Every component also has the keys `Component.ENABLED` and `Component.VISIBLE`. A binding key names a property that [`bind`](binding.md) can keep in step with a state, and sits beside the events that report the property's changes:
+
+```java
+music.bind(Toggle.SELECTED, model.music);       // works on a checkbox, a switch or a radio button
 ```
 
 The event's `control()` is typed as the attribute, such as `Toggle<?>`, and `target()` is the component that fired it. An event fires only where it means something: a progress bar has no user input, so it reports `Ranged.CHANGED` but never asks with `Ranged.CHANGE`. Each control's section below says which events it fires and when. Events that only one control has, such as `Button.PRESSED` or `TableView.SORTED`, stay constants on that control.

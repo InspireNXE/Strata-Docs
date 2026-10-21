@@ -104,6 +104,7 @@ nav:
       - Controls: guides/controls.md
       - Overlays and tooltips: guides/overlays.md
       - Events: guides/events.md
+      - Data binding: guides/binding.md
       - Event snapshots: guides/snapshots.md
       - Input and focus: guides/input-focus.md
       - Screens: guides/screens.md

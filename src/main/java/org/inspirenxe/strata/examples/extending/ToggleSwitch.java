@@ -23,6 +23,7 @@ import org.inspirenxe.strata.api.component.HasTooltip;
 import org.inspirenxe.strata.api.event.EventType;
 import org.inspirenxe.strata.api.event.control.ValueEvent;
 import org.inspirenxe.strata.api.event.control.ValueRequestEvent;
+import org.inspirenxe.strata.api.state.PropertyKey;
 
 /**
  * An on/off switch with a caption to its right: a track with a knob that sits left when off and right when on.
@@ -43,6 +44,9 @@ public interface ToggleSwitch extends Component<ToggleSwitch>, Focusable<ToggleS
     EventType<ValueRequestEvent<ToggleSwitch, Boolean>> TOGGLE = EventType.valueRequest("examplemod.switch.toggle");
     /** Told after the switch changed, whether the user or code changed it. */
     EventType<ValueEvent<ToggleSwitch, Boolean>> TOGGLED = EventType.valueReport("examplemod.switch.toggled");
+    // So it can be bound: how to read and write the property, and the report that tells of a change
+    PropertyKey<ToggleSwitch, Boolean> ON = PropertyKey.of("examplemod.switch.on", ToggleSwitch::isOn,
+            ToggleSwitch::setOn, TOGGLED);
     // --8<-- [end:events]
 
     boolean isOn();

@@ -257,6 +257,14 @@ Every number Strata picks for you.
 
 The host synthesizes repeats only for engines whose platform reports `sendsKeyRepeat == false`. Swing sends its own.
 
+## Binding
+
+| Setting | Value |
+|---|---|
+| When a state change reaches its controls | at the start of the next layout or render, or on `flush()` |
+| Rounds before a binding cycle is reported | 100; the error is logged through `System.Logger` and the remaining updates are dropped |
+| Order a component sets its bound properties on attach | the order they were first bound |
+
 ## Text
 
 | Setting | Value |

@@ -16,13 +16,16 @@
 package org.inspirenxe.strata.examples;
 
 import org.inspirenxe.strata.api.control.button.Button;
+import org.inspirenxe.strata.api.control.button.CheckBox;
 import org.inspirenxe.strata.api.control.button.DropDownButton;
 import org.inspirenxe.strata.api.control.display.Avatar;
 import org.inspirenxe.strata.api.control.display.InfoBar;
+import org.inspirenxe.strata.api.control.display.Label;
 import org.inspirenxe.strata.api.control.pane.NavigationView;
 import org.inspirenxe.strata.api.control.field.ColorPicker;
 import org.inspirenxe.strata.api.control.field.DatePicker;
 import org.inspirenxe.strata.api.control.field.PasswordTextBox;
+import org.inspirenxe.strata.api.control.field.Slider;
 import org.inspirenxe.strata.api.control.menu.Flyout;
 import org.inspirenxe.strata.api.input.Key;
 import org.inspirenxe.strata.api.input.KeyAction;
@@ -38,7 +41,10 @@ import org.inspirenxe.strata.api.theme.ThemeId;
 import org.inspirenxe.strata.api.theme.ThemeRef;
 import org.inspirenxe.strata.api.theme.Themes;
 import org.inspirenxe.strata.core.StrataCore;
+import org.inspirenxe.strata.api.control.collection.ListView;
+import org.inspirenxe.strata.api.state.State;
 import org.inspirenxe.strata.examples.adapter.ToyAdapter;
+import org.inspirenxe.strata.examples.binding.BindingExamples;
 import org.inspirenxe.strata.examples.adapter.ToyPlatform;
 import org.inspirenxe.strata.examples.controls.ControlExamples;
 import org.inspirenxe.strata.examples.events.EventExamples;
@@ -271,5 +277,60 @@ class ExamplesTest {
         assertTrue(adapter.onChar('H'));
         assertTrue(adapter.onChar('i'));
         assertTrue(adapter.onFrame().stream().anyMatch(command -> command.startsWith("text 'Hi'")));
+    }
+
+    @Test
+    void theSettingsScreenFollowsItsModelBothWays() {
+        final ScreenHost host = StrataCore.createScreenHost(new ToyPlatform(), Themes.flat());
+        host.resize(400, 300);
+        final BindingExamples.SettingsModel model = new BindingExamples.SettingsModel();
+        final List<String> saved = new ArrayList<>();
+        final BindingExamples.SettingsScreen screen = new BindingExamples.SettingsScreen(model,
+                saving -> saved.add(saving.name.get()));
+        final StackPanel[] column = new StackPanel[1];
+        host.open(factory -> column[0] = (StackPanel) screen.build(factory));
+        host.layout();
+        final CheckBox music = (CheckBox) column[0].children().get(0);
+        final Slider volume = (Slider) column[0].children().get(1);
+        final Label greeting = (Label) column[0].children().get(3);
+        final Button save = (Button) column[0].children().get(4);
+        assertTrue(music.isSelected());
+        assertEquals(0.8, volume.value(), 1e-9);
+        assertEquals("Hello, Ana", greeting.text().plain());
+
+        model.name.set(" ");
+        host.flush();
+        assertFalse(save.isEnabled());
+        model.name.set("Ben");
+        host.flush();
+        assertTrue(save.isEnabled());
+        assertEquals("Hello, Ben", greeting.text().plain());
+
+        music.requestFocus();
+        host.key(Key.SPACE, KeyAction.PRESS, Modifiers.NONE);
+        host.key(Key.SPACE, KeyAction.RELEASE, Modifiers.NONE);
+        assertFalse(model.music.get(), "the user's change reaches the model");
+        host.flush();
+        assertFalse(volume.isEnabled(), "and the slider bound to it follows");
+
+        save.press();
+        assertEquals(List.of("Ben"), saved);
+    }
+
+    @Test
+    void theBoundListKeepsItsSelectionWhenTheItemsChange() {
+        final ScreenHost host = StrataCore.createScreenHost(new ToyPlatform(), Themes.flat());
+        host.resize(300, 200);
+        final State<List<String>> names = State.of(List.of("Ana", "Ben", "Cleo"));
+        final State<String> chosen = State.of("Ben");
+        final ListView<?>[] list = new ListView<?>[1];
+        host.open(factory -> list[0] = BindingExamples.list(factory, names, chosen));
+        host.layout();
+        assertEquals(1, list[0].selectedIndex());
+        names.set(List.of("Ben", "Dev"));
+        host.flush();
+        assertEquals(0, list[0].selectedIndex());
+        list[0].select(1);
+        assertEquals("Dev", chosen.get());
     }
 }
