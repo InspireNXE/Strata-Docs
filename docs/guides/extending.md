@@ -66,7 +66,23 @@ When the piece is just existing components arranged a certain way, you need no S
 --8<-- "extending/ExtendingExamples.java:compose"
 ```
 
-The class is not a `Component`, so you add `field.component()` rather than `field`. To make a composite that is a component itself, so it can be passed anywhere a component can, extend `CustomComposite` and add the parts with `addChild`. Its children are private, so callers cannot rearrange them. `CustomContainer` is the same with public children.
+The class is not a `Component`, so you add `field.component()` rather than `field`. To make a composite that is a component itself, so it can be passed anywhere a component can, extend `CustomComposite`.
+
+### A composite of private parts
+
+A `CustomComposite` holds child components the way a container does, but only the composite can reach them. It adds them with `addChild`, lays them out in `measure` and `arrange` as a [layout](#write-a-new-layout) does, and callers see one component. This counter is a label between two buttons:
+
+```java
+--8<-- "extending/Counter.java:composite"
+```
+
+The control events of parts added with `addChild`, such as the buttons' `Button.PRESSED`, stop at the composite, so nothing outside hears them. The composite reports what the outside should hear with an event type of its own, here `Counter.CHANGED`, which bubbles like any other:
+
+```java
+--8<-- "extending/ExtendingExamples.java:composite-use"
+```
+
+A part that shows the caller's content, such as a cell a caller's cell factory made, goes in with `addContent` instead. It is still private, but control events from it and from anything inside it pass the composite, so a button in a cell is heard around the composite. `CustomComposite` also has `removeChild`, `clearChildren`, `childList()` and the ordering methods below, and `setChildClipping(false)` lets parts draw outside its bounds. `CustomContainer` is a composite whose children are public: callers add and remove them through the `Container` methods.
 
 ## Write a new component
 
@@ -115,22 +131,42 @@ Declare a `PropertyKey` beside the events for each property, as `ON` is above, a
 
 ### The hooks
 
+Every hook is a `protected` method you override, and Strata calls each one at the time the table gives.
+
 | Hook | Called | Default |
 |---|---|---|
-| `measure(context, availableWidth, availableHeight)` | During layout. Return the content's natural size. Required. | |
-| `paint(painter, bounds)` | Every frame, after the background and before a container's children | Draws nothing |
+| `measure(context, availableWidth, availableHeight)` | During layout, when the component or something inside it changed, or it is offered a different size. Return the content's natural size. Required. | |
+| `arrange(context, bounds)` | On a `CustomComposite` or `CustomContainer`, after `measure`, with the component's final bounds. Give every child its slot. Required there. | |
+| `paint(painter, bounds)` | Every frame, after the background and border and before a composite's children | Draws nothing |
+| `paintOverChildren(painter, bounds)` | On a composite, every frame after its children, outside their clip | Draws nothing |
+| `childClip()` | On a composite, while painting and hit testing, if it clips its children. Return a rectangle worked out during layout. | The bounds |
 | `requiredStyleKeys()` | When the component joins a host, and when the theme changes | None |
 | `onApplyTheme(theme)` | On attach and whenever the theme changes, before the next layout | Nothing |
 | `acceptsTextInput()` | When it gains focus | false |
 | `textInputKind()` | When it gains focus, if it accepts text input. Return `SECRET` for a secret, so the engine can turn off input methods and suggestions. | `TEXT` |
 | `snapshotState()` | When an event with [snapshots](snapshots.md#your-own-components) captures it | null |
-| `onClick(event)` and the other `on...` hooks | The default-behavior step of each input event, after the handlers, unless canceled | Nothing |
-| `onOtherEvent(type, event)` | For event types not in `InputEvents` | Nothing |
+| `onPointerEnter`, `onPointerExit`, `onPointerMove`, `onPointerPress`, `onPointerRelease`, `onClick`, `onDragStart`, `onDrag`, `onDragEnd`, `onScroll`, `onKey`, `onChar` | The default-behavior step of the matching `InputEvents` type, after the component's handlers, unless one canceled it | Nothing |
+| `onFocusGained`, `onFocusLost` | The default-behavior step of `Focusable.FOCUS_GAINED` and `FOCUS_LOST` | Nothing |
+| `onOtherEvent(type, event)` | The default-behavior step of an input event type with no hook of its own, such as `InputEvents.MODIFIERS_CHANGED` on the screen's root. Control events, the requests and reports, have no default-behavior step. | Nothing |
+| `onChildRemoved(child)` | On a composite, after a child is removed. Drop what you kept about it. | Nothing |
+| `onDescendantFocused(descendant)` | On a composite, after focus moves to a component inside it, innermost composite first | Nothing |
+
+`measure` receives the space its parent offered with the margin already taken off. Where the component has a fixed width or height, that size is offered in place of the parent's, and the maximum size caps both. A component that did not change and is offered the same space as last time keeps its last size without `measure` running, so do not count frames or poll for changes in `measure`.
+
+### When hooks run
+
+A host does its work for a frame in this order, and only the steps something asked for do anything:
+
+1. A host given its theme as a `ThemeRef` resolves it again if a theme file or an override in code changed. A screen that asked for a rebuild is built again, and bound properties are updated from their states. Expired toasts close, and a tooltip whose wait is over opens.
+2. Layout: from the root down, each component that changed, or is offered a different size, is measured, then each one that was measured or given a different slot is arranged. Components that asked only to be arranged again, through `invalidateArrangement()`, are arranged in their last slot.
+3. Painting: for each component, its `Component.PAINT` handlers run, then its background, border and `paint`, then its children in [drawing order](components.md#drawing-order), then `paintOverChildren`, then its `Component.PAINTED` handlers. Canceling `PAINT` skips the component's own drawing, `paintOverChildren` included, but not its children.
+
+Input arrives between frames. A pointer event runs the layout first if something changed, so hit testing never sees stale bounds. Then the event fires: on each component of its path, the handlers run and then the component's `on...` hook, unless a handler canceled it. `onApplyTheme` runs when a component is attached and when the theme changes, before the next layout.
 
 ### Rules
 
 - Pass the factory of the host that will show the component. A component cannot move between hosts.
-- `measure` must be pure layout. Compute and return a size, and cache what `paint` needs. Strata has already removed the margin and applied the maximum size; it applies the minimum and any fixed size to what you return. The available size may be infinite, and a negative result counts as zero. Do not change other components or call `invalidateLayout()` from it.
+- `measure` must be pure layout. Compute and return a size, and cache what `paint` needs. Strata applies the minimum and any fixed size to what you return. The available size may be infinite, and a negative result counts as zero. Do not change other components or call `invalidateLayout()` from it. A composite may add and remove its own children during layout, as a list adds the rows that scroll into view; that schedules one more layout.
 - `paint` draws inside the bounds it is given and must not change layout state. It runs every frame, so avoid allocating there. The painter is valid only during the call.
 - Call `invalidateLayout()` whenever something `measure` reads changes. Changes that only affect drawing need nothing: the next frame draws them.
 - Read time, the clipboard and text sizes through `environment()`, never from `System.currentTimeMillis()` or AWT, so the component works on every engine and in tests.
@@ -140,7 +176,25 @@ Declare a `PropertyKey` beside the events for each property, as `ON` is above, a
 
 Every `Component` method is `final` on `CustomComponent` and delegates to Strata's half of the component, its peer, so your component takes part in layout, focus, hit testing and events like any other. Return `this.self()` from your own setters to keep chaining typed.
 
-`CustomComponent` also has the methods of `Focusable`, `HasCursor` and `HasTooltip`. They take effect once your interface extends the matching one, as `ToggleSwitch` does above, and Strata ignores them otherwise. Declaring `Focusable` makes the component focusable and tabbable from the start. Hover, press, offset, theme, background and border are `protected`, for your own drawing and layout code.
+`CustomComponent` also has the methods of `Focusable`, `HasCursor` and `HasTooltip`. They take effect once your interface extends the matching one, as `ToggleSwitch` does above, and Strata ignores them otherwise. Declaring `Focusable` makes the component focusable and tabbable from the start.
+
+### Helpers for your own code
+
+These `protected` methods are for the subclass's own drawing, layout and input code:
+
+| Method | Does |
+|---|---|
+| `self()` | Returns `this` as `T`, for returning from your own setters |
+| `environment()` | The engine's text metrics, clock, clipboard and held modifiers; see [The environment](#the-environment) |
+| `theme()` | The host's theme, or `null` before the first attach, for reading styles outside `onApplyTheme` |
+| `isHovered()` | Whether the pointer is over this component itself, and not over a child |
+| `isHoverWithin()` | Whether the pointer is over this component or anything inside it |
+| `isPressed()` | Whether a button went down on this component and is still held, even if the pointer moved away |
+| `offsetX()`, `offsetY()`, `setOffset(dx, dy)` | Moves the component and everything inside it from where layout put it, without a new measure. Make `setOffset` public to let callers move it, as a window does. |
+| `background()`, `setBackground(paint)`, `border()`, `setBorder(border)` | Paint drawn over the bounds before `paint`, and lines along the inside of the edges. `CustomContainer` makes them public. |
+| `invalidateLayout()` | Schedules a measure and arrange before the next frame |
+| `invalidateArrangement()` | On a composite, schedules an arrange in the last bounds with no measure, for children that move without changing size, as in scrolling |
+| `request(...)`, `report(...)`, `isHandled(type)` | Fire your own [events](#events-for-your-own-control) |
 
 ### Painting
 
@@ -164,7 +218,7 @@ Coordinates are host coordinates in UI units. Later calls draw over earlier ones
 
 ### The environment
 
-`environment()` gives a component what it may ask of the engine outside layout:
+`environment()` returns an `Environment`, which gives a component what it may ask of the engine outside layout:
 
 | Method | Returns |
 |---|---|
@@ -191,6 +245,22 @@ Everything required of a custom component applies, plus:
 - Handle the padding yourself: take it off the space you offer children, add it to the size you return, and place children inside `contentBox()`.
 - Keep per-child data, such as a grid cell, in your own map, and drop it in `onChildRemoved`.
 - Leave drawing the children to Strata. Your `paint` draws under them and `paintOverChildren` over them. While `clipsChildren()` is true they are clipped to `childClip()`, your bounds by default.
+- Expect callers to add and remove children at any time outside layout. Each change schedules a new layout.
+
+### The layout contexts
+
+`measure` receives a `MeasureContext` and `arrange` an `ArrangeContext`. Both are valid only during the call they were passed to.
+
+| Context | Method | Does |
+|---|---|---|
+| `MeasureContext` | `text()` | The engine's text metrics, for measuring text in your own content |
+| `MeasureContext` | `measure(child, width, height)` | Measures a child in the space offered, margin included. Either size may be infinite. Returns the child's desired size plus its margin, or zero for a hidden child. |
+| `ArrangeContext` | `text()` | The engine's text metrics |
+| `ArrangeContext` | `outerSize(child)` | What the child asked for in the last measure, margin included, or zero for a hidden child |
+| `ArrangeContext` | `arrange(child, slot)` | Gives the child its slot in host coordinates, margin included. A slot smaller than the child is allowed; the child overflows it unless it stretches. |
+| `ArrangeContext` | `measure(child, width, height)` | Measures a child added during `arrange`, such as a row that scrolled into view, before you give it a slot |
+
+Slots and bounds are in host coordinates, so place children relative to `bounds` or `contentBox()`, never from 0.
 
 Callers order a container's children with `insert`, `move`, `raise`, `lower` and z indexes (see [Drawing order](components.md#drawing-order)), and Strata keeps both orders for you: iterate `children()` in `measure` and `arrange`, and leave the drawing order to Strata. A `CustomComposite`, whose children are private, orders them itself with the protected `insertChild(index, child)`, `moveChild(child, index)`, `raiseChild(child)` and `lowerChild(child)`, which work as the `Container` methods do. A progress tree, for example, can raise the node under the pointer so it draws over its neighbors.
 
@@ -200,9 +270,17 @@ Strata provides the components `ComponentFactory` makes. You see them through th
 
 You write subclasses of `CustomComponent`, `CustomComposite` and `CustomContainer`, and so does any other library that adds components. Strata's own components do not extend these classes, so a component that is an instance of `CustomComponent` was written outside Strata, and anything the factory made is Strata's. Both kinds go into the same containers and lay out, draw and fire events the same way, and either can hold the other. The parts and content of a `CustomComposite` have the composite as their `parent()`, so code inside them that needs it can find it with `ancestor(YourComposite.class)` (see [The tree](components.md#the-tree)).
 
+### How the base classes work
+
+The constructor of `CustomComponent` asks the factory you pass for a peer: Strata's half of the component, which holds its bounds, flags, layout inputs, handlers and bindings. `ComponentFactory.createPeer` makes a `ComponentPeer` for a leaf, and `createContainerPeer` a `ContainerPeer`, which adds children, for a `CustomComposite` or `CustomContainer`. That is why a component needs its factory before it can do anything, and why it belongs to that factory's host.
+
+Every `Component` method on the base class is `final` and calls the peer. In the other direction, the base class hands the peer a private `ComponentHooks` object, and the peer calls your `protected` hooks only through it, so no other code can call them. Strata's own controls use the same kind of node behind the scenes, which is why both kinds behave alike.
+
+All of this is in `api.extension.peer` and is plumbing. You never call these methods or implement these interfaces; extending the base class sets everything up.
+
 ## Things you cannot do
 
 - Implement `Component`, `Container` or a control interface directly. Strata rejects such classes.
 - Subclass the built-in controls. Their implementations are hidden in `core`. Handle their events, compose them, or write your own.
 - Draw arbitrary geometry, such as lines or textured triangles. The painter offers rectangles, gradients, sprites and text only, because every engine can draw those. See [Status and limitations](../help/status.md).
-- Use `ComponentFactory.createPeer`, `createContainerPeer`, `CustomComponent.peer()` or anything in `api.extension.peer`. They are plumbing between the base classes and core.
+- Use `ComponentFactory.createPeer`, `createContainerPeer`, `CustomComponent.peer()` or anything in `api.extension.peer`, such as `ComponentHooks`, `ComponentPeer` and `ContainerPeer`. They are plumbing between the base classes and core; see [How the base classes work](#how-the-base-classes-work).

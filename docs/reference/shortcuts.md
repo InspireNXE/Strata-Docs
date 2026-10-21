@@ -6,9 +6,12 @@ The keys the hosts and the most keyboard-driven built-in controls respond to. Li
 
 | Keys | Action |
 |---|---|
-| Tab | Focus the next tabbable component, wrapping at the end, unless something consumed the key |
+| Tab | Focus the next tabbable component, wrapping at the end, unless something consumed the key. With a dialog open, only components in the dialog take part. |
 | Shift+Tab | Focus the previous one |
 | Ctrl+Tab, Alt+Tab | Nothing; left to the engine |
+| Escape | Close the top overlay that is not a toast, such as a popup, menu or dialog, unless something consumed the key (press only) |
+
+Keys go to the focused component first. When nothing has focus they go to the top dialog's content, or to the screen's content, and the host acts only on what nothing consumed.
 
 ## Button, while focused
 

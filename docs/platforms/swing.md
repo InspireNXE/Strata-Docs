@@ -12,7 +12,7 @@ The Swing adapter draws Strata with Java2D and takes input from AWT. It is the f
 
 | Constructor argument | Meaning |
 |---|---|
-| `SwingPlatform` | Text metrics, clipboard and clock. Its text metrics also draw the text. |
+| `SwingPlatform` | Text metrics, clipboard, clock and [theme source](#themes). Its text metrics also draw the text. |
 | `Theme` | The theme for every screen pushed |
 | `scale` | Pixels per UI unit, which must be positive |
 
@@ -40,6 +40,7 @@ Use the panel on the Swing event dispatch thread only, the same as any Swing com
 - Characters come from AWT's key-typed events, with surrogate pairs joined into one code point and control characters dropped.
 - While a password box, or any field that asks for `TextInputKind.SECRET` text, has focus, the panel turns input methods off on itself, as Swing's own password field does, so no composition window shows what is typed. They come back on for the next ordinary field or when focus leaves the fields.
 - Shift plus the vertical wheel scrolls horizontally. A whole wheel rotation counts as `WHEEL`, a fractional one as `PRECISE`.
+- The panel consumes Alt and F10 after Strata sees them, so they do not put the window into its native menu mode, which on Windows would swallow wheel input until the key is pressed again.
 - Cursors map to AWT's predefined cursors. AWT has no "not allowed" cursor, so `NOT_ALLOWED` shows the default arrow.
 
 ## Fonts
@@ -58,7 +59,7 @@ Behind `SwingTextMetrics` are two `SwingFont`s, one for normal text and one for 
 --8<-- "swing/SwingExamples.java:bitmap"
 ```
 
-Each sheet is split into a grid, one character per cell, row by row, with `U+0000` for an empty cell. A glyph advances by its rightmost column with any opaque pixel, plus one, scaled from the cell to the glyph's height and rounded, plus one unit of spacing. Bold draws each glyph again one unit to the right and adds a unit to every advance, and italic slants glyphs. Characters with no glyph come from a fallback font, the logical Dialog font unless the builder is given another. The first sheet or advance that names a character wins.
+Each sheet is split into a grid, one character per cell, row by row, with `U+0000` for an empty cell. A white glyph on a transparent ground draws in the text's color. A glyph advances by its rightmost column with any opaque pixel, plus one, scaled from the cell to the glyph's height and rounded, plus one unit of spacing; a cell with no opaque pixel advances one unit. `advance(codePoint, width)` gives a character, usually the space, a fixed advance with nothing drawn. Bold draws each glyph again one unit to the right and adds a unit to every advance, and italic slants glyphs. Characters with no glyph come from a fallback font, the logical Dialog font unless the builder is given another. The first sheet or advance that names a character wins.
 
 Other adapters use other fonts with other widths. Layouts built on measured text adapt; layouts that assume widths will not.
 
@@ -72,7 +73,9 @@ SwingTranslations.use(ResourceBundle.getBundle("shop.messages", Locale.GERMAN));
 
 ## Appearances
 
-The adapter registers an [appearance](../guides/appearances.md) for `BufferedImage`: the image as its own icon, at its pixel size. A list of images needs no cell factory, and `factory.image(bufferedImage)` shows one.
+The adapter registers an [appearance](../guides/appearances.md) for `BufferedImage` when the first `SwingPlatform` is made: the image as its own icon, at its pixel size. A list of images needs no cell factory, and `factory.image(bufferedImage)` shows one.
+
+`SwingVisuals.image(image)` makes a [visual](../guides/appearances.md#visuals-and-icons) of an image at its pixel size, one UI unit per pixel, and `SwingVisuals.image(image, width, height)` one with a size of its own, for an image meant to draw smaller or larger than its pixels. The image is not copied, so do not draw into it while it is shown. The canvas draws a visual another adapter made as magenta.
 
 ## Sprites
 
@@ -88,6 +91,18 @@ The panel and `SwingSnapshot` look images up through the class loader that loade
 
 Tints multiply each channel of the image, and tinted copies are cached per sprite and tint. Sprite edges snap to the nearest device pixel, as fills and clips do, so pieces that share an edge meet at any scale. A nine-slice without a size has its borders in the image's pixels; borders wider than the rectangle shrink in proportion so nothing draws outside it, and Swing stretches its edges and center. Swing stores no slicing with its images, so Strata draws sized nine-slices and tiled sprites itself, from clipped copies of the image.
 
+## Themes
+
+`SwingThemeSource` is the platform's [theme source](../guides/theming.md#themes-by-id). `new SwingPlatform(metrics)` makes one on the adapter's class loader; pass your own to `new SwingPlatform(metrics, themes)` to use another class loader, register themes or name the default.
+
+- Theme files are read from `assets/<namespace>/themes/<path>.json` on the class path, unless a `ThemePathResolver` names another place. Every class path entry that has the file adds one, and an entry earlier on the class path wins per key, as it does for any resource. Each file's layer is named after its entry: a jar's file name, or a directory's URL.
+- `register(id, theme)` gives an id a base theme built in code, and `register(id, documents)` gives it [base files](../guides/theming.md#base-files). Each replaces whatever base the id had.
+- `setDefaultTheme(id)` names the theme that `ThemeRef.platform()` and `open(screen)` use, `strata:flat` until then.
+- Files are read once per id and cached. `reload()` drops the cache, and open panels resolve their themes again on their next frame, so a tool can call it after editing a theme file. Registering and `setDefaultTheme` reload too.
+- `resolve(ref)` resolves a ref once into a fixed `Theme`, with the overrides added in code, as a panel would.
+
+Every method may be called from any thread.
+
 ## Clipboard
 
 `SwingPlatform` uses the system clipboard. Reads and writes that fail, because another program holds the clipboard or it holds no text, read as empty and are dropped. In a headless JVM there is no clipboard at all.
@@ -100,9 +115,19 @@ Tints multiply each channel of the image, and tinted copies are cached per sprit
 --8<-- "swing/SwingExamples.java:snapshot"
 ```
 
-Any pixel the screen does not draw stays transparent. The screen's `closed()` runs before `render` returns, and a theme missing a required key throws `ThemeException`. Overloads take a `SwingPlatform`, for snapshots with other fonts, and a `ThemeRef`, resolved from that platform's theme source. `SwingThemeSource` reads `assets/<namespace>/themes/<path>.json` unless a `ThemePathResolver` names another place, and names each file's layer after the jar or directory it came from. `register(id, theme)` gives an id a base theme built in code, `register(id, documents)` gives it [base files](../guides/theming.md#base-files), and `resolve(ref)` resolves a ref once into a fixed `Theme`. Set `-Djava.awt.headless=true` on build servers. The adapter's own tests and the gallery's `--snapshot` option use it.
+Any pixel the screen does not draw stays transparent. The screen's `closed()` runs before `render` returns, and a theme missing a required key throws `ThemeException`. Overloads take input to send before the frame is drawn, such as a click that opens a drop-down, with tooltips shown at once; a `SwingSprites`, for images from elsewhere; a `SwingPlatform`, for snapshots with other fonts; and a `ThemeRef`, resolved from that platform's [theme source](#themes). Set `-Djava.awt.headless=true` on build servers. The adapter's own tests and the gallery's `--snapshot` option use it.
 
 Snapshots are a good way to test layouts: render a screen and compare pixels, or check that it renders at all with each of your themes.
+
+## Hosting Strata in other Java2D code
+
+`StrataPanel` is the usual way in. To draw Strata inside other Java2D code, such as a game loop of your own, use the pieces it is made of:
+
+- `StrataCore.createScreenStack(platform, theme)` or `createScreenHost` from `core`, with a `SwingPlatform`.
+- A `SwingCanvas` made with the platform's `SwingTextMetrics` and a `SwingSprites`. Call `begin(graphics)` at the start of every frame, with a `Graphics2D` whose transform maps UI units to pixels, then `render(canvas)` on the host, then show the cursor `requestedCursor()` returns.
+- `SwingInput` maps AWT key events, mouse buttons and modifier masks to Strata's types, and `HeldKeys` from the SPI turns AWT's repeated presses into repeats.
+
+[Writing an adapter](writing-an-adapter.md#driving-the-host) lists what the host expects of the code that drives it.
 
 ## The gallery
 

@@ -125,13 +125,13 @@ Every number Strata picks for you.
 | | Selection | none, in `SINGLE` mode; pressing the selected row does not deselect it; a double click activates |
 | | Smallest desired width | 40 |
 | | Wheel | one row and its spacing a notch |
-| `CycleButton` | Label, value label function | empty, `String::valueOf` |
+| `CycleButton` | Label, value label function | empty, the value's appearance name (`String.valueOf` for a value with no appearance) |
 | | Selection | the first item once there are items |
 | | Padding, minimum size, cursor | as `Button` |
 | | Desired size | label plus widest value, with 8 and 5 of padding |
 | `ComboBox` | Rows shown before scrolling | 8 |
 | | Selection | the first option once there are options |
-| | Label function, key function | `toString`, the option itself |
+| | Label function, key function | the option's appearance name (`String.valueOf` for an option with no appearance), the option itself |
 | | Padding | the theme's `combobox.padding`, else 4 at the sides and 3 at the top and bottom |
 | | Desired size | the widest option plus the padding, a 4-unit gap and a 7-wide arrow; one line plus the padding tall |
 | | Open list rows | one line plus 4 |
@@ -142,6 +142,7 @@ Every number Strata picks for you.
 | `TabBar` | Tab size | text plus 8 on each side; one line plus 7 |
 | | Spacing | 0 |
 | | Selected | the first tab added |
+| `Tab` | Enabled, tooltip | yes, none |
 | `ProgressBar` | Desired size | the wider of 100 and its text plus padding; one line plus padding tall |
 | | Padding | the theme's `progress.padding`, else 2 on every side |
 | | Range, value | 0 to 1, 0 |
@@ -152,6 +153,7 @@ Every number Strata picks for you.
 | `Separator` | Thickness | 1 |
 | `RadioButton` | Box, gap and cursor | as `CheckBox` |
 | | Mark inset | three tenths of the box size on each side |
+| `RadioGroup` | Buttons, selection | none, none |
 | `ToggleSwitch` | Track | a box one caption line tall and two wide, grown by the theme's `toggle.track.padding`, else 4 at the sides and 2 at the top and bottom |
 | | Knob | a square in from the track's edges by the theme's `toggle.knob.padding`, else 2 |
 | | Gap between track and caption | 4 |
@@ -167,7 +169,7 @@ Every number Strata picks for you.
 | | Auto column width | title plus 8, and 11 more when sortable |
 | | Text cells | 4 in from the column's edges, cut short with `...` |
 | | Sort | the set order; text columns sortable, ignoring case |
-| `TableColumn` | Width, cells, sorting | weighted 1, `String.valueOf(item)` as text, not sortable |
+| `TableColumn` | Width, cells, sorting | weighted 1, the item's appearance name as text (`String.valueOf` for an item with no appearance), not sortable |
 | `TreeView` | Indent | 10 a level |
 | | Arrow column | 12 |
 | | Children | none: every item is a leaf |
@@ -175,6 +177,9 @@ Every number Strata picks for you.
 | | Gutters | the theme's `menu.item.padding` at each side of an item, else 14; `menu.padding` around the items, else 2 |
 | | Separator height | 5 |
 | | Smallest width | 60, or the width set with `setMinWidth`, or the drop-down button's width while one opened it, whichever is widest |
+| `MenuItem` | Enabled, shortcut, action | yes, none, does nothing |
+| `CheckMenuItem` | Checked, enabled, action | no, yes, does nothing |
+| `SubmenuItem` | Menu, enabled | none, yes |
 | `Flyout` | Content | none |
 | | Padding | the theme's `flyout.padding`, else 4 on every side |
 | | Light dismiss | on |
@@ -198,6 +203,8 @@ Every number Strata picks for you.
 | | Toggle shown, activate on click | yes, yes |
 | | Alignment | stretched over its slot |
 | | Focusable | yes, one tab stop |
+| `NavigationItem` | Enabled, selectable, expanded | yes, yes, no |
+| | Icon, badge, page, children, tooltip | none, 0, none, none, none |
 | `ScrollBar` | Orientation | `VERTICAL` |
 | | Desired size | 6 by 100, or 100 by 6 across; 2 thick when slim |
 | | Range, visible amount, value | 0 to 0, 0, 0: nothing to scroll |
@@ -269,8 +276,15 @@ The host synthesizes repeats only for engines whose platform reports `sendsKeyRe
 
 | Setting | Value |
 |---|---|
-| `TextStyle.DEFAULT` | opaque white, no decoration, no shadow |
-| Swing default font | logical Dialog, 9 units |
+| `TextStyle.DEFAULT` | opaque white, no decoration, no shadow, the normal font |
+| A theme file's text entry | the fields it leaves out keep the style a lower layer gave the key, else `TextStyle.DEFAULT` |
+| `Text.sprite(id)` | a square as wide and tall as the line height of the style where it lands |
+| `Text.visual(visual)` | the visual's natural size |
+| Pictures in text | untinted |
+| Translation with no translator and no English | the key itself, with one warning per key |
+| Sprite paints from the factories | untinted, opaque white |
+| Paint tint in a theme file | `#FFFFFFFF` |
+| Swing default font | logical Dialog, 9 units, with logical Monospaced at the same size for monospaced styles |
 
 ## Adapters
 
@@ -280,3 +294,11 @@ The host synthesizes repeats only for engines whose platform reports `sendsKeyRe
 | `StrataPanel` background | `0xFF1E1F22` |
 | `StrataPanel` repaint rate | about 60 per second (every 16 ms) |
 | Swing missing sprite | solid magenta |
+| Swing visual from another adapter | solid magenta |
+| Swing sprite path | `assets/<namespace>/sprites/<path>.png` on the adapter's class loader |
+| Swing theme file path | `assets/<namespace>/themes/<path>.json` on the class path |
+| Swing default theme | `strata:flat` |
+| Swing translations | none: Strata's keys in English, other keys as themselves |
+| `SwingPlatform` capabilities | sends key repeats, has a monospaced font, stores no slicing with images |
+| `BitmapFont` tinted sheets kept | 256 colors |
+| `SwingSnapshot` text and sprites | `SwingTextMetrics.defaults()`, images from the adapter's class loader, tooltips with no delay |

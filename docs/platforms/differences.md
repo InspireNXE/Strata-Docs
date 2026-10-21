@@ -20,6 +20,9 @@ Strata hides most engine differences, but the SPI leaves some decisions to each 
 | Escape | Passed on to the engine when no component consumes it | Does nothing unless you handle it |
 | Clipboard | The engine's, or `Clipboard.NONE` | The system clipboard; none when headless |
 | Missing sprite | Anything visible | Magenta |
+| Visuals | The engine objects the adapter makes visuals of, and a visible placeholder for any other | `BufferedImage`s, through `SwingVisuals`; magenta for any other |
+| Bold, italic, underline, strikethrough, shadow | The engine's own where it has them; an engine with one font weight may fake or ignore bold | Bold and italic fonts derived from the base font; the lines and the shadow drawn by the adapter |
+| Translations | Usually the engine's language files, through the adapter's `Translator` | The `ResourceBundle` or `Translator` given to `SwingTranslations.use`; until then English for Strata's keys and the key itself for others |
 | Theme files | Any order the adapter chooses, later files winning per key, each named for its layer | Class path order, earlier entries winning; a file's layer is its jar's name or its directory's URL |
 | Nine-slice slicing | The `border` argument, or slicing the engine stores with the image | From the `border` argument, in image pixels |
 | `NOT_ALLOWED` cursor | Any cursor the engine has | Shows the default arrow |

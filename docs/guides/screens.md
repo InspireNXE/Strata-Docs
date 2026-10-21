@@ -11,6 +11,8 @@ A `Screen` is one full screen of UI: a settings page, a dialog, an inventory. Yo
 
 A screen object may be opened again after it closes. Each opening builds a new tree and gets a new handle.
 
+`build` runs before `opened`, so the first build has no handle yet. Keep the handle in a field and use it from handlers, which run later, as the examples below do. A rebuild calls `build` again but not `opened`: the handle stays the same for the whole opening. If `build` throws, or the theme lacks keys the tree needs, the screen does not open and `opened` is never called.
+
 `Screen` is a functional interface, so a lambda works for simple screens:
 
 ```java
@@ -34,7 +36,7 @@ A screen can give itself a title by overriding `title()`, which returns empty te
 | `open(screen)` | Opens the screen in the platform's default theme, the one `ThemeRef.platform()` names |
 | `open(screen, theme)` | Opens it in a theme of your choice |
 
-Both return the screen's `ScreenHandle`. The adapter hands its controller to Strata when it starts. Until then, `Strata.screens()` throws `IllegalStateException`. On Swing, which has no screens of its own, the controller is the stack of the panel marked with `StrataPanel.setDefault()`; see [Swing](../platforms/swing.md#showing-screens). Each adapter's documentation says where screens open and from which threads `open` may be called.
+Both return the screen's `ScreenHandle`. The adapter hands its controller to Strata when it starts. Until then, `Strata.screens()` throws `IllegalStateException` with a message that says how to set one. On Swing, which has no screens of its own, the controller is the stack of the panel marked with `StrataPanel.setDefault()`; see [Swing](../platforms/swing.md#showing-screens). Each adapter's documentation says where screens open and from which threads `open` may be called.
 
 ## Rules for `build`
 
@@ -115,3 +117,7 @@ Engines with a screen stack of their own may hold one Strata screen per engine s
 ## Changing the theme
 
 Screens cannot change their host's theme. Adapters can: `ScreenStack.setTheme` and `ScreenHost.setTheme` swap it, components re-read their keys, and a new layout runs. A new theme that lacks keys the open tree needs throws `ThemeException`, and the old theme stays.
+
+A screen opened with a `ThemeRef`, which `Strata.screens().open` always uses, follows that reference while it is open. When the engine reloads its theme files, or code adds a theme or an override through `Strata.themes()`, the host resolves the reference again before the next frame, and the components re-read their keys. If the reference no longer resolves, or the new theme lacks keys the tree needs, the host logs a warning and keeps the theme it had. See [Themes](theming.md).
+
+When the language changes, the host lays every component out again before the next frame, so translated text takes its new width.

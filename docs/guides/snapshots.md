@@ -18,16 +18,20 @@ Inside the handler:
 | `event.currentSnapshot()` | The snapshot of the component whose handler is running |
 | `event.snapshotOf(component)` | Any component's snapshot, as an `Optional` |
 
-Snapshots belong to Pre events: input, and a control's requests. A Post event, such as `TextInput.EDITED`, fires after its change, so it carries the value from before the change as `previous()` instead of a snapshot.
+Snapshots belong to Pre events: input, and a control's requests. A Post event, such as `TextInput.EDITED`, fires after its change, so it carries the value from before the change as `previous()` instead of a snapshot:
+
+```java
+--8<-- "snapshots/SnapshotExamples.java:previous"
+```
 
 ## What is captured, and when
 
-Before an event is delivered, Strata walks its path: the target and, if the type bubbles, the target's ancestors. If no component on that path has a handler for this event type, nothing is captured and nothing is allocated. Otherwise Strata snapshots:
+Before an event is delivered, Strata walks its path: the target and, if the type bubbles, the ancestors it will reach. For a control's request, the path ends at the first composite above the control, as the request itself does (see [How far events travel](events.md#how-far-events-travel)). If no component on that path has a handler for this event type, nothing is captured and nothing is allocated. Otherwise Strata snapshots:
 
 - the target, always; and
 - every component on the path that has a handler for this type.
 
-Nothing else is captured. All snapshots are taken before the first handler runs, so even a handler at the root sees the target as it was before the target's own handlers and default behavior changed it. Paint and measure events never take snapshots.
+Nothing else is captured. All snapshots are taken before the first handler runs, so even a handler at the top of the tree sees the target as it was before the target's own handlers and default behavior changed it. Paint and measure events never take snapshots, `PAINT` included, although it is a Pre event.
 
 ### What "when the event fired" means
 
@@ -124,8 +128,8 @@ Strata calls it only when the component is captured, before any handler runs. Re
 
 | Situation | `snapshot()` | `currentSnapshot()` | `snapshotOf(c)` |
 |---|---|---|---|
-| A Post, paint or measure event | throws `IllegalStateException` | throws | empty |
-| A Pre event (every handler on the path triggers capture) | works (the target is always captured) | works | present for the target and every component on the path with a handler for the type |
+| A Post event, or a paint or measure event | throws `IllegalStateException` | throws | empty |
+| Any other Pre event | works, since the target is always captured | works, since a handler is running on the current component | present for the target and every component on the path with a handler for the type |
 
 A component that joins the path while the event is being delivered, for example because a handler moved the target into another container, has no snapshot.
 

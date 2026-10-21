@@ -29,6 +29,7 @@ import org.inspirenxe.strata.api.event.control.ValueRequestEvent;
 import org.inspirenxe.strata.api.geometry.Rect;
 import org.inspirenxe.strata.api.layout.Anchor;
 import org.inspirenxe.strata.api.layout.HorizontalAlignment;
+import org.inspirenxe.strata.api.layout.Orientation;
 import org.inspirenxe.strata.api.layout.StackPanel;
 import org.inspirenxe.strata.api.layout.VerticalAlignment;
 import org.inspirenxe.strata.api.screen.Screen;
@@ -124,6 +125,21 @@ public final class ExtendingExamples {
     }
     // --8<-- [end:reuse]
 
+    static StackPanel counters(final ComponentFactory factory) {
+        // --8<-- [start:composite-use]
+        final Label total = factory.label("Total: 0");
+        final Counter apples = new Counter(factory);
+        final Counter pears = new Counter(factory).setCount(2);
+        // One handler on the row hears both counters, and never the buttons inside them
+        final StackPanel row = factory.stackPanel(Orientation.HORIZONTAL).setSpacing(8)
+                .add(apples)
+                .add(pears)
+                .add(total)
+                .onEvent(Counter.CHANGED, event -> total.setText("Total: " + (apples.count() + pears.count())));
+        // --8<-- [end:composite-use]
+        return row;
+    }
+
     // --8<-- [start:compose]
     /**
      * A caption above a text box. Composition needs no Strata types of its own: build the parts in a container and
@@ -164,7 +180,7 @@ public final class ExtendingExamples {
             music.onEvent(ToggleSwitch.TOGGLED, event -> summary.setText(event.value() ? "Music on" : "Music off"));
 
             final WrapPanel tags = new WrapPanel(factory, 4);
-            for (final String tag : new String[] {"survival", "creative", "hardcore", "peaceful", "adventure"}) {
+            for (final String tag : new String[] {"puzzle", "strategy", "co-op", "casual", "story"}) {
                 tags.add(factory.button(tag));
             }
             tags.setAlignment(HorizontalAlignment.STRETCH, VerticalAlignment.TOP);

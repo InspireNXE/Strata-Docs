@@ -17,6 +17,8 @@ Good starting points in the API Javadoc:
 - `org.inspirenxe.strata.api.event` (the package page): the order handlers and default behavior run in.
 - `org.inspirenxe.strata.api.event.input.InputEvents`: every input event type.
 - `org.inspirenxe.strata.api.extension.CustomComponent`: the rules for writing components.
-- `org.inspirenxe.strata.spi` (the package page): the steps for writing an adapter.
+- `org.inspirenxe.strata.api.text.Text`: making, styling and translating text.
+- `org.inspirenxe.strata.api.theme.ThemeRef` and `ThemeRegistry`: themes by id, their layers and overrides from code.
+- `org.inspirenxe.strata.spi` (the package page): the steps for writing an adapter, with each interface's requirements for implementors on its own page.
 
 To build the Javadoc locally, run `./gradlew javadoc` in Strata or Strata-Swing. Each module's output is in its `build/docs/javadoc` directory.

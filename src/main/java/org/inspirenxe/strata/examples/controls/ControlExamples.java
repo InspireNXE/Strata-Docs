@@ -42,6 +42,8 @@ import org.inspirenxe.strata.api.control.field.TextBox;
 import org.inspirenxe.strata.api.control.field.TimePicker;
 import org.inspirenxe.strata.api.control.menu.Flyout;
 import org.inspirenxe.strata.api.control.menu.Menu;
+import org.inspirenxe.strata.api.control.menu.MenuBar;
+import org.inspirenxe.strata.api.control.menu.MenuItem;
 import org.inspirenxe.strata.api.control.pane.NavigationItem;
 import org.inspirenxe.strata.api.control.pane.NavigationView;
 import org.inspirenxe.strata.api.layout.Anchor;
@@ -70,7 +72,8 @@ import java.util.regex.Pattern;
 
 /**
  * The controls guide's examples for images, avatars, info bars, navigation views, date and time pickers, a drop-down
- * button, a flyout, checkboxes, sliders, a highlighter, password boxes and rows of controls in a list.
+ * button, a flyout, menu entries, separators, checkboxes, sliders, a highlighter, password boxes and rows of controls
+ * in a list.
  */
 public final class ControlExamples {
 
@@ -272,6 +275,62 @@ public final class ControlExamples {
         button.onEvent(Button.PRESSED, event -> flyout.open(button.bounds()));
         // --8<-- [end:flyout]
         return button;
+    }
+
+    /**
+     * A menu bar with an Edit menu, whose Paste item is enabled only while there is something to paste, and a Sound
+     * menu with a check item, a separator and a command.
+     *
+     * @param factory the factory
+     * @param settings the settings the Sound menu changes
+     * @param canPaste whether there is something to paste
+     * @param paste pastes
+     * @return the bar
+     */
+    public static MenuBar menuBar(final ComponentFactory factory, final Settings settings,
+                                  final BooleanSupplier canPaste, final Runnable paste) {
+        // --8<-- [start:menuEntries]
+        final MenuItem pasteItem = factory.menuItem("Paste")
+                .setShortcut("Ctrl+V")
+                .setAction(paste);
+        final Menu edit = factory.menu().addItem(pasteItem);
+        // Entries are mutable: enable Paste each time the menu opens. The menu's events reach only its own handlers.
+        edit.onEvent(Openable.OPENED, event -> pasteItem.setEnabled(canPaste.getAsBoolean()));
+
+        final Menu sound = factory.menu()
+                .addItem(factory.checkMenuItem("Music")
+                        .setSelected(settings.music())
+                        .setAction(settings::setMusic))
+                .addItem(factory.menuSeparator())
+                .addItem("Reset volume", () -> settings.setVolume(80));
+
+        final MenuBar bar = factory.menuBar()
+                .addMenu(factory.submenuItem("Edit").setMenu(edit))
+                .addMenu("Sound", sound);
+        // --8<-- [end:menuEntries]
+        return bar;
+    }
+
+    /**
+     * A column and a row, each divided by a separator.
+     *
+     * @param factory the factory
+     * @return the column, holding the row
+     */
+    static StackPanel separated(final ComponentFactory factory) {
+        // --8<-- [start:separator]
+        // Across a column: the line stretches over the column's width
+        final StackPanel column = factory.stackPanel().setSpacing(4)
+                .add(factory.label("Display"))
+                .add(factory.separator())
+                .add(factory.label("Sound"));
+        // Down a row: the line stretches over the row's height
+        final StackPanel row = factory.stackPanel(Orientation.HORIZONTAL).setSpacing(4)
+                .add(factory.label("Ana"))
+                .add(factory.separator(Orientation.VERTICAL))
+                .add(factory.label("Ben"));
+        // --8<-- [end:separator]
+        return column.add(row);
     }
 
     static CheckBox checkBox(final ComponentFactory factory, final Settings settings) {

@@ -28,6 +28,7 @@ import org.inspirenxe.strata.api.layout.Anchor;
 import org.inspirenxe.strata.api.layout.StackPanel;
 import org.inspirenxe.strata.api.screen.Screen;
 import org.inspirenxe.strata.api.text.TextStyle;
+import org.inspirenxe.strata.api.theme.Border;
 import org.inspirenxe.strata.api.theme.Paint;
 import org.inspirenxe.strata.api.theme.SpriteId;
 import org.inspirenxe.strata.api.theme.Theme;
@@ -38,6 +39,7 @@ import org.inspirenxe.strata.api.theme.ThemeRef;
 import org.inspirenxe.strata.api.theme.Themes;
 import org.inspirenxe.strata.examples.quickstart.SettingsScreen;
 import org.inspirenxe.strata.swing.SwingSnapshot;
+import org.inspirenxe.strata.swing.SwingThemeSource;
 
 import java.util.List;
 
@@ -161,11 +163,31 @@ public final class ThemeExamples {
         return List.of(everywhere, shop);
     }
 
+    /**
+     * Prints which layer set the flat theme's button face.
+     *
+     * @return the layer's name
+     */
+    public static String layers() {
+        // --8<-- [start:layers]
+        // Resolve the flat theme with every theme file on the class path and every override from code
+        final SwingThemeSource source = new SwingThemeSource(ThemeExamples.class.getClassLoader());
+        final Theme resolved = source.resolve(ThemeRef.of(Themes.FLAT));
+
+        // "base" for Strata's own value, a jar's name for a pack's file, "code" for Strata.themes().override
+        final String layer = resolved.layer(Button.STYLE_NORMAL).orElse("none");
+        System.out.println(Button.STYLE_NORMAL + " was set by " + layer);
+        // --8<-- [end:layers]
+        return layer;
+    }
+
     static void perComponent(final ComponentFactory factory) {
         // --8<-- [start:local]
         // Backgrounds and label styles can be set per component, outside the theme
         final StackPanel card = factory.stackPanel().setPadding(6);
         card.setBackground(Paint.gradient(0xFF3A3D43, 0xFF2B2D31));
+        // A one-unit frame inside the card's edges
+        card.setBorder(Border.of(0xFF5A5E66, 1f));
         card.add(factory.label("Warning").setStyle(TextStyle.DEFAULT.withColor(0xFFFFB74D).withBold(true)));
         // --8<-- [end:local]
     }

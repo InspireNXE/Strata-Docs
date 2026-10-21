@@ -17,6 +17,8 @@ Button same = factory.button("Save");             // the shorthand
 ListView<Offer> offers = factory.<Offer>listView(); // cells show String.valueOf(item) until setCellFactory
 ```
 
+Besides components, the factory gives you its host's `overlays()`, for [popups, dialogs and toasts](overlays.md), and its current `theme()`.
+
 The defaults with no arguments are empty text and titles, cells and options shown as `String.valueOf(item)`, horizontal separators, sliders and split panes, vertical stack panels and scroll bars, an image that draws nothing, and a message box with only an OK button. [Defaults](../reference/defaults.md) lists the rest.
 
 !!! danger "Do not implement the component interfaces"
@@ -146,6 +148,17 @@ Hover and press state belong to a control's own drawing code, so they are not pu
 
 Engines without a shape show the closest one they have. Swing has no "not allowed" cursor and shows the default arrow.
 
+### Tooltips
+
+`setTooltip` gives a component a `Tooltip`, which the host shows near the pointer once it has rested on the component for half a second by default. Like a cursor, a tooltip covers what is inside the component: the host shows the tooltip of the deepest component under the pointer that has one, looking up through its ancestors. There are two kinds:
+
+| Kind | Made with | Shows |
+|---|---|---|
+| `Tooltip.Lines` | `setTooltip(String)`, `setTooltip(Text)`, `Tooltip.text(...)`, `Tooltip.lines(list)` | Lines of text in a box drawn from the theme's tooltip keys |
+| `Tooltip.Custom` | `Tooltip.of(factory -> component)` | A component built each time the tooltip shows, drawing its own background |
+
+`setTooltip(null)` removes it. [Tooltips](overlays.md#tooltips) covers timing, placement and the theme keys.
+
 ### Backgrounds and borders
 
 `setBackground(Paint)` and `setBorder(Border)` are on containers. A background is drawn over the container's bounds before anything else of it, and a border along the inside of its edges, and neither changes layout. Both are `NONE` by default, and themes do not set them. See [Paints](theming.md#paints).
@@ -170,6 +183,10 @@ AnchorPanel framed = factory.anchorPanel()
 Bounds are in host coordinates, not relative to the parent. Pointer events give you `localX()` and `localY()` for positions relative to the current component.
 
 Bounds are updated by layout, which runs before the next frame. Right after you change something, `bounds()` still holds the old value. Adapters can force a layout with `ScreenHost.layout()`, but screens and components should not need to.
+
+## State at the time of an event
+
+An event handler can compare a component with how it was when the event fired. `event.snapshot()` returns a `ComponentSnapshot` of the target, taken before any handler or default behavior ran. It holds what every component has, such as `bounds()`, `visible()`, `enabled()`, `focused()`, the margin and the alignments, and a `state()` with what the component's kind adds, such as a text box's text and caret. Snapshots are shallow: a container's snapshot says nothing about its children. Only Pre events have them. See [Event snapshots](snapshots.md).
 
 ## Threading and timing
 

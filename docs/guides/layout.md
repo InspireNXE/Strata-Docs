@@ -14,7 +14,7 @@ Arrange
 
 The screen's root gets the whole host as its slot.
 
-A change that affects size, such as new label text, a new child or a different margin, marks the component and its ancestors for layout, and the whole tree is laid out again before the next frame. Nothing is measured every frame, and a change that only affects drawing, such as a background, causes no layout at all.
+A change that affects size, such as new label text, a new child or a different margin, marks the component and its ancestors for layout, and the tree is laid out again before the next frame. Only the changed branch does work: a component that did not change and is offered the same space as last time keeps its desired size without being measured, and one given the same slot keeps its bounds without arranging its children. Nothing is measured every frame, and a change that only affects drawing, such as a background, causes no layout at all. Moves that change no size, such as scrolling and a window's offset, arrange the component again in its last slot without measuring anything.
 
 ## Inputs every component has
 
@@ -46,6 +46,8 @@ For each axis:
 4. Then clamp to the minimum and maximum.
 
 The minimum and maximum always win, even over a fixed size.
+
+Measuring follows the same rules. The space a parent offers, less the margin, is what the component measures its content in, except that a fixed size takes the place of the offered size on its axis and the maximum caps both. That is how a maximum width makes text wrap. A hidden component measures as zero, and its bounds are an empty rectangle at the top-left corner of its slot.
 
 With any alignment other than `STRETCH`, a component keeps its size even if the slot is smaller and overflows it. If an ancestor clips its children, which containers do by default, the overflow is cut off.
 
@@ -163,7 +165,8 @@ Fixed and auto tracks are sized first. Whatever width or height remains is share
 - A grid with no rows or columns defined acts as one auto cell.
 - A cell outside the defined rows or columns is moved to the last row or column, and spans are cut to fit. A negative row or column, or a span below 1, throws `IllegalArgumentException`.
 - `setSpacing(columnGap, rowGap)` puts gaps between tracks, never around the edge. Use padding for that.
-- `columns(...)` and `rows(...)` replace the definitions; `addColumn` and `addRow` append one. `cellOf(child)` tells you where a child sits.
+- `columns(...)` and `rows(...)` replace the definitions; `addColumn` and `addRow` append one, and `columnDefinitions()` and `rowDefinitions()` read them back.
+- `cellOf(child)` returns a child's `GridPanel.Cell`: its row, column and spans as given when it was added, before any cutting to fit. A child added with plain `add`, or a component that is not a child, gives `Cell.ORIGIN`.
 
 Weighted tracks make proportional layouts:
 
@@ -185,7 +188,7 @@ Weighted tracks make proportional layouts:
 
 ## AbsolutePanel
 
-Each child sits at a fixed position measured from the top-left corner of the content area. Its slot is exactly its desired size plus margin at that position, so alignment has no effect. Children may overlap. Later ones are drawn on top, until `raise`, `lower` or a z index changes the [drawing order](components.md#drawing-order), and a window in the panel comes to the front when it is pressed. The panel's desired size is just big enough to cover every child.
+Each child sits at a fixed position measured from the top-left corner of the content area. Children are measured with unlimited space, so a wrapping label in one needs a fixed or maximum width. Its slot is exactly its desired size plus margin at that position, so alignment has no effect. Children may overlap. Later ones are drawn on top, until `raise`, `lower` or a z index changes the [drawing order](components.md#drawing-order), and a window in the panel comes to the front when it is pressed. The panel's desired size is just big enough to cover every child.
 
 ![Three buttons at fixed positions](../assets/images/layout-absolute.png)
 
@@ -199,25 +202,30 @@ Use it for free placement, such as a board of draggable pieces. For forms and me
 
 ## ScrollPanel
 
-Shows part of content larger than itself. Children are laid out as in an `AnchorPanel`, each given the whole scrolled area; most panels hold one `StackPanel` or `GridPanel`.
+Shows part of content larger than itself. Children are laid out as in an `AnchorPanel`, each given the whole scrolled area: the size of the largest child plus its margin, and at least the viewport. Most panels hold one `StackPanel` or `GridPanel`.
 
 ```java
-StackPanel rows = factory.stackPanel().setSpacing(1);
-rows.setAlignment(HorizontalAlignment.STRETCH, VerticalAlignment.TOP);
-ScrollPanel scroll = factory.scrollPanel().add(rows);
-scroll.setHeight(200);
+--8<-- "layout/LayoutExamples.java:scroll"
 ```
 
-Each axis has a policy: `NEVER` (the axis does not scroll, and children get the viewport's size on it, so text wraps), `AUTO` (it scrolls, and its bar shows only when needed) or `ALWAYS`. The default is vertical `AUTO`, horizontal `NEVER`. The panel asks for its content's size, but no more than it is offered on a scrolling axis, so give it a height or stretch it in a parent with room.
+Each axis has a `ScrollPanel.ScrollPolicy`, set with `setPolicy(horizontal, vertical)`:
+
+| Policy | The axis |
+|---|---|
+| `NEVER` | Does not scroll. Children are measured with the viewport's size on it, so text wraps. |
+| `AUTO` | Scrolls, and its bar shows only while the content is larger than the viewport |
+| `ALWAYS` | Scrolls, and its bar always shows |
+
+The default is vertical `AUTO`, horizontal `NEVER`. The panel asks for its content's size plus its padding and shown bars, but no more than it is offered on a scrolling axis, so give it a height or stretch it in a parent with room. The viewport, which `viewport()` returns, is the bounds less the padding and the gutter of each shown bar (`BAR_WIDTH` plus `BAR_GAP`, 8 units).
 
 | Input | Scrolls |
 |---|---|
-| Wheel | 10 units a notch, set with `setScrollRate`. A scroll past the end is not consumed, so it reaches an outer panel. |
+| Wheel | 10 units a notch, set with `setScrollRate`. A scroll past the end is not consumed, so it reaches an outer panel. A panel that scrolls only sideways takes the vertical wheel too. |
 | The bar | Drag the thumb, or press the track to page |
 | Up, Down, Page Up, Page Down, Home, End | When no focused descendant used them |
 | Focus | A descendant that gains focus is scrolled into view |
 
-`setScroll(x, y)`, `scrollBy` and `scrollToVisible(component)` work from code, and `ScrollPanel.SCROLLED` reports every change of offset. Scrolling moves the children's real bounds without measuring them again, so pointer positions and `bounds()` stay in host coordinates inside a scroll panel. Children are clipped to the viewport, the bounds less the padding and the bar's gutter. For long lists of similar rows, use a [`ListView`](controls.md#listview), which builds only the rows in view.
+`setScroll(x, y)`, `scrollBy` and `scrollToVisible(component)` work from code, `scrollX()`, `scrollY()`, `maxScrollX()` and `maxScrollY()` read the offsets, and `ScrollPanel.SCROLLED` reports every change of offset with a `ScrollPanel.State`. The offset is clamped to its range on every change and after every layout, and children move by it rounded to whole units, so engines that draw whole pixels do not shimmer. A scroll panel is `Focusable` but starts unfocusable; call `setFocusable(true)` to let it take focus and its keys by itself. Scrolling moves the children's real bounds without measuring them again, so pointer positions and `bounds()` stay in host coordinates inside a scroll panel. Children are clipped to the viewport, the bounds less the padding and the bar's gutter. For long lists of similar rows, use a [`ListView`](controls.md#listview), which builds only the rows in view.
 
 ## Clipping
 

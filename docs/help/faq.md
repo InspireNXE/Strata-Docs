@@ -20,6 +20,10 @@ The Apache License, Version 2.0. You can use Strata in any project, open or clos
 
 ## Writing screens
 
+### How do I open a screen?
+
+`Strata.screens().open(screen)` opens it wherever the platform shows screens, on every engine. On Swing, first mark the panel that shows them with `StrataPanel.setDefault()`. From inside an open screen, `handle.open(other)` opens another screen above it. See [Screens](../guides/screens.md#opening-a-screen).
+
 ### Why can't I write `new Button()`?
 
 Components are interfaces with a hidden implementation. You get them from the `ComponentFactory` the host passes to your screen, so every component belongs to the host that shows it. See [Core concepts](../getting-started/concepts.md#the-factory-and-the-host).
@@ -50,7 +54,15 @@ Give the child a weight in its `StackPanel` and stretch it, or use a weighted ro
 
 ### How do I center a dialog?
 
-Put it in a root `AnchorPanel` anchored with `Anchor.FILL`, and give the dialog `Anchor.CENTER`.
+Put it in a root `AnchorPanel` anchored with `Anchor.FILL`, and give the dialog `Anchor.CENTER`. A modal dialog opened with `factory.overlays().dialog(window)` is laid out in the whole host, so a centered window stays centered there too.
+
+### How do I show a popup, a dialog or a short notice?
+
+Through `factory.overlays()`: `popup(content, area)` next to a component, `dialog(content)` for a modal dialog, and `toast(text)` for a notice that closes itself. See [Overlays and tooltips](../guides/overlays.md).
+
+### How do I bring a panel to the front?
+
+Call `raise(child)` on its container, or give it a higher z index with `setZIndex`. Neither moves it in the layout. See [Drawing order](../guides/components.md#drawing-order).
 
 ### Why doesn't my label wrap?
 
@@ -73,6 +85,10 @@ Nothing prevents it. The API is plain Java interfaces and records. The examples 
 ### What is the difference between `target()` and `current()`?
 
 `target()` is the component the event was fired at and never changes. `current()` is the component whose handlers are running, which moves up as the event bubbles. A handler on a container uses `target()` to see which child was involved. See [Target and current](../guides/events.md#target-and-current).
+
+### Why doesn't a handler on my screen hear events from a dialog or menu?
+
+An overlay's content is outside the screen's tree, so its events stop at the overlay's content. Register the handler on the dialog, the menu or the control inside it. See [How overlays are layered](../guides/overlays.md#how-overlays-are-layered).
 
 ### Why doesn't my panel's click handler see clicks on its buttons?
 

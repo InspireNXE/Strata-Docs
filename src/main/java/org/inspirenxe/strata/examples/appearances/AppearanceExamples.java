@@ -18,13 +18,16 @@ package org.inspirenxe.strata.examples.appearances;
 import org.inspirenxe.strata.api.ComponentFactory;
 import org.inspirenxe.strata.api.Strata;
 import org.inspirenxe.strata.api.appearance.Appearance;
+import org.inspirenxe.strata.api.appearance.Appearances;
 import org.inspirenxe.strata.api.component.Tooltip;
 import org.inspirenxe.strata.api.control.collection.ComboBox;
 import org.inspirenxe.strata.api.control.collection.ListView;
+import org.inspirenxe.strata.api.control.display.Label;
 import org.inspirenxe.strata.api.text.Text;
 import org.inspirenxe.strata.api.visual.Visual;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The appearances guide's examples.
@@ -77,5 +80,17 @@ public final class AppearanceExamples {
         // --8<-- [end:use]
         list.setSize(160, 120);
         return cheapest;
+    }
+
+    static Label lookup(final ComponentFactory ui, final Listing listing) {
+        // --8<-- [start:lookup]
+        // A heading for a listing: its icon and name in gold, with the same tooltip a list row would have
+        final Appearances look = ui.appearances();
+        final Text name = look.nameOf(listing).color(0xFFFFAA00);
+        final Optional<Visual> icon = look.iconOf(listing);
+        final Label heading = ui.label(icon.map(visual -> Text.visual(visual).append(" ").append(name)).orElse(name));
+        look.tooltipOf(listing).ifPresent(tooltip -> heading.setTooltip(tooltip));
+        // --8<-- [end:lookup]
+        return heading;
     }
 }

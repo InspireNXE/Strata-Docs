@@ -8,7 +8,7 @@ A theme decides how components look. It maps style keys, such as `button.hovered
 |---|---|---|
 | `Themes.flat()` | `api` | Dark, solid colors only. Works on any engine without image assets. |
 
-It defines every key of every built-in control. Adapters may ship themes of their own that use the engine's widget images.
+It defines every required key of every built-in control and most optional ones. The keys it leaves out, such as the padding keys, take the fallback each control documents, which the [theme key reference](../reference/theme-keys.md) lists. Adapters may ship themes of their own that use the engine's widget images.
 
 ![The flat theme](../assets/images/theme-flat.png)
 
@@ -24,7 +24,7 @@ Themes are immutable. `toBuilder()` starts a builder holding all of a theme's ke
 
 ## A theme from scratch
 
-`Theme.builder(name)` starts empty. The name appears in error messages.
+`Theme.builder(name)` starts an empty `Theme.Builder`. The name appears in error messages. `paint`, `textStyle` and `insets` set a key's value, replacing any value the builder already holds for it, and `build()` makes the theme. A builder can go on to make more themes after `build()`, and none of them changes when it does.
 
 ```java
 --8<-- "theming/ThemeExamples.java:scratch"
@@ -44,6 +44,8 @@ A host checks the theme before it shows anything. When it opens a screen, it col
 --8<-- "theming/ThemeExamples.java:missing"
 ```
 
+`ThemeException` is also what a [theme named by id](#themes-by-id) throws when it cannot be built at all, such as an id that nothing defines or parents that form a cycle. Its `missingKeys()` is then empty.
+
 Your own components declare required keys through `requiredStyleKeys()`. Remember to add them to the theme you use, as the [switch example](extending.md#write-a-new-component) does.
 
 A key may have a paint, a text style, [insets](#insets), or any mix; `has(key)` is true for any of them. Look keys up with `paint(key)`, `textStyle(key)` and `insets(key)`, which return `Optional`, or with `paintOr`, `textStyleOr` and `insetsOr`, which take a fallback.
@@ -62,7 +64,7 @@ A `Paint` fills a rectangle. There are five kinds:
 
 `Paint.NONE` draws nothing; it is the default background. The sprite factories make untinted paints. To tint, use the record constructor with an ARGB tint, which is multiplied with the image's pixels: `new Paint.NineSlice(id, border, 0xFFC0C0C0)` darkens it slightly. Opaque white leaves an image unchanged.
 
-`paint.paint(painter, rect)` draws any paint, so custom components need not care which kind they hold.
+`paint.paint(painter, rect)` draws any paint, so custom components need not care which kind they hold. `Paint` is a sealed interface of the five records, so code that does need the kind, such as a component that draws a solid paint's color a shade darker, can switch over them.
 
 ### Colors
 
@@ -129,11 +131,13 @@ Padding set in code wins over the theme: `setTextPadding` on a button, a drop-do
 
 ## Per-component overrides
 
-Backgrounds and label text styles can be set per component, outside the theme:
+Backgrounds and borders of containers, and the text styles of labels, can be set per component, outside the theme:
 
 ```java
 --8<-- "theming/ThemeExamples.java:local"
 ```
+
+A `Border` is a set of solid lines along the inside of a container's edges, in one color, each side with its own width, so a panel can have a border on every side but the bottom. `Border.of(argb, width)` makes one of the same width all around, and `new Border(argb, insets)` one with a width per side. The default is `Border.NONE`.
 
 There is no per-component theme or per-subtree theme. To give one button a different face, cancel its `Component.PAINT` and draw something else, or write a component that reads its own keys.
 
@@ -146,7 +150,7 @@ ThemeRef theme = ThemeRef.of(ThemeId.of("mymod", "shop"))
         .override(Button.STYLE_NORMAL, Paint.solid(0xFF2E7D32));
 ```
 
-The host resolves the ref when it opens. `Themes.FLAT` (`strata:flat`) is registered on every engine, adapters register their engine themes under ids of their own, and code can define more. An id with nothing registered is defined by its files alone and names its starting theme as `parent`.
+The host resolves the ref when it opens. `Themes.FLAT` (`strata:flat`) is registered on every engine, adapters register their engine themes under ids of their own, and code can define more. An id with nothing registered is defined by its files alone and names its starting theme as `parent`. An id that nothing registers, defines or has files for cannot resolve, and the host throws `ThemeException` when it opens.
 
 ### The platform's default theme
 
@@ -173,11 +177,15 @@ A theme comes together from layers, lowest first. Each layer sets keys over the 
 
 A parent resolves in full, its own files and overrides included, before the child's layers go on top. When an id has a base, its files' `parent` is ignored, so a pack can change keys of an engine theme but cannot swap it for another theme. The adapter decides the order of the theme files, so it decides where the player's packs and each mod's files fall. [Platform differences](../platforms/differences.md#at-a-glance) lists what Swing does.
 
-A resolved theme remembers which layer set each key. `theme.layer(key)` returns the layer's name, which shows where a color or a sprite came from. A theme built with `Theme.builder` reports none, and neither does a variant made with `toBuilder()`.
+A resolved theme remembers which layer set each key. `theme.layer(key)` returns the layer's name, which shows where a color or a sprite came from. A theme built with `Theme.builder` reports none, and neither does a variant made with `toBuilder()`. To look at a resolved theme outside a screen, resolve the ref yourself; on Swing, `SwingThemeSource.resolve` does it the way a host would:
+
+```java
+--8<-- "theming/ThemeExamples.java:layers"
+```
 
 ### Overrides from code
 
-`ThemeRef.override` changes a theme for one screen. To change it for every screen that uses it, or to define a theme of your own on top of another, use the registry from `Strata.themes()`:
+`ThemeRef.override` changes a theme for one screen. To change it for every screen that uses it, or to define a theme of your own on top of another, use the `ThemeRegistry` from `Strata.themes()`. It works before any screen exists, and from any thread:
 
 ```java
 --8<-- "theming/ThemeExamples.java:registry"
@@ -220,10 +228,10 @@ A theme file sets only the keys it changes. Where the files live depends on the 
 | Nine-slice | `{ "nine_slice": "ns:path", "border": ... }`, with an optional `"tint"`, `"size": [width, height]` and `"tiled": true`, which needs a size. The border is one number, `[horizontal, vertical]` or `[left, top, right, bottom]` |
 | Tiled sprite | `{ "tiled": "ns:path", "size": [width, height] }`, with an optional `"tint"` |
 | Gradient | `{ "gradient": [top, bottom] }` |
-| Text style | Any of `color`, `bold`, `italic`, `underline`, `strikethrough`, `shadow` and `monospace`. Fields you leave out keep the inherited style for that key |
+| Text style | Any of `color`, `bold`, `italic`, `underline`, `strikethrough`, `shadow` and `monospace`. Fields you leave out keep the style a lower layer gave the key, or `TextStyle.DEFAULT` where none did |
 | Insets | One number, `[horizontal, vertical]` or `[left, top, right, bottom]`, in UI units |
 
-A misspelled member, a bad color or broken JSON makes the whole file invalid. The engine logs it and skips that file, and the other packs still apply.
+A misspelled member, a bad color or broken JSON makes the whole file invalid. The engine logs it and skips that file, and the other packs still apply. Adapters find the files through the SPI's `ThemeSource`, which [Writing an adapter](../platforms/writing-an-adapter.md#themes) describes.
 
 ### Base files
 

@@ -28,6 +28,20 @@ A host shows a screen: it owns the tree, runs layout, routes input, tracks focus
 
 You rarely see a host. On Swing, `StrataPanel` holds a stack of them. An adapter for an engine with its own screen system may give each engine screen a host of its own.
 
+## Services before any screen
+
+Some things are needed before a screen exists, such as text in a static field or a theme registered at startup. The `Strata` class hands these out from static methods:
+
+| Method | Returns |
+|---|---|
+| `Strata.screens()` | The platform's `ScreenController`, which opens screens. See [Screens](../guides/screens.md#opening-a-screen). |
+| `Strata.texts()` | The factory that makes `Text`. See [Text](../guides/text.md). |
+| `Strata.themes()` | The themes and overrides added in code. See [Themes](../guides/theming.md). |
+| `Strata.appearances()` | How values of a type show in lists, tables and combo boxes. See [Appearances](../guides/appearances.md). |
+| `Strata.states()` | The factory that makes states to bind controls to. See [Data binding](../guides/binding.md). |
+
+They come from Strata's core, which lists a `Strata.Provider` in its `META-INF/services`. Java's `ServiceLoader` finds it the first time you call one of these methods. With core missing from the class path, or on it twice, every one of them throws `IllegalStateException`. They may be called from any thread, and none of them makes components: those still come only from a host's factory.
+
 ## UI units
 
 All positions and sizes are floats in UI units, with the origin at the top left of the host, x growing right and y growing down. The adapter decides how big a unit is:
@@ -57,6 +71,10 @@ When an event finishes, the host tells the adapter whether it was handled. Unhan
 ## Focus
 
 At most one component per host has keyboard focus. Key events go to it, or to the screen's root when nothing has focus, and typed characters go only to it. Tab and Shift+Tab move focus between tabbable components. See [Input and focus](../guides/input-focus.md).
+
+## Overlays
+
+Popups, dialogs and toasts draw above the screen in layers of their own, outside the screen's tree, so nothing in the screen clips them or makes room for them. A screen opens them through `factory.overlays()`. A dialog is modal: while it is open, nothing below it gets input. Tooltips draw in a last layer above everything. See [Overlays and tooltips](../guides/overlays.md).
 
 ## Themes
 

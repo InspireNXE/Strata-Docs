@@ -1,6 +1,6 @@
 # Translation keys
 
-Strata's built-in controls show these keys through [translated text](../guides/text.md#translated-text). Strata has English for each, used when the platform's translator has none.
+Strata's built-in controls show these keys through [translated text](../guides/text.md#translated-text). Strata has English for each, used when the platform's translator has none. The translator is asked first, so a language file that has a key replaces the English. A key that neither has, such as one of your own with no translation yet, shows as itself, with one warning per key in the log.
 
 | Key | English | Shown by |
 |---|---|---|
@@ -29,9 +29,11 @@ Month and weekday names, the first day of the week, the order of a date's parts,
 | `strata.date.month.short.1` to `.12` | A name | Short month names, used in the calendar's year view |
 | `strata.date.weekday.short.1` to `.7` | A name | Short weekday names over the calendar's days. Monday is 1, as in `java.time.DayOfWeek`. |
 | `strata.date.first_weekday` | A number from 1 to 7 | The first day of the week |
-| `strata.date.order` | `dmy`, `mdy` or `ymd` | The order of a date's parts in the pickers |
+| `strata.date.order` | The letters `d`, `m` and `y` in any order, such as `dmy`, `mdy` or `ymd` | The order of a date's parts in the pickers |
 | `strata.date.separator` | Any text | What goes between a date's parts, such as `/` or `.` |
 | `strata.time.clock` | `12` or `24` | Whether hours count to 12 or 24 |
 | `strata.time.am`, `strata.time.pm` | A name | The halves of the day on a 12 hour clock |
+
+The separator between hours, minutes and seconds comes from the locale, `:` where it has none, and has no key. A missing date or time key is not logged, since most languages need none of them.
 
 Code can still set a control's first day of the week and clock format with `setFirstDayOfWeek` and `setClockFormat`. The order of the parts and the names follow the language only.

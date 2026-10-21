@@ -2,14 +2,20 @@
 
 Strata's built-in controls are interfaces in the subpackages of `org.inspirenxe.strata.api.control`, made by the factory: `display` (`Label`, `Image`, `Avatar`, `InfoBar`, `ProgressBar`, `BusyIndicator`, `Separator`), `button` (`Button`, `DropDownButton`, `CycleButton`, `CheckBox`, `RadioButton`, `RadioGroup`, `ToggleSwitch`), `field` (`TextBox`, `PasswordTextBox`, `TextArea`, `Spinner`, `Slider`, `ColorPicker`, `CalendarView`, `DatePicker`, `TimePicker`, `DateTimePicker`), `collection` (`ListView`, `ComboBox`, `TableView`, `TreeView`, `GridView`), `menu` (`Menu`, `MenuBar`, `Flyout`), `pane` (`TabBar`, `Expander`, `SplitPane`, `ScrollBar`, `NavigationView`) and `window` (`Window`, `MessageBox`). Each one has [events](events.md): a request (Pre) for each change the user can make, which a handler can cancel or rewrite, and a report (Post) for each change from any source. Each section below lists them in an Events table. Their theme keys are listed on each control below and in the [theme key reference](../reference/theme-keys.md). Scrolling is a container, [`ScrollPanel`](layout.md#scrollpanel), and popups, dialogs and tooltips are in [Overlays and tooltips](overlays.md); `Menu` and `Flyout` are controls that open themselves as popups.
 
+## Making controls
+
+Every factory method has a form with no arguments, and the forms with arguments are shorthands for it followed by setters. `factory.button("Save")` makes the same button as `factory.button().setText("Save")`, and `factory.infoBar(InfoBar.Severity.ERROR, "Not saved", message)` the same bar as `factory.infoBar()` with its severity, title and message set. Where a control shows your items, the form with no arguments shows each item through its [appearance](appearances.md): `factory.listView()`, `factory.treeView()` and `factory.gridView()` build each row or cell with `factory.cell(item)`, which shows the item's icon and name, and `factory.comboBox()` shows each option by its name. Pass a cell factory or a label function to show items your own way.
+
+Setters return the control, so a control is made, set up and given its handlers in one chain. Text setters take a `String` or a [`Text`](text.md#text), which may be styled or translated.
+
 ## Attributes
 
 Controls that do the same kind of thing share small interfaces called attributes, in `org.inspirenxe.strata.api.control.attribute`. A control has every attribute that fits it, so the same thing has the same name on every control, and code written against an attribute works for all of them.
 
 | Attribute | Package | What it adds | Events | Binding keys | Controls |
 |---|---|---|---|---|---|
-| `HasText` | `text` | `text()`, `setText` | | `TEXT` | `Button`, `DropDownButton`, `CycleButton`, `CheckBox`, `RadioButton`, `ToggleSwitch`, `Label`, `InfoBar` and `MessageBox` (the message), `ProgressBar`, `BusyIndicator`, and through `TextInput` the text fields |
-| `Titled` | `text` | `title()`, `setTitle` | | `TITLE` | `Window`, `MessageBox`, `Expander`, `InfoBar`, `NavigationView` |
+| `HasText` | `text` | `text()`, `setText` | | `TEXT` | `Button`, `DropDownButton`, `CycleButton`, `CheckBox`, `RadioButton`, `ToggleSwitch`, `Label`, `InfoBar` and `MessageBox` (the message), `ProgressBar`, `BusyIndicator`, and through `TextInput` the text fields; also the entries `MenuItem`, `CheckMenuItem`, `SubmenuItem`, `Tab`, `NavigationItem` and `NavigationHeader` |
+| `Titled` | `text` | `title()`, `setTitle` | | `TITLE` | `Window`, `MessageBox`, `Expander`, `InfoBar`, `NavigationView`; also the entry `TableColumn` |
 | `TextEntry` | `text` | `length()`, `isEmpty()`, `clear()`, the caret, the selection, `setMaxLength`, `setReadOnly`, `setTextPadding`; nothing that carries the text | `MODIFY`, `MODIFIED` | | `TextBox`, `TextArea`, `PasswordTextBox` |
 | `TextInput` | `text` | `TextEntry` plus `text()`, `setText`, `selectedText()` and the highlighter | `EDIT`, `EDITED` | `TEXT` | `TextBox`, `TextArea` |
 | `Toggle` | `value` | `isSelected()`, `setSelected`, `toggle()` | `TOGGLE`, `TOGGLED` | `SELECTED` | `CheckBox`, `ToggleSwitch`, `RadioButton` |
@@ -18,7 +24,7 @@ Controls that do the same kind of thing share small interfaces called attributes
 | `HasDate` | `value` | `date()`, `setDate`, `clearDate()`, `minDate()`, `maxDate()`, `setDateRange`, `setDateFilter`, `firstDayOfWeek()`, `setFirstDayOfWeek` | `PICK_DATE`, `DATE_PICKED` | | `CalendarView`, `DatePicker`, `DateTimePicker` |
 | `HasTime` | `value` | `time()`, `setTime`, `clearTime()`, `clockFormat()`, `setClockFormat`, `isSecondsShown()`, `setSecondsShown`, `minuteStep()`, `setMinuteStep` | `PICK_TIME`, `TIME_PICKED` | | `TimePicker`, `DateTimePicker` |
 | `ItemSource` | `item` | `items()`, `setItems`, `refresh()`, `setKeyFunction` | | `itemsKey()` | `ListView`, `TableView`, `TreeView`, `ComboBox`, `GridView`, `CycleButton` |
-| `CellSource` | `item` | `setCellFactory` | | | `ListView`, `TreeView`, `GridView` |
+| `CellSource` | `item` | `setCellFactory` | | | `ListView`, `TreeView`, `GridView`; also the entry `TableColumn` |
 | `Selection` | `item` | `selectedIndex()`, `selected()`, `select(index)`, `selectItem(item)`, `clearSelection()`: the current entry | `SELECT`, `SELECTED` | `SELECTED_INDEX`, `selectedItem()` | every control below that selects |
 | `SingleSelection` | `item` | `Selection` and nothing more: the control only ever selects one entry | | | `ComboBox`, `GridView`, `CycleButton`, `TabBar`, `MenuBar`, `RadioGroup`, `NavigationView` |
 | `MultiSelection` | `item` | `Selection` plus `setSelectionMode`, `selectedIndexes()`, `selectedItems()`, `selectIndexes`, `selectAll()` | `SELECT_MANY`, `SELECTED_MANY` | | `ListView`, `TableView`, `TreeView` |
@@ -45,6 +51,37 @@ music.bind(Toggle.SELECTED, model.music);       // works on a checkbox, a switch
 ```
 
 The event's `control()` is typed as the attribute, such as `Toggle<?>`, and `target()` is the component that fired it. An event fires only where it means something: a progress bar has no user input, so it reports `Ranged.CHANGED` but never asks with `Ranged.CHANGE`. Each control's section below says which events it fires and when. Events that only one control has, such as `Button.PRESSED` or `TableView.SORTED`, stay constants on that control.
+
+Entries such as menu items, tabs and table columns have the attributes without events (`HasText`, `Titled`, `CellSource`), so a menu item's `setText` is the same method as a button's. Only components bind, so an entry takes no binding key.
+
+### Controls that show items
+
+The `item` attributes fit together. A control that shows your data is an `ItemSource`: it keeps a copy of the list you give `setItems`, and `refresh()` shows the same items again after they changed inside. Each item gets a key, the item itself unless `setKeyFunction` says otherwise, and when `setItems` replaces the list the selection follows the key, so a list of offers fetched again from a server keeps the same offer selected. A `CellSource` builds a component for each item with its cell factory; lists, tables and trees build only the cells in view and drop them when they scroll out, so a cell is built from the item and keeps nothing that must outlive it.
+
+Every control that selects is a `Selection` and also exactly one of these:
+
+- `SingleSelection`: only ever one entry, such as a combo box, a tab bar or a radio group. It adds nothing to `Selection`; it says the current entry is the whole selection.
+- `MultiSelection`: a list, a table or a tree, which select one entry in `SelectionMode.SINGLE`, the default, and any number in `SelectionMode.MULTIPLE`. See [ListView](#listview) for the clicks and keys.
+
+Selection events carry indexes into what the control shows: a list's items, a table's sorted rows (`shownItems()`), a tree's visible rows (`shownItems()`), a tab bar's tabs, a navigation view's `allItems()`. Read the entry from the control, or use `selected()`. -1 means nothing is selected.
+
+```java
+offers.onEvent(Selection.SELECTED, event -> offers.selected().ifPresent(this::showOffer));
+```
+
+`Activatable` controls, the lists, tables, trees, grids and navigation views, report a double click or Enter on an entry as `ACTIVATED`, or a single click with `setActivateOnClick(true)`. There is no method that activates an entry from code. `RowView` controls, the lists, tables and trees, show their entries as rows of one height (`setRowHeight`, 20 units by default, and `setRowSpacing`), show a placeholder while there are none (`setPlaceholder`), scroll with `setScrollY` and `scrollToIndex`, and let a press on the selected row clear it once `setDeselectable(true)`.
+
+`Stepped` is a `Ranged` control whose value moves in steps, a slider or a spinner. `setStep` rounds the value to the new step at once. A slider takes a step of 0 for any value in the range; a spinner needs a step above 0.
+
+### Entries
+
+Some controls hold a list of things that are not your data and not components: a menu's `MenuEntry`s, a navigation view's `NavigationEntry`s, a tab bar's `Tab`s and a table's `TableColumn`s. They follow the same rules:
+
+- The factory makes them, with a form with no arguments and one that takes the text or title: `factory.menuItem("Copy")`, `factory.navigationHeader("Account")`, `factory.tab("Sell")`, `factory.tableColumn("Price")`. Each control also has shorthands that make and add one, such as `menu.addItem("Copy", this::copy)`.
+- They are mutable. A change to one shows in its control at once, so you can keep an entry and enable, rename or check it later.
+- An entry belongs to one control at a time. Adding one that another control holds throws `IllegalArgumentException`; remove it first.
+- They are not components and not event targets. The control's events carry the entry, or for selection the entry's index, so a handler on the control or a container hears them.
+- Call them on the UI thread, as you call controls.
 
 ## Label
 
@@ -78,6 +115,10 @@ A label is not focusable and has no default behavior for input, so clicks and ke
 
 `style()` returns the style the label draws with: the one you set, or the theme's.
 
+A label reads one key, `label.text` (text style, optional), unless you set a style; without it the label draws in `TextStyle.DEFAULT`.
+
+A label fires no events, since the user cannot change it. `setText` reports nothing; [bind](binding.md) `HasText.TEXT` to keep it in step with a state.
+
 ## Image
 
 A sprite drawn at a size you choose, such as an icon or a picture.
@@ -93,8 +134,11 @@ A sprite drawn at a size you choose, such as an icon or a picture.
 | `setScaling(Scaling)` | `STRETCH` | `STRETCH` covers the bounds; `FIT` draws as large as fits with the image size's aspect ratio, centered |
 | `setTint(argb)` | `0xFFFFFFFF` | Multiplied with the sprite. Lower alpha fades it. |
 | `setVisual(Visual)` | | Shows an engine visual instead of a sprite, and takes its natural size |
+| `setValue(value)` | none | Shows a value through its [appearance](appearances.md): its icon at the icon's natural size, or nothing, and its tooltip, asked anew each time the pointer arrives. A tooltip set afterwards replaces the value's until the next `setValue`, and a sprite or a visual set afterwards clears the value. |
 
-Strata cannot ask the engine how big an image file is, so set the image size yourself, usually to the size you want it drawn at. A missing sprite draws the engine's placeholder. An image reads no theme keys, is not focusable and has no input behavior, so clicks pass through to its ancestors. A disabled image looks the same as an enabled one; change its tint to show it.
+`factory.image()` makes an empty image, `factory.image(sprite)` and `factory.image(visual)` show one, and `factory.image(value)` shows a value as `setValue` does. An image shows a sprite or a visual, never both: each setter replaces the other.
+
+Strata cannot ask the engine how big an image file is, so set the image size yourself, usually to the size you want it drawn at. A missing sprite draws the engine's placeholder. An image reads no theme keys, is not focusable and has no input behavior, so clicks pass through to its ancestors. A disabled image looks the same as an enabled one; change its tint to show it. It fires no events.
 
 ### Engine visuals
 
@@ -161,11 +205,13 @@ A strip in a screen's layout that tells the user something about the screen, suc
 --8<-- "controls/ControlExamples.java:infobar"
 ```
 
+`factory.infoBar()` makes an open `INFO` bar with a close button and no title, message or action, and `factory.infoBar(severity, title, message)` sets those three.
+
 From the left, the bar shows an accent strip in the severity's color, the severity's icon when the theme has one, the title in bold, the message, the action, and the close button at the right end. When the title, the message and the action fit on one line beside the close button, they share it. Otherwise the title and the message wrap, the message below the title, and the action goes below the message. The bar stretches across its slot unless you align it otherwise.
 
 | Method | Default | Notes |
 |---|---|---|
-| `setSeverity(severity)` | `INFO` | `INFO`, `SUCCESS`, `WARNING` or `ERROR`. Picks the background, the accent strip and the icon. |
+| `setSeverity(severity)` | `INFO` | An `InfoBar.Severity`: `INFO` for something the user may want to know, `SUCCESS` for something that went well, `WARNING` for something that may need their attention, `ERROR` for something that failed. Picks the background, the accent strip and the icon. |
 | `setTitle(title)` | none | A `String` or a [`Text`](text.md#text), drawn before the message in the title style |
 | `setText(message)` | none | The message. It is the bar's `HasText`, so code written against labels reaches it. |
 | `setAction(component)` | none | Any component after the message, such as a button. `null` removes it. A component already in a tree, or made by another factory, throws. |
@@ -269,6 +315,8 @@ A button with a down arrow after its caption that opens a popup below itself: a 
 --8<-- "controls/ControlExamples.java:dropdown"
 ```
 
+`factory.dropDownButton()` makes one with no caption and no popup, `factory.dropDownButton(text)` gives it a caption, and `factory.dropDownButton(text, popup)` a popup too.
+
 | Method | Notes |
 |---|---|
 | `setPopup(popup)` | The `Menu` or `Flyout` it opens; `null` for none. Replacing an open popup closes it first. A popup belongs to one button at a time, so a popup another button holds, a menu that is a submenu or in a menu bar, and a popup made by another factory throw `IllegalArgumentException`. |
@@ -308,7 +356,7 @@ CycleButton<Difficulty> difficulty = factory.<Difficulty>cycleButton("Difficulty
 | Method | Default | Notes |
 |---|---|---|
 | `setText(label)` | empty | The text before the value (`HasText`). With no label only the value shows, and with no value only the label. |
-| `setValueLabelFunction(function)` | `String::valueOf` | Turns a value into its text. |
+| `setValueLabelFunction(function)` | the value's appearance name | Turns a value into what the button shows: a [`Text`](text.md#text), or any other value shown by its [appearance](appearances.md)'s name, which is `String.valueOf` for a value with no appearance. `factory.cycleButton(label, function)` sets it at once. |
 | `setItems(list)` | none | The values (`ItemSource`). The selection stays on the item with the same key, or moves to the first item. |
 | `select(index)`, `selectItem(item)` | the first item | Chooses a value from code (`Selection`). |
 | `cycle(steps)` | | Moves the selection from code, wrapping at the ends. One step forward from nothing selects the first item. |
@@ -347,6 +395,7 @@ A left click anywhere on the checkbox, caption included, toggles it, and so does
 | `checkbox.mark`, `checkbox.mark.disabled` (optional) | A check drawn over a checked box, inside a fifth of its size from each edge |
 | `checkbox.mark.mixed`, `checkbox.mark.mixed.disabled` (optional) | A square over a mixed box, inset by a fifth of its size. Fall back to the mark keys. A mixed box uses the unchecked faces. |
 | `checkbox.focus` (optional) | A one-unit ring inside the box's edge while focused |
+| `checkbox.text`, `checkbox.text.disabled` (optional) | The caption, and the caption when disabled. The first falls back to `TextStyle.DEFAULT` and the second to the first. |
 
 Themes built from images can draw the check mark into the checked faces and leave `checkbox.mark` out. Themes built from colors use `checkbox.mark`.
 
@@ -404,6 +453,7 @@ It is focusable and tabbable and shows the hand cursor. A horizontal slider want
 | `slider.thumb.hovered` | yes | The thumb while the slider is hovered, focused or pressed |
 | `slider.thumb.disabled` | no | Falls back to `slider.thumb` |
 | `slider.text`, `slider.text.disabled` | no | The label, drawn over the thumb as well as the track. The flat theme gives it a shadow so it stays readable on both. |
+| `slider.padding` | no | Between the slider's edges and its label, which centers inside it and is cut to it. None by default. |
 
 ## The controls together
 
@@ -521,7 +571,9 @@ box.setSuggestionProvider((text, caret) -> text.startsWith("/")
         : List.of());
 ```
 
-`SuggestionProvider.words(list)` completes the word around the caret from a list, matching what is typed before the caret and ignoring case. It suggests nothing for a caret with no word before it.
+`TextBox.SuggestionProvider.words(list)` completes the word around the caret from a list. The word is the run of characters other than whitespace around the caret. Every entry that starts with the part of the word before the caret, ignoring case, is suggested in the list's order, except an entry equal to the whole word, and each suggestion replaces the whole word. It suggests nothing for a caret with no word before it, and it copies the list, so later changes to it are not seen.
+
+A `Suggestion`'s range counts chars, as the caret does: `start` is where the replaced range begins and `end` where it ends, exclusive. A suggestion with `start` equal to `end` inserts its text at that point, and a range that starts below 0 or ends before it starts throws. The provider runs on the UI thread each time the box asks, so keep it quick. `setSuggestionProvider(null)` turns suggestions off again.
 
 The box asks the provider after each edit by the user that changes the text, and on Ctrl+Space. If there are suggestions, the list shows them with the first highlighted, at least as wide as the box and up to `setMaxVisibleSuggestions(n)` rows tall (8 by default) before it scrolls. If there are none, the list closes. A read-only or disabled box never asks.
 
@@ -712,6 +764,8 @@ list.setSelectionMode(SelectionMode.MULTIPLE)
 
 Build each cell fresh from its item, and keep nothing in it that must survive scrolling: a row that scrolls out is dropped and rebuilt when it comes back.
 
+`factory.listView()` with no cell factory shows each item through its [appearance](appearances.md), with `factory.cell(item)`: the item's icon, if it has one, and its name, in a cell label, with the item's tooltip. `setCellFactory` replaces it and builds the rows in view again.
+
 `ui.cellLabel(text)` makes the label the default cells use: the theme's `list.cell.padding` as its margin, or `ComponentFactory.CELL_PADDING` (4 units) at the sides without it, vertically centered, and cut short with an ellipsis. Its margin follows the theme until you set one. Use it in your own cell factories so text rows line up with tables and the built-in lists. The `list.background` key paints the list's whole area behind its rows, so an empty list shows its placeholder on it.
 
 ### Rows of controls
@@ -754,7 +808,11 @@ ComboBox<SortType> sort = factory.<SortType>comboBox(SortType::label)
         .onEvent(Selection.SELECTED, event -> search());
 ```
 
-A click opens the list as a [popup](overlays.md#popups), at least as wide as the box; a click on an option selects it. While closed and focused, Up, Down, Home and End change the selection, and Enter, Space or Alt+Down open it. While open, Up and Down move the highlight, Enter or Space picks it, and Escape closes without changing anything. `setMaxVisibleOptions(n)` (8 by default) caps how many rows show before the list scrolls. `setItems` keeps the selection on the option with the same key (`setKeyFunction`, the option itself by default), or selects the first option. `clearSelection()` leaves nothing selected, and the box then shows no text.
+`factory.comboBox()` shows each option by its [appearance](appearances.md)'s name, or by `String.valueOf` when it has none. `factory.comboBox(labelFunction)` and `setLabelFunction` show what the function returns: a [`Text`](text.md#text), or any other value shown by its appearance's name. The selection events carry option indexes, so read the option with `box.items().get(event.value())` or `box.selected()`.
+
+A click opens the list as a [popup](overlays.md#popups) below the box, or above it when there is more room there, at least as wide as the box; a click on an option selects it and closes the list, and a click anywhere else closes it with no change. While closed and focused, Up, Down, Home and End change the selection, and Enter, Space or Alt+Down open it. While open, Up and Down move the highlight, Enter or Space picks it, and Escape closes without changing anything. `setMaxVisibleOptions(n)` (8 by default) caps how many rows show before the list scrolls. `setItems` keeps the selection on the option with the same key (`setKeyFunction`, the option itself by default), or selects the first option. `clearSelection()` leaves nothing selected, and the box then shows no text. `open()` and `close()` open and close the list from code; `open()` does nothing while the box is detached, disabled or has no options.
+
+The box is focusable and tabbable and shows the hand cursor. It asks for its widest option plus its padding and the arrow, and one line plus 3 units above and below, so picking another option never changes its size. A disabled box ignores input.
 
 | Key | Required | Used for |
 |---|---|---|
@@ -762,7 +820,9 @@ A click opens the list as a [popup](overlays.md#popups), at least as wide as the
 | `combobox.popup` | yes | Behind the open list |
 | `combobox.hovered` | no | The box while hovered, focused or open. Falls back to `combobox.normal`. |
 | `combobox.disabled` | no | The box when disabled. Falls back to `combobox.normal`. |
-| `combobox.text`, `combobox.text.disabled` | no | The option text |
+| `combobox.text`, `combobox.text.disabled` | no | The option text, and the selected option when disabled. The first falls back to `TextStyle.DEFAULT` and the second to the first. |
+| `combobox.padding` | no | Between the box's edges and its value on the left and its arrow on the right. 4 at the sides and 3 at the top and bottom. |
+| `list.*`, `scroll.*` | | The rows and the scroll bar of the open list, as for `ListView` |
 
 | Event | Kind | Fires |
 |---|---|---|
@@ -782,7 +842,7 @@ window.setSize(600, 370);
 window.onEvent(Closable.CLOSED, event -> handle.close());
 ```
 
-Dragging the title bar moves the window, through its [offset](layout.md#offset), kept inside the slot its parent gives it (`setMovable(false)` stops that). The close button and an Escape the window acts on fire `Closable.CLOSE`, which a handler can cancel, then call `close()`, which fires `Closable.CLOSED` and closes the overlay showing the window. A window that is a screen's content does not close itself: close the screen from a `CLOSED` handler. With no `CLOSE` or `CLOSED` handler on its path, and outside an overlay, it leaves Escape to the engine. `setClosable(false)` hides the button and ignores Escape. A new window is centered in its slot.
+Dragging the title bar moves the window, through its [offset](layout.md#offset), kept inside the slot its parent gives it (`setMovable(false)` stops that). The close button and an Escape the window acts on fire `Closable.CLOSE`, which a handler can cancel, then call `close()`, which fires `Closable.CLOSED` and closes the overlay showing the window. A window that is a screen's content does not close itself: close the screen from a `CLOSED` handler. With no `CLOSE` or `CLOSED` handler on its path, and outside an overlay, it leaves Escape to the engine. `setClosable(false)` hides the button and ignores Escape. A new window is centered in its slot. `factory.window()` makes one with no title, and `factory.window(title)` one with a title. A window is a container: `add` puts content in it, and `setTitle` changes the bar.
 
 A press with any button anywhere in a window, on its content included, [raises](components.md#drawing-order) it among its siblings before the press is delivered, so of several windows in an `AbsolutePanel` the one the user pressed comes to the front. It works even when a handler inside cancels the press or stops it. A sibling with a higher z index stays above it. `setRaiseOnPress(false)` turns it off. A window that is a screen's content or an overlay's has no siblings, so nothing changes.
 
@@ -814,8 +874,10 @@ A resize keeps the window within its minimum and maximum sizes and inside the sl
 |---|---|---|
 | `window.background` | yes | The whole window |
 | `window.title` | no | The title bar. Nothing if missing. |
-| `window.title.text` | no | The title |
-| `window.close`, `window.close.hovered` | no | The close button's `x` |
+| `window.title.text` | no | The title, centered on the bar. Falls back to `TextStyle.DEFAULT`. |
+| `window.close`, `window.close.hovered` | no | The close button's `x`, and while it is hovered. The first falls back to `window.title.text` and the second to the first. |
+| `window.title.padding` | no | Around the title in the title bar. 3 on every side. |
+| `window.padding` | no | Between the window's edges, below the title bar, and its content. 3 on every side. Padding set with `setPadding` wins over it. |
 | `window.grip`, `window.grip.hovered` | no | The resize grip, drawn as six small squares in a triangle. The hovered paint shows while the pointer is over a part that resizes, and during a resize. |
 
 | Event | Kind | Fires |
@@ -833,7 +895,33 @@ A window with a message and a row of buttons, opened as a [dialog](overlays.md#d
 --8<-- "overlays/OverlayExamples.java:message-box"
 ```
 
-The buttons come in sets: `OK`, `OK_CANCEL`, `YES_NO`, `YES_NO_CANCEL` and `CLOSE`. The first one is focused when the dialog opens. A button, the close button or Escape asks with `MessageBox.ANSWER`, which a handler can cancel to keep the box open or rewrite, then reports the `Result` once with `MessageBox.ANSWERED` and closes the dialog. The close button and Escape answer the set's `dismissResult()`: Cancel when the set has it, No for `YES_NO`, and the only button for `OK` and `CLOSE`. `setText` changes the message and `setTitle` the window's title, `setButtonText(result, caption)` translates a caption, and `window()` gives the window to change its size. The message wraps at 280 units.
+`factory.messageBox(title, message, buttons)` makes one, and `factory.messageBox()` one with no title, no message and an OK button. Each button stands for a `MessageBox.Result`: `OK`, `CANCEL`, `YES`, `NO` or `CLOSE`. The buttons come in sets, a `MessageBox.Buttons`:
+
+| Set | Buttons, left to right | The close button and Escape answer |
+|---|---|---|
+| `OK` | OK | `OK` |
+| `OK_CANCEL` | OK, Cancel | `CANCEL` |
+| `YES_NO` | Yes, No | `NO` |
+| `YES_NO_CANCEL` | Yes, No, Cancel | `CANCEL` |
+| `CLOSE` | Close | `CLOSE` |
+
+`results()` lists a set's buttons and `dismissResult()` its last column. The buttons sit at the bottom right, 64 units wide and 4 apart, and the first one is focused when the dialog opens. Their captions are the translated `strata.button.ok`, `strata.button.cancel`, `strata.button.yes`, `strata.button.no` and `strata.button.close` from the [translation keys](../reference/translation-keys.md); `setButtonText(result, caption)` replaces one.
+
+A button, pressed with a click, Enter or Space, the window's close button or Escape asks with `MessageBox.ANSWER`. A handler can cancel it to keep the box open, or rewrite it to any result, even one the box has no button for. Unless canceled, the box reports the result once with `MessageBox.ANSWERED` and closes the dialog. Escape counts when focus is inside the box, or when nothing has focus and the box is the content of the top dialog. Closing `window()` from code answers the set's dismiss result too, and reports it without asking.
+
+| Method | Notes |
+|---|---|
+| `setText(message)` | The message. It wraps at 280 units (`MESSAGE_WIDTH`), and `\n` starts a new line. |
+| `setTitle(title)` | The window's title |
+| `setButtons(buttons)` | Another set. Captions set with `setButtonText` stay for the results that still have a button. |
+| `setButtonText(result, caption)` | One button's caption, such as a more specific word than Yes |
+| `window()` | The window the box is built on, to change its size or other settings |
+
+The box is a composite: the events of its window and buttons reach handlers on those parts and on the box, and nothing outside it, so a handler around the dialog does not hear its buttons' `PRESSED`. Handle `ANSWER` and `ANSWERED` on the box. It draws with the `window.*`, `label.*` and `button.*` keys, plus one of its own:
+
+| Key | Required | Used for |
+|---|---|---|
+| `messagebox.padding` | no | Between the window's padding and the message and buttons. 4 on every side. |
 
 | Event | Kind | Fires |
 |---|---|---|
@@ -856,19 +944,29 @@ TabBar sides = factory.tabBar()
 
 A change to a tab shows in its bar at once, and a tab belongs to one bar at a time.
 
-Tabs share the width equally. A click selects an enabled tab, and Left and Right do while the bar has focus. A disabled tab still shows its tooltip. Disabling the whole bar draws every tab disabled, and the selected tab keeps a distinct `tab.selected.disabled` look.
+| Tab method | Default | Notes |
+|---|---|---|
+| `setText(text)` | | The tab's text |
+| `setEnabled(enabled)` | `true` | A disabled tab cannot be selected by clicks or keys, draws its disabled look and still shows its tooltip. Disabling the selected tab keeps it selected. |
+| `setTooltip(tooltip)` | none | Shown while the pointer rests on the tab, such as one that says why it is disabled |
+
+The first tab added to an empty bar is selected, without an event. `addTab(index, tab)` keeps the selection on the same tab, and reports `SELECTED` if its index moved. Removing the selected tab selects the one that takes its place, or the last one, or none when no tab is left. `select(index)` selects a tab from code, enabled or not.
+
+Tabs share the bar's width equally, with `setSpacing` between them (0 by default), and are one line plus 7 units tall. A click selects an enabled tab, and while the bar has focus Left and Right select the nearest enabled tab that way. The bar is focusable and tabbable, and an enabled tab shows the hand cursor. Disabling the whole bar draws every tab disabled, and the selected tab keeps a distinct `tab.selected.disabled` look.
 
 | Key | Required | Used for |
 |---|---|---|
 | `tab.normal`, `tab.selected` | yes | Unselected and selected tabs |
 | `tab.hovered`, `tab.disabled` | no | Fall back to `tab.normal` |
 | `tab.selected.disabled` | no | The selected tab when it or the bar is disabled. Falls back to `tab.disabled`. |
-| `tab.text`, `tab.text.selected`, `tab.text.disabled` | no | Tab text |
+| `tab.text`, `tab.text.selected`, `tab.text.disabled` | no | Tab text. The first falls back to `TextStyle.DEFAULT` and the others to it. |
+| `tab.padding` | no | Between an unselected tab's edges and its text. 8 at the sides, 4 at the top and 3 at the bottom. |
+| `tab.padding.selected` | no | The same for the selected tab. Falls back to `tab.padding`. |
 
 | Event | Kind | Fires |
 |---|---|---|
 | `Selection.SELECT` | Pre | When a click or Left and Right would select another tab, with its index. A rewritten index that is disabled or out of range is ignored. |
-| `Selection.SELECTED` | Post | After another tab was selected, including `select` |
+| `Selection.SELECTED` | Post | After another tab was selected, including `select`, and after adding or removing tabs moved the selected tab's index. The first tab selected by `addTab` fires nothing. |
 
 ## ProgressBar
 
@@ -881,7 +979,15 @@ ProgressBar quota = factory.progressBar()
         .setText(used + "/" + limit);
 ```
 
-The range is 0 to 1 by default, so the value is the fraction filled. `setValue` clamps to the range and NaN throws. `setRange` needs `max` above `min` and clamps the value into it. Keys: `progress.track` and `progress.fill` (paints, required), `progress.segment` (paint, optional, falls back to `progress.fill`) and `progress.text` (text style, optional).
+The range is 0 to 1 by default, so the value is the fraction filled. `setValue` clamps to the range and NaN throws. `setRange` needs `max` above `min` and clamps the value into it. The bar takes no input and is not focusable.
+
+| Key | Required | Used for |
+|---|---|---|
+| `progress.track` | yes | The whole bar |
+| `progress.fill` | yes | The filled part |
+| `progress.segment` | no | The moving segment of an indeterminate bar. Falls back to `progress.fill`. |
+| `progress.text` | no | The caption, centered. Falls back to `TextStyle.DEFAULT`. |
+| `progress.padding` | no | Around the caption. The bar is at least as wide as the caption plus this left and right, and a line plus this top and bottom tall. 2 on every side. |
 
 For work whose length is not known, `setIndeterminate(true)` draws a moving segment instead of the fill. The segment is a quarter of the bar's width, at least 8 units, and slides in at the left and out at the right once every 1.5 seconds, by the host's clock, in whole units. The value and the caption are kept, and `setIndeterminate(false)` shows the value again.
 
@@ -915,7 +1021,15 @@ It fires no events, since the user cannot change anything on it, and `setText` r
 
 ## Separator
 
-A thin line across or down a panel: `factory.separator(Orientation.HORIZONTAL)` stretches across its slot and is one unit tall, `setThickness` changes that. Key: `separator` (paint, required).
+A thin line that divides a panel, across or down.
+
+```java
+--8<-- "controls/ControlExamples.java:separator"
+```
+
+`factory.separator()` makes a horizontal one, and `factory.separator(orientation)` either. A horizontal separator is one unit tall and stretches across its slot, at the top; a vertical one is one unit wide and stretches down its slot, at the left. Along the line it asks for no length, so it takes the length of the slot. `setThickness` changes the thickness, and `setOrientation` turns it and sets the matching alignment again, so call `setAlignment` after it if you want another.
+
+A separator is not focusable, takes no input and fires no events. Key: `separator` (paint, required), which menus, navigation views and split panes fall back to for their own lines.
 
 ## RadioButton and RadioGroup
 
@@ -929,7 +1043,7 @@ difficulty.selectItem(settings.difficulty())
         .onEvent(Selection.SELECTED, event -> settings.setDifficulty(difficulty.selected().orElseThrow()));
 ```
 
-Each button stands for a value, and `group.selected()` returns the value of the selected one. A new group has nothing selected. A click, Enter or Space selects a button. Up and Left move the selection and focus to the previous usable button in the group, Down and Right to the next, wrapping at the ends and skipping disabled, hidden and detached buttons. `button.setSelected(true)`, `group.select(index)` and `group.selectItem(value)` work while disabled too; `selectItem` with a value no button stands for clears the selection. A button measures and draws like a [`CheckBox`](#checkbox), with the mark inset by three tenths of the box.
+`factory.radioGroup()` makes an empty group, and `group.add(caption, value)` makes each button, unselected and not yet in any container. Each button stands for a value, which may be null, and `group.selected()` returns the value of the selected one. `buttons()` lists the buttons in the order they were made, `value(index)` is a button's value, `selectedButton()` the selected button, and a button's `group()` its group. A new group has nothing selected, and selecting a button deselects the one before. A click, Enter or Space selects a button. Up and Left move the selection and focus to the previous usable button in the group, Down and Right to the next, wrapping at the ends and skipping disabled, hidden and detached buttons. `button.setSelected(true)`, `group.select(index)` and `group.selectItem(value)` work while disabled too; `selectItem` with a value no button stands for clears the selection. A button measures and draws like a [`CheckBox`](#checkbox), with the mark inset by three tenths of the box.
 
 | Key | Required | Used for |
 |---|---|---|
@@ -946,6 +1060,8 @@ Each button stands for a value, and `group.selected()` returns the value of the 
 | `Toggle.TOGGLED` | Post | On each button whose state changed, the one deselected first, from any source |
 | `Selection.SELECTED` | Post | On the group, after the selected button changed from any source, with its index in `buttons()` or -1. Register it on the group: `group.onEvent(Selection.SELECTED, ...)`. |
 
+The group is an event target of its own, outside the tree its buttons sit in. Its `SELECTED` reaches only handlers on the group and does not bubble, and the event's `target()` is the newly selected button, or the deselected one when the selection was cleared. The group never fires `Selection.SELECT`: to refuse a choice, cancel `Toggle.TOGGLE` on the buttons or on a container around them. The buttons' own `TOGGLE` and `TOGGLED` bubble as any control's do.
+
 ## ToggleSwitch
 
 An on and off switch with a sliding knob, for settings that take effect at once.
@@ -955,7 +1071,7 @@ ToggleSwitch pvp = factory.toggleSwitch("PvP").setSelected(settings.pvp())
         .onEvent(Toggle.TOGGLED, event -> settings.setPvp(event.value()));
 ```
 
-A click, Enter or Space flips it. `setSelected` works while disabled; `toggle()` does not. The track is the caption's line height plus 4 tall and twice that wide, the knob a square 2 units in from its edges, and the caption 4 units to its right.
+A left click anywhere on it, or Enter, keypad Enter or Space while it has focus, flips it; held keys that repeat do not. `setSelected` works while disabled; `toggle()` does not. It is focusable and tabbable and shows the hand cursor. With the default paddings, the track is the caption's line height plus 4 tall and twice that wide, the knob a square 2 units in from its edges, and the caption 4 units to its right. The knob jumps between the ends; it does not slide.
 
 | Key | Required | Used for |
 |---|---|---|
@@ -965,6 +1081,8 @@ A click, Enter or Space flips it. `setSelected` works while disabled; `toggle()`
 | `toggle.knob.hovered`, `toggle.knob.disabled` | no | Fall back to `toggle.knob` |
 | `toggle.focus` | no | A one-unit ring inside the track while focused |
 | `toggle.text`, `toggle.text.disabled` | no | The caption |
+| `toggle.track.padding` | no | How far the track reaches past a box a line tall and two lines wide. 4 at the sides and 2 at the top and bottom. |
+| `toggle.knob.padding` | no | Between the knob and the track's edges. The knob is as tall as the track less this top and bottom. 2 on every side. |
 
 | Event | Kind | Fires |
 |---|---|---|
@@ -1042,7 +1160,17 @@ TableView<Offer> offers = factory.<Offer>tableView()
         .setItems(market.offers());
 ```
 
-Each column is a `TableColumn`, made with `factory.tableColumn(title)` or by the `addColumn` and `addTextColumn` shorthands. It holds its title, its width (a `GridLength`, weighted 1 by default), its cell factory and its comparator. `setCellText(text)` gives it text cells and sorts it by that text. `columns()` lists them, and `addColumn(column)`, `addColumn(index, column)` and `removeColumn(column)` change them.
+`factory.tableView()` makes a table with no columns and no items. Each column is a `TableColumn` [entry](#entries), made with `factory.tableColumn(title)` or by the `addColumn(title, width, cellFactory)` and `addTextColumn(title, width, text)` shorthands. `columns()` lists them, and `addColumn(column)`, `addColumn(index, column)` and `removeColumn(column)` change them.
+
+| Column method | Default | Notes |
+|---|---|---|
+| `setTitle(title)` | | The header title (`Titled`) |
+| `setWidth(width)` | `GridLength.weighted(1)` | How wide the column is, as a [`GridPanel`](layout.md#gridpanel) sizes its columns |
+| `setCellText(text)` | each item's appearance name | Text cells: one-line [cell labels](#listview) cut short with `...`. The function returns a [`Text`](text.md#text), or any other value shown by its appearance's name. It also makes the column sortable by that text, ignoring case; set a comparator afterwards to sort another way. |
+| `setCellFactory(factory)` | | Any component per cell (`CellSource`), built when the item's row comes into view |
+| `setComparator(comparator)` | none | Makes the column sortable, or not sortable with `null`. If the rows are sorted by this column they sort again. |
+
+A new column shows each item's appearance name as text and does not sort.
 
 ```java
 TableColumn<Offer> price = factory.<Offer>tableColumn("Price")
@@ -1062,6 +1190,7 @@ A column with a comparator is sortable, and text columns sort by their text, ign
 | `table.header.hovered` | no | A sortable title under the pointer. Falls back to `table.header`. |
 | `table.header.text` | no | The titles and sort arrows |
 | `table.grid` | no | One-unit lines between columns. Nothing if missing. |
+| `table.header.padding` | no | Between a column's edges and its title and sort arrow. 4 at the sides and none at the top and bottom. |
 | `list.*`, `scroll.*` | | The body, as for `ListView` |
 
 | Event | Kind | Fires |
@@ -1084,9 +1213,11 @@ TreeView<Category> categories = factory.<Category>treeView(category -> factory.l
 categories.onEvent(Selection.SELECTED, event -> categories.selected().ifPresent(this::showCategory));
 ```
 
-The tree asks the children function for an item's children only when it shows them, so a large hierarchy costs what is expanded. Rows are indented 10 units per level (`setIndent`), then a 12-unit arrow column, then the cell. Clicking an arrow expands or collapses its item. Right expands the selected item or moves into it; Left collapses it or moves to its parent. The other keys and the scrolling work as in a list.
+`factory.treeView(cellFactory)` makes a tree, and `factory.treeView()` one whose rows show each item's [appearance](appearances.md). `setChildren(function)` says how to find an item's children; until it is set every item is a leaf. The tree asks the children function for an item's children only when it shows them, so a large hierarchy costs what is expanded. Rows are indented 10 units per level (`setIndent`), then a 12-unit arrow column, then the cell. Clicking an arrow expands or collapses its item. Right expands the selected item or moves into it; Left collapses it or moves to its parent. The other keys and the scrolling work as in a list.
 
-`setExpanded(item, boolean)`, `expandAll()` and `collapseAll()` change what shows, and a selection inside a collapsed item moves up to it. `selectItem(item)` searches the hierarchy, expands the item's ancestors and scrolls to it, and `select(row)` selects a row of `shownItems()`. `items()` and `setItems` are the roots. Items are told apart by their key, the item itself unless `setKeyFunction` says otherwise, and expanded keys carry over when the roots change. After the children of shown items change, call `refresh()`.
+`setExpanded(item, boolean)`, `expandAll()` and `collapseAll()` change what shows, and a selection inside a collapsed item moves up to it. `selectItem(item)` searches the hierarchy, expands the item's ancestors and scrolls to it, and `select(row)` selects a row of `shownItems()`. `items()` and `setItems` are the roots, `shownItems()` the rows in order, and `depth(row)` how deep a row is, 0 for a root. `isExpanded(item)` says whether an item's key is expanded, shown or not. Items are told apart by their key, the item itself unless `setKeyFunction` says otherwise, and expanded keys carry over when the roots change. After the children of shown items change, call `refresh()`.
+
+The expansion events carry a `TreeView.Expansion`, a record of the item and whether its children show. A handler on `EXPAND` may rewrite it, even to another item of the tree, and the tree applies it as `setExpanded` does. The press that starts a click on an arrow selects the row first, through `Selection.SELECT`. `expandAll()` and `collapseAll()` report `EXPANDED` once for each item that changed, and `selectItem` once for each ancestor it expanded.
 
 The rows read the `list.*` keys. The arrows read `tree.arrow` (paint, optional), which falls back to a light gray.
 
@@ -1116,7 +1247,22 @@ cell.onEvent(InputEvents.CLICK, event -> {
 });
 ```
 
-Its entries are `MenuEntry`s: a `MenuItem` runs a command, a `CheckMenuItem` flips a setting, a `SubmenuItem` opens another menu, and a `MenuSeparator` draws a line. The shorthands above make them; `factory.menuItem(text)` and its siblings make them for you to keep, change and add with `addItem(entry)`. A shortcut is only drawn as a hint. `items()` lists the entries, and `addItem(index, entry)`, `removeItem(entry)` and `clearItems()` change them.
+Its entries are `MenuEntry`s, a sealed set of four kinds of [entry](#entries). The shorthands above make them; the factory makes them for you to keep, change and add with `addItem(entry)`. `items()` lists the entries, and `addItem(index, entry)`, `removeItem(entry)` and `clearItems()` change them.
+
+| Entry | Made by | Methods |
+|---|---|---|
+| `MenuItem`: runs a command | `factory.menuItem(text)`, `menu.addItem(text, action)`, `menu.addItem(text, shortcut, action)` | `setText`, `setShortcut` (a hint drawn at the right, such as `"Ctrl+C"`, which binds no key), `setEnabled`, `setAction(Runnable)` |
+| `CheckMenuItem`: a setting that is on or off | `factory.checkMenuItem(text)`, `menu.addCheckItem(text, checked, action)` | `setText`, `setSelected` (checks it without running the action), `setEnabled`, `setAction(Consumer<Boolean>)`. Choosing it flips the check and runs the action with the new state. |
+| `SubmenuItem`: opens another menu beside this one | `factory.submenuItem(text)`, `menu.addSubmenu(text, submenu)`, `bar.addMenu(title, menu)` | `setText`, `setMenu`, `setEnabled`. Without a menu it opens nothing. |
+| `MenuSeparator`: a line between groups | `factory.menuSeparator()`, `menu.addSeparator()` | none. It cannot be highlighted or chosen. |
+
+A disabled item draws dimmed and cannot be highlighted or chosen. An action runs after the menus close and before `Menu.CHOSEN`, and does nothing until you set one. A menu opens from one place at a time: a submenu item in a menu or a bar, or a drop-down button. Giving a menu that already opens from one place to another throws `IllegalArgumentException`, and so does a submenu item that would open the menu it is in or one that menu opens from. A check item names its state as `Toggle` does but fires no `Toggle` events; listen to the menu's `CHOSEN` or give the item its action.
+
+Kept entries can change while the menu is closed or open. This bar enables Paste each time the Edit menu opens:
+
+```java
+--8<-- "controls/ControlExamples.java:menuEntries"
+```
 
 ```java
 MenuItem paste = factory.menuItem("Paste")
@@ -1126,7 +1272,9 @@ menu.addItem(paste);
 paste.setEnabled(clipboard.hasText());
 ```
 
-`open(rect)` opens the menu below a rectangle as a [popup](overlays.md#popups), and `openAt(x, y)` with its corner at a point. A [drop-down button](#dropdownbutton) opens a menu below itself for you. `setMinWidth(width)` makes a menu at least that wide; it is never narrower than 60 units or its widest item.
+`factory.menu()` makes an empty menu. A menu is a component only so it can sit in a popup: do not add it to a container. `open(rect)` opens it below a rectangle as a [popup](overlays.md#popups), and `openAt(x, y)` with its corner at a point; `close()` closes it. A [drop-down button](#dropdownbutton) opens a menu below itself for you. `setMinWidth(width)` makes a menu at least that wide; it is never narrower than 60 units or its widest item. With the default paddings an item is one line plus 6 units tall, with 14 units at the left for the check mark and 14 at the right for the submenu arrow, and a separator is 5 units tall.
+
+A menu is the whole content of its popup and has no parent, so its events reach only handlers on the menu itself, never the screen.
 
 An open menu takes focus. Hovering an item highlights it and opens its submenu. Up and Down move the highlight past separators and disabled items; Right opens a submenu and Left closes it; Enter or Space chooses; Escape closes the menu it is pressed in. Choosing closes the whole chain of menus and then runs the action, and focus goes back to where it was before the first menu opened. A click outside closes them all.
 
@@ -1136,7 +1284,7 @@ MenuBar bar = factory.menuBar()
         .addMenu("View", viewMenu);
 ```
 
-A menu bar's titles are `SubmenuItem`s: `menus()` lists them, `addMenu(entry)` and `removeMenu(entry)` change them, and a disabled title opens nothing. A menu bar opens a title's menu below it on a click and closes it on a second. While one of its menus is open, moving the pointer onto another title switches to that menu, and Left and Right in a menu with no submenu open move along the bar. A menu belongs to at most one bar, parent menu or drop-down button. The bar's selection is its open menu: `selectedIndex()` is the open title or -1, `select(index)` opens a menu from code and `clearSelection()` closes it.
+`factory.menuBar()` makes an empty bar. Its titles are `SubmenuItem`s: `menus()` lists them, `addMenu(entry)`, `addMenu(index, entry)` and `removeMenu(entry)` change them, and a disabled title, or one with no menu, opens nothing. A title is its text plus the title padding, the bar is one line plus 6 units tall, and the bar is not focusable. A menu bar opens a title's menu below it on a click and closes it on a second. While one of its menus is open, moving the pointer onto another title switches to that menu, and Left and Right in a menu with no submenu open move along the bar. A menu belongs to at most one bar, parent menu or drop-down button. The bar's selection is its open menu: `selectedIndex()` is the open title or -1, `select(index)` opens a menu from code and `clearSelection()` closes it.
 
 | Key | Required | Used for |
 |---|---|---|
@@ -1145,9 +1293,12 @@ A menu bar's titles are `SubmenuItem`s: `menus()` lists them, `addMenu(entry)` a
 | `menu.text`, `menu.text.disabled` | no | Item text, check marks and arrows |
 | `menu.shortcut` | no | Shortcut hints. Falls back to `menu.text.disabled`. |
 | `menu.separator` | no | Separator lines. Falls back to `separator`. |
+| `menu.item.padding` | no | Around an item's text; the left side holds the check mark and the right side the submenu arrow. 14 at the sides and 3 at the top and bottom. |
+| `menu.padding` | no | Between the menu's edges and its items. 2 on every side. |
 | `menubar.background` | no | Behind the bar. Nothing if missing. |
 | `menubar.item.hovered` | no | A title under the pointer or with its menu open. Falls back to `menu.item.hovered`. |
 | `menubar.text` | no | Titles. Falls back to `menu.text`. |
+| `menubar.title.padding` | no | Around each title. 8 at the sides and 3 at the top and bottom. |
 
 | Event | Kind | Fires |
 |---|---|---|
@@ -1166,7 +1317,7 @@ A popup that shows any component, such as a color picker opened from a button, o
 --8<-- "controls/ControlExamples.java:flyout"
 ```
 
-`open(rect)` opens it below a rectangle, or above when there is more room there, and `openAt(x, y)` with its corner at a point, as a [menu](#menu-and-menubar) opens. `openIn(rect)` lays it out inside an area, at its size and where its alignment places it, the area's top-left corner by default, so a flyout can open beside a component: pass the space from the component's right edge to the host's. A [drop-down button](#dropdownbutton) opens one for you. Opening an open flyout, or one with no content, does nothing.
+`open(rect)` opens it below a rectangle, or above when there is more room there, and `openAt(x, y)` with its corner at a point, as a [menu](#menu-and-menubar) opens. `openIn(rect)` lays it out inside an area, at its size and where its alignment places it, the area's top-left corner by default, so a flyout can open beside a component: pass the space from the component's right edge to the host's. A [drop-down button](#dropdownbutton) opens one for you. Opening an open flyout, or one with no content, does nothing. `factory.flyout()` makes an empty flyout and `factory.flyout(content)` one that shows a component. Like a menu, a flyout is a component only so it can sit in its popup: open it, and do not add it to a container.
 
 | Method | Default | Notes |
 |---|---|---|
@@ -1200,12 +1351,22 @@ A titled header that shows or hides a component below it.
 Expander filters = factory.expander("Filters").setContent(filterPanel).setExpanded(true);
 ```
 
-A click on the header, Enter or Space flips it; keys pressed inside the content do not. While collapsed, the content is out of the tree: it takes no space and no input, and loses focus. The header is one line plus 6 units tall, with an arrow and the title. The content goes below it, across the expander's width, placed by its own alignment.
+`factory.expander()` makes one with no title, collapsed and empty, and `factory.expander(title)` gives it a title.
+
+| Method | Default | Notes |
+|---|---|---|
+| `setTitle(title)` | none | One line, in the header (`Titled`) |
+| `setContent(component)` | none | What shows below the header; `null` for none. The old content leaves the tree. A component that already has a parent throws. |
+| `setExpanded(expanded)` | collapsed | Works while disabled too |
+| `toggle()` | | Flips it as a click would, firing `EXPANDED` but not `EXPAND`. Does nothing while disabled. |
+
+A left click on the header, or Enter, keypad Enter or Space while it has focus, flips it; held keys that repeat do not, and keys pressed inside the content do not either. While collapsed, the content is out of the tree: it takes no space and no input, and loses focus, though `content()` still returns it. The expander is focusable and tabbable, and the header shows the hand cursor. The header is one line plus 6 units tall: a 7-unit arrow, pointing right when collapsed and down when expanded, then the title. The content goes below it, across the expander's width, placed by its own alignment. The expander asks for the wider of the header and the content, and the header's height plus the content's while expanded. A disabled expander does not flip.
 
 | Key | Required | Used for |
 |---|---|---|
 | `expander.header`, `expander.header.hovered` | no | Behind the header. Nothing if missing. |
 | `expander.text`, `expander.text.disabled` | no | The title and arrow |
+| `expander.header.padding` | no | Between the header's edges and its arrow and title. 4 at the sides and 3 at the top and bottom. |
 
 | Event | Kind | Fires |
 |---|---|---|
@@ -1223,13 +1384,15 @@ SplitPane split = factory.splitPane(Orientation.HORIZONTAL)
         .setPosition(0.3f);
 ```
 
-`HORIZONTAL` puts the first component on the left, `VERTICAL` on top. The position is the fraction of the space, after the 4-unit divider, that the first side gets. A drag keeps each side at least its minimum (20 units each by default, `setMinSizes`) when both fit; `setPosition` is not limited. Each side is placed in its part by its own alignment, so give it `Anchor.FILL` to fill it.
+`factory.splitPane()` makes an empty pane side by side, and `factory.splitPane(orientation)` either way. `HORIZONTAL` puts the first component on the left, `VERTICAL` on top; `setOrientation` changes it later. `setFirst` and `setSecond` place the two sides, and a missing side counts as empty. The position is the fraction of the space, after the 4-unit divider, that the first side gets, 0.5 by default. A drag with the left button keeps each side at least its minimum (20 units each by default, `setMinSizes`) when both fit; `setPosition` is not limited, and throws outside 0 to 1. Each side is placed in its part by its own alignment, so give it `Anchor.FILL` to fill it. The divider shows a resize cursor.
 
-Keys: `split.divider` and `split.divider.hovered` (paints, optional). The divider falls back to `separator`.
+The pane asks for both sides' desired sizes and the divider along the split, and the larger of the two across it.
+
+Keys: `split.divider` and `split.divider.hovered` (paints, optional), the divider and the divider under the pointer or being dragged. The first falls back to `separator` and the second to the first.
 
 | Event | Kind | Fires |
 |---|---|---|
-| `SplitPane.MOVE` | Pre | For each drag step that would move the divider, with the position already kept within the minimum sizes |
+| `SplitPane.MOVE` | Pre | For each drag step that would move the divider, with the position already kept within the minimum sizes. Cancel to keep the divider in place, or set another position, which is clamped to 0 to 1 and kept within the minimum sizes. |
 | `SplitPane.MOVED` | Post | After every move, including `setPosition` |
 
 ## NavigationView
@@ -1240,23 +1403,51 @@ A pane of navigation items at the side of a screen, with the content of the sele
 --8<-- "controls/ControlExamples.java:navigation"
 ```
 
-The pane holds, from the top: the toggle and the title, the pane header (`setPaneHeader`, such as a search box), the items, which scroll, the footer items (`addFooterItem`), and the pane footer (`setPaneFooter`, such as the user's [avatar](#avatar)). The entries are made by the factory, as menu items are: `navigationItem(text)`, `navigationHeader(text)` for a caption over a group, and `navigationSeparator()` for a line. The view's `addItem(text, page)`, `addHeader(text)` and `addSeparator()` make them for you. An entry belongs to one view, or one parent item, at a time.
+`factory.navigationView()` makes an empty view in `AUTO` mode with nothing selected. It stretches over its slot by default. The pane holds, from the top: the toggle and the title (`setTitle`), the pane header (`setPaneHeader`, such as a search box), the items, which scroll, the footer items (`addFooterItem`), and the pane footer (`setPaneFooter`, such as the user's [avatar](#avatar)). The toggle, three lines, shows only while the pane can open over the content, so not in `EXPANDED`.
+
+### Entries
+
+The pane's entries are `NavigationEntry`s, a sealed set of three kinds of [entry](#entries):
+
+| Entry | Made by | What it is |
+|---|---|---|
+| `NavigationItem` | `factory.navigationItem(text)`, `view.addItem(text, page)` | Something the user picks: a section of the screen, with an optional icon, badge, page and children |
+| `NavigationHeader` | `factory.navigationHeader(text)`, `view.addHeader(text)` | A caption over a group of items, drawn in `nav.header.text`. It has only `setText`. The user cannot pick it, the keyboard passes over it, and it is hidden in the column of icons. |
+| `NavigationSeparator` | `factory.navigationSeparator()`, `view.addSeparator()` | A line between groups. The user cannot pick it and the keyboard passes over it. |
+
+`items()` lists the entries above the footer, and `addItem(entry)`, `addItem(index, entry)`, `removeItem(entry)` and `clearItems()` change them. `footerItems()`, `addFooterItem(entry)` and `removeFooterItem(entry)` do the same for the footer, whose entries do not scroll. `allItems()` lists every `NavigationItem` in the order selection indexes count them, headers and separators left out. An entry belongs to one view, or one parent item, at a time, and an entry made by anything but Strata's factory throws. Removing an item discards the pages kept for it and its children, and removing the selected item clears the selection.
 
 | Item method | Default | Notes |
 |---|---|---|
 | `setText(text)` | | The item's text |
-| `setIcon(sprite)`, `setIcon(visual)`, `clearIcon()` | none | A square one line tall before the text. In the column of icons, the icon is all the item shows. |
+| `setIcon(sprite)`, `setIcon(visual)`, `clearIcon()` | none | A square one line tall before the text. In the column of icons, the icon is all the item shows. Without an icon the space stays, so the texts of items line up. |
 | `setPage(builder)` | none | Builds the item's page with the view's factory the first time it is selected; see below |
-| `setSelectable(selectable)` | `true` | Not selectable: a pick only activates it, as for Sign out |
-| `setEnabled(enabled)` | `true` | A disabled item cannot be picked; its tooltip still shows |
+| `setSelectable(selectable)` | `true` | Not selectable: a pick only activates it, as for Sign out, or expands it if it has children. Code can still select it. |
+| `setEnabled(enabled)` | `true` | A disabled item draws in the disabled text, cannot be picked or reached with the keyboard, and still shows its tooltip. Disabling the selected item keeps it selected. |
 | `setTooltip(tooltip)` | none | In the column of icons, an item with no tooltip shows its text |
-| `setBadge(count)` | 0 | A count at the item's right end, with the shared `badge.*` keys; 0 hides it, and above 99 it shows `99+` |
-| `addItem(child)`, `removeItem(child)` | none | Children, shown below the item, indented, while it is expanded |
-| `setExpanded(expanded)` | `false` | Shows the children |
+| `setBadge(count)` | 0 | A count at the item's right end, or at the corner of its icon in the column of icons, with the shared `badge.*` keys; 0 hides it, and above 99 it shows `99+`. Negative throws. |
+| `addItem(child)`, `removeItem(child)` | none | Children, shown below the item, indented, while it is expanded. An item with children shows an arrow at its right end. |
+| `setExpanded(expanded)` | `false` | Shows the children. In a view, a change reports `NavigationView.ITEM_EXPANDED`. In the column of icons children open in a menu instead, whatever this says. |
+
+### The view
+
+| View method | Default | Notes |
+|---|---|---|
+| `setTitle(title)` | none | Beside the toggle at the top of the pane, and in the bar of `MINIMAL` (`Titled`) |
+| `setDisplayMode(mode)` | `AUTO` | A `NavigationView.DisplayMode`; see below |
+| `setPaneWidth(width)` | 120 | The pane's width, beside the content in `EXPANDED` and over it in the other modes |
+| `setAutoWidths(compactBelow, minimalBelow)` | 400, 240 | Where `AUTO` changes mode. `minimalBelow` above `compactBelow` throws. |
+| `setToggleShown(shown)` | `true` | Without the toggle, only code, and Enter or Space in `MINIMAL`, open the pane over the content |
+| `setPaneHeader(component)`, `setPaneFooter(component)` | none | Your components at the top and foot of the pane, out of the tree in the column of icons. `null` removes one. |
+| `setContent(component)` | none | Shown beside the pane while the selected item has no page, or nothing is selected |
+| `setActivateOnClick(onClick)` | `true` | Off, a single click selects or expands without activating, and a double click activates. Enter and Space always activate. |
+| `setExpanded(expanded)` | `false` | Opens or closes the pane over the content from code, reporting `EXPANDED` but never asking `EXPAND`. Does nothing in `EXPANDED` mode or while the view is disabled, hidden or not on a screen. |
+
+A component given to `setPaneHeader`, `setPaneFooter` or `setContent` that is already in a tree, or was made by another factory, throws `IllegalArgumentException`. Disabled, the view closes the pane over the content and its menu, and it and everything in it take no focus or input.
 
 ### Display modes
 
-`setDisplayMode` picks how the pane shows:
+`setDisplayMode` picks how the pane shows, with a `NavigationView.DisplayMode`:
 
 - `EXPANDED`: the pane is open at its width, 120 by default (`setPaneWidth`), beside the content.
 - `COMPACT`: the pane is a column of icons beside the content. The toggle at its top opens the full pane over the content.
@@ -1269,7 +1460,9 @@ The pane over the content is a popup laid out at the view's left edge, as wide a
 
 A click on an item asks `Activatable.ACTIVATE`, then, if the item is selectable and not selected, `Selection.SELECT`, and reports `SELECTED` and `ACTIVATED`. Activation fires on every click, the selected item's included, so an item that only acts, such as Sign out, is made not selectable and handled with `ACTIVATED`. A click on an item's arrow expands or collapses it, and a click elsewhere on an item with children that is not selectable does the same. In the column of icons, a click on an item with children opens them in a menu beside the column; choosing one picks that child. With `setActivateOnClick(false)`, a single click selects or expands without activating, and a double click activates.
 
-The indexes of these events count `allItems()`: every item depth first, the children of collapsed items included, then the footer items. Adding or removing items before the selected one moves its index, and the view reports `SELECTED` with the new one.
+The indexes of these events count `allItems()`: every item depth first, the children of collapsed items included, then the footer items. Read the item with `view.allItems().get(event.value())`, or `view.selected()`. Adding or removing items before the selected one moves its index, and the view reports `SELECTED` with the new one.
+
+The item events carry a `NavigationView.Expansion`, a record of the item and whether its children show. A handler on `EXPAND_ITEM` may rewrite it to another item of the view; the view ignores null and items it does not hold. A click on an item's arrow asks `EXPAND_ITEM` and nothing else.
 
 ### Pages and content
 
@@ -1369,13 +1562,14 @@ GridView<Item> inventory = factory.<Item>gridView(item -> factory.image(item.ico
         .onEvent(GridView.CLICKED, event -> this.take(event.value().index(), event.value().button()));
 ```
 
-There is one cell per item, null items being empty cells, in rows of `setColumns` (9 by default). Cells are 18 units square (`setCellSize`) with no space between them (`setSpacing`), and a filled cell shows the component its cell factory made, inset by one unit. A click with any button fires `GridView.CLICK` and then `GridView.CLICKED` with the cell, its item, the button and the modifiers. `setSelectable(true)` also selects the cell a left click lands on. A left double click activates a cell, or a single click with `setActivateOnClick(true)`. `setItem(index, item)` rebuilds one cell. The grid is positional: `setItems` keeps the selected index, and the key function only matters to `selectItem`.
+`factory.gridView(cellFactory)` makes a grid, and `factory.gridView()` one whose cells show each item's [appearance](appearances.md). There is one cell per item, null items being empty cells, in rows of `setColumns` (9 by default). Cells are 18 units square (`setCellSize`) with no space between them (`setSpacing`), and a filled cell shows the component its cell factory made, inset by `grid.cell.padding`, one unit by default. `setTooltips(function)` gives each filled cell a tooltip, and `hoveredIndex()` is the cell under the pointer or -1. The grid asks for its columns and rows of cells with the spacing between them. It is not focusable, so it has no keyboard selection, and it consumes the clicks on its cells, empty ones included. A click with any button fires `GridView.CLICK` and then `GridView.CLICKED` with the cell, its item, the button and the modifiers. `setSelectable(true)` also selects the cell a left click lands on. A left double click activates a cell, or a single click with `setActivateOnClick(true)`. `setItem(index, item)` rebuilds one cell. The grid is positional: `setItems` keeps the selected index, and the key function only matters to `selectItem`.
 
 | Key | Required | Used for |
 |---|---|---|
 | `grid.cell` | yes | Each cell, behind its content |
 | `grid.cell.hovered` | no | Over the cell under the pointer. Nothing if missing. |
 | `grid.cell.selected` | no | Over the selected cell. Falls back to `grid.cell.hovered`. |
+| `grid.cell.padding` | no | Between a cell's edges and its content. 1 on every side. |
 
 | Event | Kind | Fires |
 |---|---|---|
@@ -1436,9 +1630,18 @@ They share two attributes, `HasDate` and `HasTime`, so one handler on a form hea
 | `setDateFilter(allowed)` | every date | Which dates the user may pick. Refused days draw disabled. The control asks the filter whenever it draws or checks a date, so it may read state that changes. |
 | `setFirstDayOfWeek(day)` | the language's | `null` follows the language again |
 | `setTime(time)`, `clearTime()` | empty | Seconds are dropped unless shown, and the fraction of a second always |
-| `setClockFormat(format)` | the language's | `ClockFormat.H12` or `H24`; `null` follows the language again |
+| `setClockFormat(format)` | the language's | A `HasTime.ClockFormat`: `H12` for hours 1 to 12 with the half of the day, `H24` for hours 0 to 23. `null` follows the language again, and `clockFormat()` is empty while it does. |
 | `setSecondsShown(shown)` | false | Hiding seconds drops them from the time |
 | `setMinuteStep(minutes)` | 1 | A divisor of 60: the rows of the minute column and the step of Up and Down on the minutes. Typed minutes and minutes from code stay as they are. |
+
+The three pickers, `DatePicker`, `TimePicker` and `DateTimePicker`, also share these:
+
+| Method | Default | Notes |
+|---|---|---|
+| `factory.datePicker(date)`, `factory.timePicker(time)`, `factory.dateTimePicker(value)` | | Make a picker with a value. The forms with no arguments make an empty one. |
+| `setPlaceholder(text)` | "Pick a date", "Pick a time", "Pick a date and time" | Shown while the field is empty and unfocused. The defaults are the translated `strata.date.placeholder`, `strata.time.placeholder` and `strata.datetime.placeholder`. |
+| `setClearable(clearable)` | `true` | Whether Delete clears the value. Code can always clear it. |
+| `open()`, `close()` | | Open or close the popup from code. `open()` reports `OPENED` but never asks `OPEN`, and does nothing while the picker is open, disabled or not in a tree. |
 
 The language decides month and weekday names, the first day of the week, the order of a date's parts and their separator, and whether the clock has 12 or 24 hours. Strata reads them from the JDK's data for the translator's locale, after asking the translator for the `strata.date.*` and `strata.time.*` keys in the [translation keys reference](../reference/translation-keys.md#dates-and-times). Today comes from the platform's wall clock.
 
@@ -1545,7 +1748,36 @@ A change by the user first asks `PICK` with the whole new value, then `PICK_DATE
 
 ### Drawing the pickers
 
-The fields draw with the text box's faces, text, placeholder and padding, and the time columns with the list keys, so a theme that styles text boxes and lists styles the pickers too. The calendar needs one key of its own, `calendar.day.selected`. A picker draws its focused part on `picker.segment.focused`, its button with the `picker.button` keys (which fall back to the spinner's buttons), and an icon from `picker.icon.date` or `picker.icon.time` when the theme has one, otherwise the combo box's arrow. Every key is in the [theme key reference](../reference/theme-keys.md#calendarview).
+The fields draw with the text box's faces, text, placeholder and padding, and the time columns with the list and scroll bar keys, so a theme that styles text boxes and lists styles the pickers too. The calendar needs one key of its own, `calendar.day.selected`, which a date picker needs as well. The other calendar keys are optional:
+
+| Key | Required | Used for |
+|---|---|---|
+| `calendar.day.selected` | yes | Behind the picked day |
+| `calendar.background` | no | Behind the whole calendar. Nothing if missing. |
+| `calendar.header.text` | no | The title. Falls back to `TextStyle.DEFAULT`. |
+| `calendar.header.hovered` | no | Behind the title or an arrow under the pointer. Falls back to `list.row.hovered`. |
+| `calendar.weekday.text` | no | The weekday names. Falls back to `calendar.day.text.outside`. |
+| `calendar.day.text` | no | Days of the month in view, months and years. Falls back to `TextStyle.DEFAULT`. |
+| `calendar.day.text.outside` | no | Days of the months before and after, and the years outside the decade. Falls back to `calendar.day.text.disabled`. |
+| `calendar.day.text.disabled` | no | Days that cannot be picked, and every day while disabled. Falls back to `textbox.text.disabled`. |
+| `calendar.day.text.selected` | no | The picked day. Falls back to `calendar.day.text`. |
+| `calendar.day.hovered` | no | Behind the day under the pointer. Falls back to `list.row.hovered`. |
+| `calendar.day.today` | no | Behind today. Without it, today has a one-unit outline in the day text's color. |
+| `calendar.day.marker` | no | The square under a marked day. Falls back to the day text's color. |
+| `calendar.arrow` | no | The arrows. Without it they draw in the title's color, and in the disabled text's color at the ends of the range. |
+| `calendar.focus` | no | The ring around the cursor's cell while focused. Falls back to `button.focus`. |
+| `calendar.padding` | no | Between the calendar's edges and its grid. 4 on every side. |
+| `calendar.cell.padding` | no | Around each day number. 3 at the sides and 2 at the top and bottom. |
+
+The pickers' own keys are optional too, and `TimePicker` and `DateTimePicker` read the same ones as `DatePicker`:
+
+| Key | Required | Used for |
+|---|---|---|
+| `picker.segment.focused` | no | Behind the focused part while the field has focus. Falls back to `textbox.selection`. |
+| `picker.button`, `picker.button.hovered`, `picker.button.disabled` | no | The button, under the pointer, and on a disabled picker. They fall back to `spinner.button`, `spinner.button.hovered` and `spinner.button.disabled`, and those to the button faces. |
+| `picker.icon.date`, `picker.icon.time` | no | The icon on a date picker's or date and time picker's button, and on a time picker's. Without it the button draws the combo box's down arrow in the text color. |
+| `picker.popup` | no | Behind the popup. Falls back to `combobox.popup`. |
+| `picker.padding` | no | Between the field's edges and its text. Falls back to `textbox.padding`. |
 
 ## Controls that do not exist yet
 

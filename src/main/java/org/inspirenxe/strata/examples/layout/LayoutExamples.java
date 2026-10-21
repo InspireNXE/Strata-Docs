@@ -256,6 +256,41 @@ public final class LayoutExamples {
     }
 
     /**
+     * A scroll panel around a long column, with a button that scrolls back to the top.
+     *
+     * @return the screen
+     */
+    public static Screen scrollPanel() {
+        return factory -> {
+            // --8<-- [start:scroll]
+            final StackPanel rows = factory.stackPanel().setSpacing(1);
+            rows.setAlignment(HorizontalAlignment.STRETCH, VerticalAlignment.TOP);
+            for (int i = 1; i <= 40; i++) {
+                rows.add(factory.label("Row " + i));
+            }
+
+            // Scroll up and down only, so the rows are measured with the viewport's width
+            final ScrollPanel scroll = factory.scrollPanel()
+                    .setPolicy(ScrollPanel.ScrollPolicy.NEVER, ScrollPanel.ScrollPolicy.AUTO)
+                    .setScrollRate(12)
+                    .add(rows);
+            scroll.setSize(160, 100);
+
+            // SCROLLED reports every change of offset, by the wheel, the bar, the keys or code
+            final Label where = factory.label("Scrolled 0 of 0");
+            scroll.onEvent(ScrollPanel.SCROLLED, event -> {
+                final ScrollPanel.State now = event.value();
+                where.setText("Scrolled " + Math.round(now.scrollY()) + " of " + Math.round(now.maxScrollY()));
+            });
+            final Button top = factory.button("Top").onEvent(Button.PRESSED, event -> scroll.setScroll(0, 0));
+            // --8<-- [end:scroll]
+            final StackPanel column = factory.stackPanel().setPadding(8).setSpacing(4).add(scroll).add(where).add(top);
+            column.setBackground(PANEL);
+            return factory.anchorPanel().add(column.setAnchor(Anchor.CENTER)).setAnchor(Anchor.FILL);
+        };
+    }
+
+    /**
      * Margin outside, padding inside.
      *
      * @return the screen

@@ -4,16 +4,16 @@ Each guide covers one part of Strata in depth: the rules, the defaults, the edge
 
 | Guide | Read it to learn |
 |---|---|
-| [Components](components.md) | What every component has: state flags, the tree, attachment, focus, cursors, bounds |
-| [Layout](layout.md) | How sizes and positions are decided, and every container |
+| [Components](components.md) | What every component has: the tree, parents and ancestors, drawing order and z index, state flags, focus, cursors, tooltips, bounds |
+| [Layout](layout.md) | How sizes and positions are decided, margins and padding, every container, the spacer, and scrolling |
 | [Controls](controls.md) | What each control does, key by key: labels and images, buttons, checkboxes, sliders, text fields, lists, tables, trees, drop-downs, menus, pickers, windows, message boxes, tabs, progress bars and separators |
 | [Appearances](appearances.md) | How values of one type show their icon, name and tooltip in every list, table and combo box |
-| [Overlays and tooltips](overlays.md) | Popups, modal dialogs, tooltips and held modifiers |
+| [Overlays and tooltips](overlays.md) | Popups, modal dialogs, toasts, how overlays are layered, tooltips and held modifiers |
 | [Events](events.md) | Handlers, priorities, Pre and Post events, cancellation, bubbling, clicks and drags |
 | [Data binding](binding.md) | Keeping controls in step with states in a model, one way or two |
 | [Event snapshots](snapshots.md) | Comparing a component's state when an event fired with its state now |
 | [Input and focus](input-focus.md) | Keys, modifiers, shortcuts, focus rules, tab order, text input |
-| [Screens](screens.md) | The screen lifecycle, rebuilding, closing and stacks |
+| [Screens](screens.md) | Opening screens with `Strata.screens()`, the lifecycle, handles, rebuilding, screens above screens, stacks and theme reloads |
 | [Themes](theming.md) | Style keys, paints, sprites, nine-slices, themes by id and theme files |
 | [Text](text.md) | Text styles, spans, measurement and wrapping |
-| [Extending Strata](extending.md) | Changing built-ins through their events, composition, custom components with their own events, and custom layouts |
+| [Extending Strata](extending.md) | Changing built-ins through their events, composition, composites of private parts, custom components with their own events, every hook and when it runs, and custom layouts |

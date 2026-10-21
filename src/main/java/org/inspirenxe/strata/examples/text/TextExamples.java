@@ -24,6 +24,7 @@ import org.inspirenxe.strata.api.visual.Visual;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 /**
@@ -107,5 +108,15 @@ public final class TextExamples {
         final Label row = ui.label(Text.concat(Text.visual(lantern), Text.of(" Lantern  "), cost));
         // --8<-- [end:inline]
         return row;
+    }
+
+    static Text shouted(final Text line) {
+        // --8<-- [start:inline-spans]
+        // Capitals for the characters; spans that hold a picture pass through unchanged
+        final Text shouted = line.mapSpans(span -> span.isInline()
+                ? span
+                : span.withText(span.text().toUpperCase(Locale.ROOT)));
+        // --8<-- [end:inline-spans]
+        return shouted;
     }
 }

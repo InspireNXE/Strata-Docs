@@ -8,7 +8,7 @@ Components never see engine input codes. Each adapter maps its engine's keys, bu
 
 The constants cover letters, digits (`NUM_0` to `NUM_9`), punctuation, `SPACE`, `ENTER`, `TAB`, `BACKSPACE`, `ESCAPE`, `INSERT`, `DELETE`, arrows, `HOME`, `END`, `PAGE_UP`, `PAGE_DOWN`, the lock keys, `PRINT_SCREEN`, `PAUSE`, `F1` to `F12`, the keypad (`KP_0` to `KP_9`, `KP_ENTER` and friends), left and right modifiers, and `MENU`. Keys an adapter cannot identify, such as F13 to F24 on most adapters, arrive as `Key.UNKNOWN`.
 
-A few helpers: `isEnter()` is true for `ENTER` and `KP_ENTER`, and `isPrintable()` for keys that usually type a character.
+A few helpers: `isEnter()` is true for `ENTER` and `KP_ENTER`, `isModifier()` for the eight left and right Shift, Control, Alt and Super keys, and `isPrintable()` for keys that usually type a character.
 
 !!! warning "Store keys by name"
     The order of the `Key` constants carries no meaning and may change between versions. Save a key binding as `key.name()` and load it with `Key.valueOf(name)`, never by ordinal.
@@ -31,7 +31,7 @@ Strata delivers repeats on every engine. Engines differ in how they report a hel
 
 - If the engine sends real repeats, the adapter passes them on.
 - If the engine reports a held key as more presses (AWT does), the adapter uses the SPI's `HeldKeys` to turn the second and later presses into `REPEAT`.
-- If the engine sends no repeats at all, the host makes them: after 400 ms, then every 33 ms, for Left, Right, Up, Down, Backspace, Delete, Home, End, Page Up and Page Down only. These timings follow the host's clock and need `render` to be called every frame.
+- If the engine sends no repeats at all, the host makes them: after 400 ms, then every 33 ms, for Left, Right, Up, Down, Backspace, Delete, Home, End, Page Up and Page Down only. Only the last of these keys pressed repeats, with the modifiers held when it went down, and each repeat goes to whatever has focus when it fires. These timings follow the host's clock and need `render` to be called every frame. A slow frame sends at most one repeat, so repeats are dropped rather than sent in a burst.
 
 The Swing adapter falls in the second group, so you see the user's system repeat rate there.
 
@@ -50,6 +50,8 @@ Modifiers.of(Modifier.CONTROL, Modifier.SHIFT);
 Modifiers.NONE.with(Modifier.ALT).without(Modifier.ALT);
 ```
 
+`InputEvents.MODIFIERS_CHANGED` fires whenever the held set changes, so a screen can relabel a button while Control is held; see [Held modifiers](overlays.md#held-modifiers).
+
 Some engines do not report modifiers with every kind of input. An adapter for such an engine reports `Modifiers.NONE` for those events, typically pointer moves, scrolls or typed characters. See [Platform differences](../platforms/differences.md#modifier-keys).
 
 ## Shortcuts
@@ -67,7 +69,13 @@ Some engines do not report modifiers with every kind of input. An adapter for su
 --8<-- "events/EventExamples.java:shortcut"
 ```
 
-Put screen-wide shortcuts on the root, as above. Keys bubble from the focused component, so a shortcut on the root fires unless something focused consumed the key first. A focused text box consumes plain typing keys, but not Control combinations it does not use, so Ctrl+S still reaches the root while the user is typing.
+Put screen-wide shortcuts on the screen's content, as above. Keys bubble from the focused component, so a shortcut there fires unless something focused consumed the key first. A focused text box consumes plain typing keys, but not Control combinations it does not use, so Ctrl+S still reaches the content while the user is typing. Keys pressed inside an overlay bubble to the overlay's content and stop there, so a shortcut that should also work while a popup or dialog has focus needs a handler on that content too.
+
+`ModifierPolicy.matches(required, held)` is the test `is` uses, and it works on the modifiers of any event, such as a click that does something else with Control held:
+
+```java
+--8<-- "events/EventExamples.java:modifier-click"
+```
 
 ## Characters
 
@@ -85,14 +93,14 @@ Strata handles this through focus. When a component that accepts text input gain
 
 ## Focus
 
-At most one component per host has keyboard focus. Keys go to it, or to the screen's root when nothing has focus. Characters go only to it.
+At most one component per host has keyboard focus. Keys go to it. When nothing has focus, keys go to the content of the top dialog, or to the screen's content when no dialog is open. Characters go only to the focused component.
 
-A component can take focus when it is attached, focusable, visible and enabled, and every ancestor is visible and enabled. Built-in controls you work with the keyboard, such as buttons, checkboxes, sliders and text boxes, are focusable; [Components](components.md#what-only-some-components-have) lists them all. Labels and panels are not. Scroll panels and scroll bars are focusable once you call `setFocusable(true)`.
+A component can take focus when it is attached, focusable, visible and enabled, and every ancestor is visible and enabled. While a dialog is open, only components in that dialog, or in overlays opened after it, can take focus. Built-in controls you work with the keyboard, such as buttons, checkboxes, sliders and text boxes, are focusable; [Components](components.md#what-only-some-components-have) lists them all. Labels and panels are not. Scroll panels and scroll bars are focusable once you call `setFocusable(true)`.
 
 Focus moves when:
 
 - a mouse button goes down: focus moves to the pressed component or its nearest focusable ancestor, or is cleared if there is none. This happens just before `POINTER_PRESS` fires, so a click on empty space clears focus;
-- Tab or Shift+Tab is pressed and nothing consumed it;
+- Tab or Shift+Tab is pressed or repeats, without Control or Alt, and nothing consumed it;
 - code calls `requestFocus()`, which returns false and changes nothing if the component cannot take focus.
 
 Focus is cleared when the focused component, or an ancestor, is hidden, disabled or removed. A screen that is rebuilt starts with nothing focused.
@@ -103,9 +111,9 @@ There is no public method to clear focus from a component. Requesting focus on a
 
 Tab moves to the next component in tab order and Shift+Tab to the previous one, wrapping at both ends. With nothing focused, Tab goes to the first and Shift+Tab to the last.
 
-The order holds every component that is focusable and tabbable, with all its ancestors visible and enabled. It is sorted by tab index, lowest first, and components with equal indexes keep tree order: depth first, children in the order of `children()`, which `insert` and `move` change. The [drawing order](components.md#drawing-order) does not count, so raising a window does not change where Tab goes. A focused component that is not in the order, for example one focused by a click with tabbing turned off, counts as "nothing focused".
+The order holds every component that is focusable and tabbable, with all its ancestors visible and enabled, in the top dialog or, with no dialog open, in the screen's content. Tab never moves into a popup; a [flyout](controls.md#flyout) handles Tab itself and keeps focus inside it. It is sorted by tab index, lowest first, and components with equal indexes keep tree order: depth first, children in the order of `children()`, which `insert` and `move` change. The [drawing order](components.md#drawing-order) does not count, so raising a window does not change where Tab goes. A focused component that is not in the order, for example one focused by a click with tabbing turned off, counts as "nothing focused".
 
-Ctrl+Tab and Alt+Tab do not move focus, so they stay free for the engine or the operating system. A component that consumes Tab keeps focus where it is; nothing built in does.
+Ctrl+Tab and Alt+Tab do not move focus, so they stay free for the engine or the operating system. A component that consumes Tab keeps focus where it is. Among the built-ins, only a flyout and a text box showing suggestions do.
 
 ```java
 first.setTabIndex(1);
@@ -115,7 +123,7 @@ skipMe.setTabbable(false);   // still focusable by clicking
 
 ## Pointer input
 
-Pointer positions are in UI units in host coordinates. Mouse buttons are `LEFT`, `RIGHT`, `MIDDLE`, `BACK` (button 4), `FORWARD` (button 5) and `UNKNOWN`. Clicks, drags, hover and scrolling are covered in [Events](events.md#clicks).
+Pointer positions are in UI units in host coordinates. `MouseButton` is `LEFT`, `RIGHT`, `MIDDLE`, `BACK` (button 4), `FORWARD` (button 5) or `UNKNOWN` for a button the adapter could not map. Scroll amounts are in wheel notches, and `ScrollEvent.kind()` says whether they came from a notched wheel (`ScrollKind.WHEEL`, 1 per notch) or a trackpad or smooth wheel (`ScrollKind.PRECISE`, fractions). Clicks, drags, hover and scrolling are covered in [Events](events.md#clicks).
 
 ## What reaches the engine
 
@@ -124,10 +132,10 @@ Every input call into the host returns whether Strata used it, and adapters pass
 | Input | Counts as used when |
 |---|---|
 | Pointer move | The pointer is over a component, or a drag is in progress |
-| Button press | It hit a component |
+| Button press | It hit a component, closed a popup, or a dialog was open |
 | Button release | It ended a press that started on a component |
 | Scroll | A component consumed it |
-| Key | A component consumed it, or Tab moved focus |
+| Key | A component consumed it, Escape closed an overlay, or Tab moved focus |
 | Character | The focused component consumed it |
 
 A screen whose root fills the host is "a component" everywhere, so it claims every press. On an engine that shows its own widgets in the same screen as a Strata host, those widgets would never be clicked.

@@ -17,6 +17,18 @@ The theme lacks keys that components in the tree require. The message lists ever
 
 The same rules apply to the component `Screen.build` returns.
 
+### `IllegalStateException: Expected one Strata provider on the class path, found 0`
+
+A `Strata` method such as `Strata.screens()` or `Strata.texts()` could not find Strata's core. `strata-core` must be on the runtime class path; the Swing adapter brings it as a runtime dependency. "found 2" means two copies of core are on the class path, for example from two mods that each bundle it. Keep exactly one.
+
+### `IllegalStateException: No screen controller is set`
+
+`Strata.screens()` was called before the engine adapter handed Strata its screen controller. On Swing, call `setDefault()` on the `StrataPanel` that should show screens before opening any. On another engine, open screens only after the adapter has loaded; its documentation says when that is.
+
+### `IllegalStateException: Screen ... has closed and cannot open another`
+
+`open` was called on the handle of a screen that has closed, or whose host has since opened another screen. A stale handle ignores `invalidate` and `close`, but it cannot open a screen above a screen that is gone. Open from `Strata.screens()` instead, or keep only the handle of the current opening.
+
 ### `IllegalStateException: No snapshot was taken for this event`
 
 A handler called `event.snapshot()` or `currentSnapshot()` on an event that has no snapshot of that component: a Post, paint or measure event, or a component that joined the path during delivery. On a Post event, read `previous()` instead. See [Event snapshots](../guides/snapshots.md#when-there-is-no-snapshot).

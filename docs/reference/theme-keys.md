@@ -1,6 +1,6 @@
 # Theme keys
 
-Every style key the built-in controls read. A theme lacking a required key cannot show a tree that uses the control; see [Themes](../guides/theming.md#required-and-optional-keys). On a theme resolved from a `ThemeRef`, `theme.layer(key)` names the [layer](../guides/theming.md#layers) that set a key.
+Every style key the built-in controls read. A theme lacking a required key cannot show a tree that uses the control; see [Themes](../guides/theming.md#required-and-optional-keys). On a theme resolved from a `ThemeRef`, `theme.layer(key)` names the [layer](../guides/theming.md#layers) that set a key. [Theme files](../guides/theming.md#theme-files) use the same keys, each under `paints`, `text` or `insets` by its kind, and so do `ThemeOverrides` and `ThemeRef.override`.
 
 ## Button
 

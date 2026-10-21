@@ -19,11 +19,15 @@ import org.inspirenxe.strata.api.ComponentFactory;
 import org.inspirenxe.strata.api.component.Component;
 import org.inspirenxe.strata.api.control.attribute.text.TextInput;
 import org.inspirenxe.strata.api.control.attribute.value.Ranged;
+import org.inspirenxe.strata.api.control.attribute.value.Toggle;
 import org.inspirenxe.strata.api.control.button.Button;
 import org.inspirenxe.strata.api.control.display.Label;
 import org.inspirenxe.strata.api.control.field.Slider;
+import org.inspirenxe.strata.api.control.field.TextArea;
 import org.inspirenxe.strata.api.control.field.TextBox;
+import org.inspirenxe.strata.api.event.EventHandler;
 import org.inspirenxe.strata.api.event.Subscription;
+import org.inspirenxe.strata.api.event.control.ValueRequestEvent;
 import org.inspirenxe.strata.api.event.input.InputEvents;
 import org.inspirenxe.strata.api.geometry.Rect;
 import org.inspirenxe.strata.api.input.Key;
@@ -57,6 +61,27 @@ public final class EventExamples {
                 .onEvent(InputEvents.POINTER_ENTER, event -> System.out.println("Hovering Save"));
         // --8<-- [end:chain]
         return saveButton;
+    }
+
+    static void handler(final TextBox name, final TextArea notes) {
+        // --8<-- [start:handler]
+        // A handler is an EventHandler of the event interface the type carries, so one can serve several fields
+        final EventHandler<ValueRequestEvent<TextInput<?>, String>> noTabs =
+                event -> event.setValue(event.value().replace("	", "    "));
+        name.onEvent(TextInput.EDIT, noTabs);
+        notes.onEvent(TextInput.EDIT, noTabs);
+        // --8<-- [end:handler]
+    }
+
+    static void kinds(final StackPanel settings, final Button save) {
+        // --8<-- [start:kinds]
+        // A report with a value: control() is typed as the attribute, value() and previous() as its value
+        settings.onEvent(Toggle.TOGGLED, event -> {
+            final Toggle<?> toggle = event.control();
+            System.out.println(toggle + " went from " + event.previous() + " to " + event.value());
+            save.setEnabled(true);
+        });
+        // --8<-- [end:kinds]
     }
 
     static void veto(final ComponentFactory factory, final TextBox confirmation) {
@@ -140,6 +165,19 @@ public final class EventExamples {
             }
         });
         // --8<-- [end:shortcut]
+    }
+
+    static void modifierClick(final Label link, final Runnable openInNewWindow) {
+        // --8<-- [start:modifier-click]
+        // ModifierPolicy matches any set of modifiers, so pointer input can ask for them too
+        link.onEvent(InputEvents.CLICK, event -> {
+            if (event.button() == MouseButton.LEFT
+                    && ModifierPolicy.EXACT.matches(Modifiers.of(Modifier.CONTROL), event.modifiers())) {
+                openInNewWindow.run();
+                event.consume();
+            }
+        });
+        // --8<-- [end:modifier-click]
     }
 
     static void submit(final TextBox name, final Consumer<String> submit) {

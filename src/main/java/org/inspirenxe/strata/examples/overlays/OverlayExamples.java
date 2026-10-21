@@ -16,6 +16,7 @@
 package org.inspirenxe.strata.examples.overlays;
 
 import org.inspirenxe.strata.api.ComponentFactory;
+import org.inspirenxe.strata.api.component.Component;
 import org.inspirenxe.strata.api.component.Tooltip;
 import org.inspirenxe.strata.api.control.attribute.popup.Closable;
 import org.inspirenxe.strata.api.control.button.Button;
@@ -24,7 +25,10 @@ import org.inspirenxe.strata.api.control.field.TextBox;
 import org.inspirenxe.strata.api.control.window.MessageBox;
 import org.inspirenxe.strata.api.control.window.Window;
 import org.inspirenxe.strata.api.event.input.InputEvents;
+import org.inspirenxe.strata.api.geometry.Rect;
+import org.inspirenxe.strata.api.layout.Anchor;
 import org.inspirenxe.strata.api.layout.AnchorPanel;
+import org.inspirenxe.strata.api.layout.StackPanel;
 import org.inspirenxe.strata.api.overlay.Overlay;
 import org.inspirenxe.strata.api.text.Text;
 import org.inspirenxe.strata.api.theme.Paint;
@@ -75,12 +79,48 @@ public final class OverlayExamples {
         // --8<-- [end:dialog]
     }
 
+    static Overlay sidePane(final ComponentFactory factory, final Component<?> screenRoot) {
+        // --8<-- [start:popup-in]
+        // A pane over the left third of the screen. It stretches, so it fills the area.
+        final StackPanel pane = factory.stackPanel().setPadding(8).setSpacing(4)
+                .add(factory.label("Filters"))
+                .add(factory.checkBox("In stock only"));
+        pane.setBackground(Paint.solid(0xF0202020));
+        pane.setAnchor(Anchor.FILL);
+        final Rect screen = screenRoot.bounds();
+        final Overlay overlay = factory.overlays()
+                .popupIn(pane, new Rect(screen.x(), screen.y(), screen.width() / 3f, screen.height()));
+        // --8<-- [end:popup-in]
+        return overlay;
+    }
+
+    static void notices(final ComponentFactory factory) {
+        // --8<-- [start:toast]
+        // Text in the theme's toast style, for three seconds
+        factory.overlays().toast("Listing created");
+
+        // Any component, for as long as you say. It draws its own background.
+        final AnchorPanel notice = factory.anchorPanel().setPadding(6).add(factory.label("Ben sent you an offer"));
+        notice.setBackground(Paint.solid(0xF0203040));
+        factory.overlays().toast(notice, 5000);
+        // --8<-- [end:toast]
+    }
+
+    static Button doneButton(final ComponentFactory factory) {
+        // --8<-- [start:close-from-inside]
+        // Closes whichever popup or dialog the button is shown in
+        final Button done = factory.button("Done");
+        done.onEvent(Button.PRESSED, event -> factory.overlays().of(done).ifPresent(Overlay::close));
+        // --8<-- [end:close-from-inside]
+        return done;
+    }
+
     static Label tooltips(final ComponentFactory factory) {
         // --8<-- [start:tooltips]
         final Label price = factory.label("125.50/ea").setTooltip("Total: 1,506");
 
         price.setTooltip(Tooltip.lines(List.of(
-                Text.of("Diamond"),
+                Text.of("Silver ring"),
                 Text.of("Example Mod").color(0xFF5555FF).italic())));
         // --8<-- [end:tooltips]
         return price;

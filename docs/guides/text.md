@@ -17,7 +17,9 @@ Text has no style of its own until a control shows it. The control resolves it a
 --8<-- "text/TextExamples.java:styled"
 ```
 
-Text is immutable, and two texts built the same way are equal. Read the characters with `plain()`, for searching, sorting and narration.
+`Text.builder()` returns a `Text.Builder`. Its `append` adds text, or characters in the base or in a style of their own, and `color`, `bold` and `italic` add characters with that change to the base. `build()` returns the parts added so far as one text, and the builder can go on adding after it.
+
+Text is immutable, and two texts built the same way are equal. Read the characters with `plain()`, for searching, sorting and narration, and check for none with `isEmpty()`. The static methods on `Text` go through a `TextFactory` that Strata finds on the class path the first time one is used, so text can be made in a static field before any screen exists.
 
 ### Translated text
 
@@ -27,7 +29,7 @@ Text is immutable, and two texts built the same way are equal. Read the characte
 --8<-- "text/TextExamples.java:translated"
 ```
 
-Where the translation comes from depends on the platform. A game's adapter usually reads the game's own language files, so keys go wherever the game keeps its translations. On Swing, set a `ResourceBundle` with `SwingTranslations.use`; see [Swing](../platforms/swing.md#translations). A key with no translation shows the key itself, which makes missing ones easy to spot. Strata's own controls use keys too, listed in [Translation keys](../reference/translation-keys.md), with English built in.
+Where the translation comes from depends on the platform. A game's adapter usually reads the game's own language files, so keys go wherever the game keeps its translations. On Swing, set a `ResourceBundle` with `SwingTranslations.use`; see [Swing](../platforms/swing.md#translations). A key with no translation shows the key itself, which makes missing ones easy to spot, and the log gets one warning per missing key. Strata's own controls use keys too, listed in [Translation keys](../reference/translation-keys.md), with English built in.
 
 Plural rules are not handled. Pick the key for the count yourself, such as `shop.item` for one and `shop.items` for more.
 
@@ -67,9 +69,17 @@ Tooltips take a list of texts, one per line:
 --8<-- "text/TextExamples.java:inline"
 ```
 
+`Text.sprite(sprite, width, height)` needs a positive size; a square that fits the line comes from `Text.sprite(sprite)` alone.
+
 Labels, buttons, tooltips and toasts make each line tall enough for the pictures in it, and center the characters and each picture on the line. Controls whose rows have a fixed height, such as menus, keep it, so keep pictures there no taller than the text. A picture is never cut in two: when a label shortens a line with `...`, a picture that does not fit gives way to the dots.
 
-To text operations a picture is one character, U+FFFC, the object replacement character, which is also what `plain()` returns for it. It is not whitespace, so `trim` keeps it and wrapping keeps it next to the characters it touches. `mapSpans` sees it as a span whose `element()` is set; keep its text when you change the span, or it becomes plain characters.
+To text operations a picture is one character, U+FFFC, the object replacement character (`TextSpan.OBJECT_REPLACEMENT`), which is also what `plain()` returns for it. It is not whitespace, so `trim` keeps it and wrapping keeps it next to the characters it touches.
+
+A resolved picture is a span of its own whose `element()` holds an `InlineElement`: an `InlineSprite` with the sprite and its size, where 0 by 0 means it fits the line, or an `InlineVisual` with the visual. `isInline()` tells such a span from characters. `mapSpans` sees these spans too; `withStyle` keeps the picture, but `withText` turns the span into plain characters unless the new text is still U+FFFC, so leave picture spans alone when you change characters:
+
+```java
+--8<-- "text/TextExamples.java:inline-spans"
+```
 
 ## TextStyle
 
@@ -111,7 +121,7 @@ Other adapters use the engine's own text styles where it has them.
 
 ## TextSpan
 
-A `TextSpan` is a string with a `TextStyle`, the unit engines draw. `Text.resolve(base)` turns text into spans. `TextSpan.of(text)` uses the default style, and `withText` and `withStyle` make copies.
+A `TextSpan` is a string with a `TextStyle`, the unit engines draw, or a [picture](#pictures-in-text) in the style of the text around it. `Text.resolve(base)` turns text into spans, joining neighbors of equal style and leaving out empty ones. `TextSpan.of(text)` uses the default style, `TextSpan.of(element, style)` holds a picture, and `withText` and `withStyle` make copies.
 
 As far as engines are concerned, a span is one line. Break text into lines before drawing it, as `Label` does.
 
@@ -124,7 +134,7 @@ As far as engines are concerned, a span is one line. Break text into lines befor
 | `width(span)` | How wide the span is drawn, in UI units. 0 for empty text. |
 | `lineHeight(style)` | The distance from one line's top to the next line's top |
 
-Components get it from `MeasureContext.text()` during measure and from `environment().text()` anywhere else. The widths match drawing, so a text box can place its caret between characters.
+Components get it from `MeasureContext.text()` during measure and from `environment().text()` anywhere else. The widths match drawing, so a text box can place its caret between characters. These metrics also measure pictures in text: a span that holds one is as wide as the picture. `lineHeight` describes a style, so it leaves pictures out; a line with a picture taller than its text needs room for the picture's height too.
 
 | Engine | Widths | Line height |
 |---|---|---|
@@ -156,7 +166,7 @@ protected void paint(Painter painter, Rect bounds) {
 }
 ```
 
-`Painter.text(span, x, y)` puts the top-left corner of the line box at the point: `y` is the top of the line, not the baseline. Resolve text during measure and keep the spans for painting, so translations are read once per layout and painting does not allocate. Hosts lay every component out again when the language changes. The [switch example](extending.md#write-a-new-component) does this.
+`Painter.text(span, x, y)` puts the top-left corner of the line box at the point: `y` is the top of the line, not the baseline. A span that holds a picture draws the picture with its top at `y`. Resolve text during measure and keep the spans for painting, so translations are read once per layout and painting does not allocate. Hosts lay every component out again when the language changes. The [switch example](extending.md#write-a-new-component) does this.
 
 ## Wrapping
 
@@ -182,6 +192,10 @@ A label draws styled text one part after another, each in its own style, and wra
 - A disabled field ignores the runs and draws in its disabled style. A read-only field keeps them. Runs do not change the line height. A password box has no highlighter.
 
 Strata ships no highlighters. The [gallery](https://github.com/InspireNXE/Strata-Gallery) has a small Java one, `JavaHighlighter`, as sample code: it colors keywords, strings, comments, numbers and annotations, and makes the whole text monospaced so indentation lines up.
+
+## Text from the engine
+
+An engine adapter can turn the engine's own text, such as a translated engine message, into `Text`. Such text reads the engine's text anew each time a control lays out, so it follows the engine's language, and every operation on this page works on it. How you get it depends on the adapter; see its documentation. Adapter authors wrap engine text with a `TextSource`, described in [Writing an adapter](../platforms/writing-an-adapter.md#starting-up).
 
 ## Fonts
 
