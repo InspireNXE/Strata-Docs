@@ -151,7 +151,7 @@ Engines without a shape show the closest one they have. Swing has no "not allowe
 
 ### Tooltips
 
-`setTooltip` gives a component a `Tooltip`, which the host shows near the pointer once it has rested on the component for half a second by default. Like a cursor, a tooltip covers what is inside the component: the host shows the tooltip of the deepest component under the pointer that has one, looking up through its ancestors. There are two kinds:
+`setTooltip` gives a component a `Tooltip`, which the host shows near the pointer once it has rested on the component for half a second, unless the theme's `tooltip.delay` or the adapter sets another wait. Like a cursor, a tooltip covers what is inside the component: the host shows the tooltip of the deepest component under the pointer that has one, looking up through its ancestors. There are two kinds:
 
 | Kind | Made with | Shows |
 |---|---|---|

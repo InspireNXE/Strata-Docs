@@ -1,6 +1,6 @@
 # Theme keys
 
-Every style key the built-in controls read. A theme lacking a required key cannot show a tree that uses the control; see [Themes](../guides/theming.md#required-and-optional-keys). On a theme resolved from a `ThemeRef`, `theme.layer(key)` names the [layer](../guides/theming.md#layers) that set a key. [Theme files](../guides/theming.md#theme-files) use the same keys, each under `paints`, `text` or `insets` by its kind, and so do `ThemeOverrides` and `ThemeRef.override`.
+Every style key the built-in controls read. A theme lacking a required key cannot show a tree that uses the control; see [Themes](../guides/theming.md#required-and-optional-keys). On a theme resolved from a `ThemeRef`, `theme.layer(key)` names the [layer](../guides/theming.md#layers) that set a key. [Theme files](../guides/theming.md#theme-files) use the same keys, each under `paints`, `text`, `insets` or `metrics` by its kind, and so do `ThemeOverrides` and `ThemeRef.override`. A [metric](../guides/theming.md#metrics) key's fallback is the value the control uses when the theme sets none, and `Themes.flat()` sets no metrics.
 
 ## Button
 
@@ -18,12 +18,17 @@ Every style key the built-in controls read. A theme lacking a required key canno
 | `button.link.text.disabled` | `Button.STYLE_LINK_TEXT_DISABLED` | text style | no | `button.text.disabled` |
 | `button.padding` | `Button.STYLE_PADDING` | insets | no | 8, 5, 8 and 5 |
 | `button.padding.icon` | `Button.STYLE_PADDING_ICON` | insets | no | 2 on every side |
+| `button.clip` | `Button.STYLE_CLIP` | insets | no | The padding's left and right, none at the top and bottom |
+| `button.text.scroll` | `Button.STYLE_TEXT_SCROLL` | metric | no | 0, which cuts a caption too wide instead of scrolling it |
+| `button.text.scroll.minimum` | `Button.STYLE_TEXT_SCROLL_MINIMUM` | metric | no | 0 |
 
 The `button.link.*` keys apply to a button made a link, which reads no face keys. A `CycleButton` reads the same keys as a button.
 
+A caption too wide for its button is cut at the clip area, `button.clip` in from the edges. When `button.text.scroll` is above 0, it slides between its two ends instead, and one sweep there and back takes that many milliseconds per unit of overflow, and at least `button.text.scroll.minimum`. A caption that fits is centered and kept inside the clip area.
+
 ## DropDownButton
 
-A drop-down button reads the `Button` keys above except the link keys, with the same requirements, and one of its own.
+A drop-down button reads the `Button` keys above except the link keys, the clip and scroll keys included, with the same requirements, and one of its own.
 
 | Key | Constant | Kind | Required | Fallback |
 |---|---|---|---|---|
@@ -68,6 +73,11 @@ A style set with `Label.setStyle` overrides the key.
 | `slider.text` | `Slider.STYLE_TEXT` | text style | no | `TextStyle.DEFAULT` |
 | `slider.text.disabled` | `Slider.STYLE_TEXT_DISABLED` | text style | no | `slider.text` |
 | `slider.padding` | `Slider.STYLE_PADDING` | insets | no | None |
+| `slider.text.scroll` | `Slider.STYLE_TEXT_SCROLL` | metric | no | 0, which cuts a label too wide instead of scrolling it |
+| `slider.text.scroll.minimum` | `Slider.STYLE_TEXT_SCROLL_MINIMUM` | metric | no | 0 |
+| `slider.key.travel` | `Slider.STYLE_KEY_TRAVEL` | metric | no | 0, which moves a slider with no step by a hundredth of the range |
+
+A label too wide for the slider is cut at the left and right of `slider.padding`, or scrolls as a [button's caption](#button) does. `slider.key.travel` is in units of the thumb's travel along the track and applies only to a slider with no step.
 
 ## TextBox
 
@@ -85,12 +95,20 @@ A style set with `Label.setStyle` overrides the key.
 | `textbox.caret` | `TextBox.STYLE_CARET` | paint | no | `0xFFE0E0E0`, light gray |
 | `textbox.suggestions` | `TextBox.STYLE_SUGGESTIONS` | paint | no | `combobox.popup` |
 | `textbox.suggestion.text` | `TextBox.STYLE_SUGGESTION_TEXT` | text style | no | `textbox.text` |
+| `textbox.text.selected` | `TextBox.STYLE_TEXT_SELECTED` | text style | no | None; selected text keeps its own style |
+| `textbox.selection.extend` | `TextBox.STYLE_SELECTION_EXTEND` | metric | no | 0 |
+| `textbox.caret.extend` | `TextBox.STYLE_CARET_EXTEND` | metric | no | 0 |
+| `textbox.caret.blink` | `TextBox.STYLE_CARET_BLINK` | metric | no | 500 |
+| `textbox.caret.underscore` | `TextBox.STYLE_CARET_UNDERSCORE` | metric | no | 0, a bar |
+| `textbox.placeholder.hide` | `TextBox.STYLE_PLACEHOLDER_HIDE` | metric | no | 0, shown while focused |
 
 The suggestion list also uses the `ListView` and `ScrollPanel` keys.
 
+`textbox.selection.extend` and `textbox.caret.extend` are how many units the selection and the caret reach above and below the line. `textbox.caret.blink` is how many milliseconds the caret stays shown and then hidden. With `textbox.caret.underscore` set to any value but 0, a caret at the end of the text is an underscore in the text's style, 1 unit after the text. With `textbox.placeholder.hide` set to any value but 0, the placeholder hides while the box has focus. Password boxes read all six keys. Text areas read all but `textbox.caret.underscore` and always draw the caret as a bar.
+
 ## PasswordTextBox
 
-A password box reads the `TextBox` keys above for its face, text, selection, caret, placeholder and padding. Its own keys are optional.
+A password box reads the `TextBox` keys above for its face, text, selection, caret, placeholder and padding, the metrics included. Its own keys are optional.
 
 | Key | Constant | Kind | Required | Fallback |
 |---|---|---|---|---|
@@ -134,6 +152,17 @@ A standard scroll bar reads the `scroll.*` keys above (`ScrollBar.STYLE_TRACK`, 
 | `list.row.hovered` | `ListView.STYLE_ROW_HOVERED` | paint | no | `list.row` |
 | `list.placeholder` | `ListView.STYLE_PLACEHOLDER` | text style | no | `TextStyle.DEFAULT` |
 | `list.cell.padding` | `ListView.STYLE_CELL_PADDING` | insets | no | 4, 0, 4 and 0 |
+| `list.row.selected.unfocused` | `ListView.STYLE_ROW_SELECTED_UNFOCUSED` | paint | no | `list.row.selected` |
+| `list.row.ring` | `ListView.STYLE_ROW_RING` | paint | no | Nothing |
+| `list.row.ring.unfocused` | `ListView.STYLE_ROW_RING_UNFOCUSED` | paint | no | Nothing |
+| `list.row.width` | `ListView.STYLE_ROW_WIDTH` | metric | no | 0, rows as wide as the list |
+| `list.bar.gap` | `ListView.STYLE_BAR_GAP` | metric | no | 2 |
+| `list.scroll.rows` | `ListView.STYLE_SCROLL_ROWS` | metric | no | 1 |
+| `list.edge` | `ListView.STYLE_EDGE` | paint | no | Nothing |
+| `list.edge.outer` | `ListView.STYLE_EDGE_OUTER` | paint | no | Nothing |
+| `list.padding` | `ListView.STYLE_PADDING` | insets | no | None |
+
+The ring is one unit wide, just inside the selected row; `list.row.ring` draws while the list has focus and `list.row.ring.unfocused` while it does not. `list.scroll.rows` is how many rows one wheel notch scrolls. A list wider than `list.row.width` centers a column of rows that wide and puts its scroll bar `list.bar.gap` units right of it. `list.edge` is a one-unit line just outside the list's top and bottom edges, and `list.edge.outer` another beyond it. `list.padding` puts space above the first row and below the last, which scrolls with the rows; only its top and bottom are read. Row width, padding and edges apply only to lists the factory makes. The lists inside tables, trees, combo boxes, text box suggestions and time pickers keep full-width rows and draw no edges, and read the other list keys.
 
 ## ComboBox
 
@@ -151,7 +180,7 @@ The open list also uses the `ListView` and `ScrollPanel` keys.
 
 ## Window
 
-`MessageBox` uses these keys and those of `Label` and `Button`, and its own `messagebox.padding`, the last row.
+`MessageBox` uses these keys and those of `Label` and `Button`, and its own `messagebox.*` keys, the last rows.
 
 | Key | Constant | Kind | Required | Fallback |
 |---|---|---|---|---|
@@ -165,6 +194,15 @@ The open list also uses the `ListView` and `ScrollPanel` keys.
 | `window.title.padding` | `Window.STYLE_TITLE_PADDING` | insets | no | 3 on every side |
 | `window.padding` | `Window.STYLE_PADDING` | insets | no | 3 on every side |
 | `messagebox.padding` | `MessageBox.STYLE_PADDING` | insets | no | 4 on every side |
+| `messagebox.spacing` | `MessageBox.STYLE_SPACING` | metric | no | 8 |
+| `messagebox.message.width` | `MessageBox.STYLE_MESSAGE_WIDTH` | metric | no | 280 |
+| `messagebox.message.center` | `MessageBox.STYLE_MESSAGE_CENTER` | metric | no | 0, lines start at the left |
+| `messagebox.button.width` | `MessageBox.STYLE_BUTTON_WIDTH` | metric | no | 64 |
+| `messagebox.button.width.maximum` | `MessageBox.STYLE_BUTTON_WIDTH_MAXIMUM` | metric | no | 0, no limit |
+| `messagebox.button.gap` | `MessageBox.STYLE_BUTTON_GAP` | metric | no | 4 |
+| `messagebox.close` | `MessageBox.STYLE_CLOSE` | metric | no | 1, the close button shows |
+
+`messagebox.spacing` is the space between the message and the buttons, and `messagebox.message.width` where the message wraps. With `messagebox.button.width` above 0, each button is that wide and the row sits at the right. At 0, the box is as wide as the message width and the buttons share it evenly, each at most `messagebox.button.width.maximum` wide, centered. `messagebox.close` at 0 hides the window's close button, and Escape still answers.
 
 ## TabBar
 
@@ -180,6 +218,16 @@ The open list also uses the `ListView` and `ScrollPanel` keys.
 | `tab.text.disabled` | `TabBar.STYLE_TEXT_DISABLED` | text style | no | `tab.text` |
 | `tab.padding` | `TabBar.STYLE_PADDING` | insets | no | 8, 4, 8 and 3 |
 | `tab.padding.selected` | `TabBar.STYLE_PADDING_SELECTED` | insets | no | `tab.padding` |
+| `tab.selected.hovered` | `TabBar.STYLE_SELECTED_HOVERED` | paint | no | `tab.selected`. Also drawn while the bar has focus the keyboard gave it, not a click |
+| `tab.selected.fill` | `TabBar.STYLE_SELECTED_FILL` | paint | no | Nothing |
+| `tab.selected.fill.insets` | `TabBar.STYLE_SELECTED_FILL_INSETS` | insets | no | None |
+| `tab.underline` | `TabBar.STYLE_UNDERLINE` | paint | no | Nothing |
+| `tab.underline.disabled` | `TabBar.STYLE_UNDERLINE_DISABLED` | paint | no | `tab.underline` |
+| `tab.clip` | `TabBar.STYLE_CLIP` | insets | no | The padding's left and right, none at the top and bottom |
+| `tab.text.scroll` | `TabBar.STYLE_TEXT_SCROLL` | metric | no | 0, which cuts text too wide instead of scrolling it |
+| `tab.text.scroll.minimum` | `TabBar.STYLE_TEXT_SCROLL_MINIMUM` | metric | no | 0 |
+
+`tab.selected.fill` is a second layer over the selected tab's face, `tab.selected.fill.insets` in from its edges. The underline is 1 unit tall, its bottom 1 unit above the tab's bottom, as wide as the text but at most the tab less 2 units at each side, and centered. A tab's text too wide for it is cut or scrolls as a [button's caption](#button) does, with the tab keys.
 
 ## ProgressBar and Separator
 
@@ -191,6 +239,9 @@ The open list also uses the `ListView` and `ScrollPanel` keys.
 | `progress.segment` | `ProgressBar.STYLE_SEGMENT` | paint | no | `progress.fill` |
 | `progress.padding` | `ProgressBar.STYLE_PADDING` | insets | no | 2 on every side |
 | `separator` | `Separator.STYLE_LINE` | paint | yes | |
+| `separator.shadow` | `Separator.STYLE_SHADOW` | paint | no | Nothing |
+
+`separator.shadow` is a second line as thick as the first, below a horizontal separator's line or right of a vertical one, so a theme that sets it makes every separator twice as thick.
 
 ## BusyIndicator
 
@@ -199,6 +250,9 @@ The open list also uses the `ListView` and `ScrollPanel` keys.
 | `busy.dot` | `BusyIndicator.STYLE_DOT` | paint | yes | |
 | `busy.dot.active` | `BusyIndicator.STYLE_DOT_ACTIVE` | paint | yes | |
 | `busy.text` | `BusyIndicator.STYLE_TEXT` | text style | no | `TextStyle.DEFAULT` |
+| `busy.dots.text` | `BusyIndicator.STYLE_DOTS_TEXT` | text style | no | None; the dots use the dot paints |
+
+With `busy.dots.text` set, the dots are the letters `o o o` in that style, the lit one a capital `O`, one line tall and centered where the dots would be.
 
 ## Avatar
 
@@ -351,6 +405,10 @@ The toggle's three lines are drawn in the `nav.item.text` color over `nav.toggle
 | `grid.cell.hovered` | `GridView.STYLE_CELL_HOVERED` | paint | no | Nothing |
 | `grid.cell.selected` | `GridView.STYLE_CELL_SELECTED` | paint | no | `grid.cell.hovered` |
 | `grid.cell.padding` | `GridView.STYLE_CELL_PADDING` | insets | no | 1 on every side |
+| `grid.cell.hovered.back` | `GridView.STYLE_CELL_HOVERED_BACK` | paint | no | Nothing |
+| `grid.cell.highlight` | `GridView.STYLE_CELL_HIGHLIGHT` | insets | no | None, the whole cell |
+
+`grid.cell.hovered.back` is drawn under the hovered cell's content, over the cell's own paint. `grid.cell.highlight` says where the hovered and selected paints go, in from the cell's edges.
 
 ## ColorPicker
 
@@ -407,9 +465,23 @@ A color picker's hex field uses the `TextBox` keys.
 | `tooltip.background` | `Tooltip.STYLE_BACKGROUND` | paint | no | `0xF0100010` with a one-unit `0x805000FF` edge |
 | `tooltip.text` | `Tooltip.STYLE_TEXT` | text style | no | `TextStyle.DEFAULT` |
 | `tooltip.padding` | `Tooltip.STYLE_PADDING` | insets | no | 4 on every side |
+| `tooltip.frame` | `Tooltip.STYLE_FRAME` | paint | no | Nothing |
+| `tooltip.outset` | `Tooltip.STYLE_OUTSET` | insets | no | None |
+| `tooltip.delay` | `Tooltip.STYLE_DELAY` | metric | no | 500 |
+| `tooltip.offset.x` | `Tooltip.STYLE_OFFSET_X` | metric | no | 12 |
+| `tooltip.offset.y` | `Tooltip.STYLE_OFFSET_Y` | metric | no | -12 |
+| `tooltip.below` | `Tooltip.STYLE_BELOW` | metric | no | 0, beside the pointer |
+| `tooltip.below.overlap` | `Tooltip.STYLE_BELOW_OVERLAP` | metric | no | 3 |
+| `tooltip.below.gap` | `Tooltip.STYLE_BELOW_GAP` | metric | no | 5 |
 | `toast.background` | `Overlays.STYLE_TOAST` | paint | no | `tooltip.background` |
 | `toast.text` | `Overlays.STYLE_TOAST_TEXT` | text style | no | `tooltip.text` |
 | `toast.padding` | `Overlays.STYLE_TOAST_PADDING` | insets | no | 6 on every side |
+| `toast.title` | `Overlays.STYLE_TOAST_TITLE` | text style | no | None: the first line is drawn like the rest |
+| `toast.line.gap` | `Overlays.STYLE_TOAST_LINE_GAP` | metric | no | 0 |
+| `toast.width.minimum` | `Overlays.STYLE_TOAST_WIDTH_MINIMUM` | metric | no | 0 |
+| `toast.margin` | `Overlays.STYLE_TOAST_MARGIN` | metric | no | `Overlays.TOAST_MARGIN` |
+
+`tooltip.frame` is a second layer over `tooltip.background`, and `tooltip.outset` how far the two reach past the box, for images with a margin of their own; the box alone is placed and kept inside the host. `tooltip.delay` is in milliseconds, and a delay the adapter sets with `ScreenHost.setTooltipDelay` wins. The offsets put the box's top-left corner that many units right of and below the pointer's position floored to a whole unit, so a negative `tooltip.offset.y` puts it above. A box flipped to the pointer's left has its right edge `tooltip.offset.x` units left of the pointer. With `tooltip.below` set to any value but 0, the box sits just below its component instead and moves a little with the pointer's height, by an amount `tooltip.below.overlap` and `tooltip.below.gap` shape, and goes above the pointer when the host has no room below. Its left edge still follows `tooltip.offset.x`. The `Tooltip.STYLE_BELOW` Javadoc gives the formula.
 
 ## Image and panels
 

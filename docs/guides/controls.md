@@ -265,7 +265,9 @@ Button save = factory.button("Save").onEvent(Button.PRESSED, event -> this.save(
 
 A button presses on a left click, or on a press of Enter, keypad Enter or Space while it has focus. Held keys that repeat do not press it again. It consumes those inputs. A disabled button does neither and draws its disabled face.
 
-It is focusable and tabbable, shows the hand cursor, and has a minimum size of 20 by 20. Its desired size is the caption plus the text padding. The caption is centered in whatever size the button ends up.
+Some engines' own buttons act as soon as the pointer button goes down. On a platform whose `Conventions.activateOnPress` is on, a button presses on the left pointer press instead of the click, and so do cycle buttons, checkboxes, radio buttons, toggle switches and tabs. Keys and drop-down buttons work the same either way. Swing and the default conventions act on the click.
+
+It is focusable and tabbable, shows the hand cursor, and has a minimum width of 20. Its desired size is the caption plus the text padding, and at least 20 tall; a smaller height set on it applies. The caption is centered in whatever size the button ends up. A caption too wide for the button is cut at its padding, or at the theme's `button.clip`, and when the theme's `button.text.scroll` is above 0 it slides from one end to the other and back instead. See [Theme keys](../reference/theme-keys.md#button).
 
 | Face | When |
 |---|---|
@@ -297,7 +299,7 @@ The icon is drawn 4 units before the caption, and the two are centered together 
 Button terms = factory.button("Terms of sale").setLink(true).onEvent(Button.PRESSED, event -> this.openTerms());
 ```
 
-A link has no frame. It draws only its caption, and the caption underlines while the link is hovered or focused. It has no padding and no minimum size, so it sits in a line of other text. It presses, focuses and fires events exactly like a button. `setLink(false)` brings the frame and the 20 by 20 minimum size back.
+A link has no frame. It draws only its caption, and the caption underlines while the link is hovered or focused. It has no padding and no minimum size, so it sits in a line of other text. It presses, focuses and fires events exactly like a button. `setLink(false)` brings the frame back, with the minimum width of 20 and the desired height of at least 20.
 
 | Key | Used for |
 |---|---|
@@ -329,7 +331,7 @@ A left click opens the popup, and so does Enter, keypad Enter, Space or Alt+Down
 
 A menu opens at least as wide as the button, for that opening only, and keeps any minimum width you gave it. A flyout opens at its content's size. With no popup, or one with nothing to show (a menu with no items, a flyout with no content), the button asks nothing and stays closed. A disabled button takes no focus, does not open, and closes its popup if it is open.
 
-It looks and measures like a button, with the combo box's arrow, 7 by 4, at the right end of the space inside its padding, 4 units after the caption. The caption and icon center in the space left of the arrow. While open it draws `button.pressed`. It reads every `button.*` key a framed button reads, requires the same four faces, and adds one key:
+It looks and measures like a button, with the combo box's arrow, 7 by 4, at the right end of the space inside its padding, 4 units after the caption. The caption and icon center in the space left of the arrow. While open it draws `button.pressed`. It reads every `button.*` key a framed button reads, the clip and scroll keys included, requires the same four faces, and adds one key:
 
 | Key | Required | Used for |
 |---|---|---|
@@ -361,7 +363,7 @@ CycleButton<Difficulty> difficulty = factory.<Difficulty>cycleButton("Difficulty
 | `select(index)`, `selectItem(item)` | the first item | Chooses a value from code (`Selection`). |
 | `cycle(steps)` | | Moves the selection from code, wrapping at the ends. One step forward from nothing selects the first item. |
 
-A left click, or Enter, keypad Enter or Space while focused, selects the next value, and the first one after the last; held keys that repeat do not. A right click, or Shift with any of those, selects the previous one. The button consumes those inputs. A disabled button ignores them, and a step that would land on the value already selected, as with a single value, fires nothing. The button asks for the label plus its widest value, so cycling never changes its size, and it is focusable, tabbable and at least 20 by 20 units. It draws with the `button.*` keys of [`Button`](#button).
+A left click, or Enter, keypad Enter or Space while focused, selects the next value, and the first one after the last; held keys that repeat do not. A right click, or Shift with any of those, selects the previous one. The button consumes those inputs. A disabled button ignores them, and a step that would land on the value already selected, as with a single value, fires nothing. The button asks for the label plus its widest value, so cycling never changes its size, and it is focusable, tabbable, at least 20 units wide and asks to be at least 20 tall, though a smaller height set on it applies. It draws with the `button.*` keys of [`Button`](#button), and cuts or scrolls a caption too wide as a button does.
 
 | Event | Kind | Fires |
 |---|---|---|
@@ -419,9 +421,9 @@ A slider that picks a number from a range. It runs across by default; `setOrient
 | `setRange(min, max)` | 0 to 1 | Bounds must be finite with `max` above `min`. The value is clamped into the new range. |
 | `setStep(step)` | 0, continuous | Values snap to `min + k * step`. The maximum is always reachable, even off that grid. |
 | `setValue(value)` | 0 | Clamped and snapped. NaN throws. Works while disabled. |
-| `setLabel(DoubleFunction<String>)` | none | Text drawn centered over the track, recomputed when the value changes. Text wider than the slider is cut off. |
+| `setLabel(DoubleFunction<String>)` | none | Text drawn centered over the track, recomputed when the value changes. Text wider than the slider is cut at its padding, or scrolls when the theme's `slider.text.scroll` is above 0. |
 | `setOrientation(orientation)` | `HORIZONTAL` | `VERTICAL` runs up from the bottom. The value is kept. |
-| `keyStep()` | | The step, or a hundredth of the range without one |
+| `keyStep()` | | The step. Without one, the value that moves the thumb `slider.key.travel` units when the theme sets that above 0 and the slider is longer than its thumb, else a hundredth of the range. |
 
 | Event | Kind | Fires |
 |---|---|---|
@@ -453,7 +455,9 @@ It is focusable and tabbable and shows the hand cursor. A horizontal slider want
 | `slider.thumb.hovered` | yes | The thumb while the slider is hovered, focused or pressed |
 | `slider.thumb.disabled` | no | Falls back to `slider.thumb` |
 | `slider.text`, `slider.text.disabled` | no | The label, drawn over the thumb as well as the track. The flat theme gives it a shadow so it stays readable on both. |
-| `slider.padding` | no | Between the slider's edges and its label, which centers inside it and is cut to it. None by default. |
+| `slider.padding` | no | Between the slider's edges and its label, which centers inside it and is cut at its left and right. None by default. |
+| `slider.text.scroll`, `slider.text.scroll.minimum` | no | Milliseconds per unit of overflow for one sweep of a label too wide, and the shortest sweep. 0 cuts the label instead. |
+| `slider.key.travel` | no | How far an arrow key moves the thumb of a slider with no step, in units along the track. 0 moves a hundredth of the range. |
 
 ## The controls together
 
@@ -476,7 +480,7 @@ name.setAlignment(HorizontalAlignment.STRETCH, VerticalAlignment.TOP);
 |---|---|---|
 | `setText(text)` | empty | Removes line breaks, cuts to the length limit and puts the caret at the end. Fires `EDITED` if the text changed, but no `EDIT` request. |
 | `setMaxLength(n)` | `Integer.MAX_VALUE` | Counted in code points. Longer text is cut at once, which fires `EDITED`. Negative throws. |
-| `setPlaceholder(text)` | none | A hint drawn in `textbox.placeholder` while the box is empty, focused or not. It is never part of `text()`. |
+| `setPlaceholder(text)` | none | A hint drawn in `textbox.placeholder` while the box is empty, focused or not, unless the theme's `textbox.placeholder.hide` hides it while focused. It is never part of `text()`. |
 | `setTextPadding(Insets)` and its number forms | the theme's `textbox.padding`, else 4 left and right, 5 top and bottom | Space between the text and the edges; `null` follows the theme again |
 | `setReadOnly(boolean)` | off | The box still focuses, selects and copies, but does not edit, and shows no caret. Its text uses `textbox.text.readonly`. |
 | `setHighlighter(h)` | none | Draws parts of the text in their own styles, for syntax coloring, highlighted matches or colored input. See [Styled text in fields](text.md#styled-text-in-fields). |
@@ -532,7 +536,7 @@ A disabled box ignores input.
 
 ### Drawing
 
-The caret is one unit wide and blinks every half second on the host's clock. It shows again after each edit or move. When the text is wider than the box, it scrolls sideways to keep the caret in view.
+The caret is one unit wide and blinks on the host's clock, shown and hidden for the theme's `textbox.caret.blink` in milliseconds, half a second without it. It shows again after each edit or move. When the text is wider than the box, it scrolls sideways to keep the caret in view.
 
 | Key | Required | Used for |
 |---|---|---|
@@ -547,6 +551,11 @@ The caret is one unit wide and blinks every half second on the host's clock. It 
 | `textbox.caret` | no | The caret. Falls back to light gray. |
 | `textbox.suggestions` | no | Behind the suggestion list. Falls back to `combobox.popup`. |
 | `textbox.suggestion.text` | no | The text of each suggestion. Falls back to `textbox.text`. |
+| `textbox.text.selected` | no | Selected text. None by default, so selected text keeps its style. |
+| `textbox.selection.extend`, `textbox.caret.extend` | no | Units the selection and the caret reach above and below the line. 0. |
+| `textbox.caret.blink` | no | Milliseconds the caret stays shown, then hidden. 500. |
+| `textbox.caret.underscore` | no | Any value but 0 draws a caret at the end of the text as an underscore in the text's style. 0. |
+| `textbox.placeholder.hide` | no | Any value but 0 hides the placeholder while the box has focus. 0. |
 
 The suggestion rows use the [`ListView`](#listview) row keys, the highlighted one as the selected row.
 
@@ -602,7 +611,7 @@ Accepting closes the list, then replaces the suggestion's range with its text an
 
 ### Size
 
-The desired size is 120 units wide and one line plus the text padding tall, with a minimum of 20 by 20. Stretch it or set a width to make it wider.
+The desired size is 120 units wide and one line plus the text padding tall, and at least 20 tall, with a minimum width of 20. A smaller height set on it applies. Stretch it or set a width to make it wider.
 
 ### Common recipes
 
@@ -694,7 +703,7 @@ The caret and the selection sit on the mask glyphs. Every glyph of the mask is a
 
 ### Drawing
 
-A password box reads the [`TextBox` keys](#drawing) for its face, text, selection, caret, placeholder and padding, so any theme that styles text boxes styles it too. Its own keys are optional:
+A password box reads the [`TextBox` keys](#drawing) for its face, text, selection, caret, placeholder and padding, the metrics included, so any theme that styles text boxes styles it too. Its own keys are optional:
 
 | Key | Required | Used for |
 |---|---|---|
@@ -723,7 +732,7 @@ Text boxes had a password mode until Strata gained this control. `TextBox.isPass
 
 ### Size
 
-As a text box: 120 units wide and one line plus the text padding tall, at least 20 by 20.
+As a text box: 120 units wide and one line plus the text padding tall, at least 20 wide, and asking to be at least 20 tall, though a smaller height set on it applies.
 
 ## ListView
 
@@ -753,7 +762,7 @@ listings.setItems(fromServer);
 | `refresh()` | | Rebuilds the rows in view from the same items |
 | `setScrollY(y)`, `scrollToIndex(i)` | | Scroll by code |
 
-A left press on a row selects it, unless something in the cell consumed the press. A double press on a row activates it, and so does Enter or keypad Enter on the selected row while the list has focus; Space does not. While focused, Up and Down move the selection a row, Page Up and Page Down by the rows in view, and Home and End to the ends; with nothing selected, Up starts from the last row. Held keys repeat. The list leaves keys with Alt alone, and with Control all but Control+A in `MULTIPLE` mode, and an empty list takes no keys. The wheel scrolls one row per notch, and the scroll bar works as in a [`ScrollPanel`](layout.md#scrollpanel). Rows sit inside the list's border widths, so a bordered list keeps its rows off the border.
+A left press on a row selects it, unless something in the cell consumed the press. A double press on a row activates it, and so does Enter or keypad Enter on the selected row while the list has focus; Space does not. While focused, Up and Down move the selection a row, Page Up and Page Down by the rows in view, and Home and End to the ends; with nothing selected, Up starts from the last row. Held keys repeat. The list leaves keys with Alt alone, and with Control all but Control+A in `MULTIPLE` mode, and an empty list takes no keys. The wheel scrolls one row per notch, or the theme's `list.scroll.rows`, and the scroll bar works as in a [`ScrollPanel`](layout.md#scrollpanel). Rows sit inside the list's border widths, so a bordered list keeps its rows off the border.
 
 In `MULTIPLE` mode, a press selects one row, Control and a press adds or removes one, Shift and a press selects the range from the anchor, Shift and the keys that move the selection extend it, and Control+A selects every row. Those keys without Shift select only the row they move to. `selectedIndexes()` and `selectedItems()` are the set in order; `selectedIndex()` is the current row, the one the keys move from. The user's changes ask `MultiSelection.SELECT_MANY` with the set they would leave, and every change of the set reports `MultiSelection.SELECTED_MANY`, followed by `Selection.SELECTED` when the current row moved too. `setItems` keeps the selected items it finds by key. Tables and trees work the same way; collapsing a tree branch drops its hidden rows from the set.
 
@@ -777,7 +786,7 @@ A cell can be any component, controls included, so a list of option rows needs n
 ```
 
 - Keep the value in your model, not in the control. The row is rebuilt from the item when it scrolls back into view, so set each control from the model in the cell factory and write changes back from a handler.
-- A press that a control does not consume reaches the list and selects the row. Buttons only act on the click, so a press on a button selects its row; sliders, text boxes and the like consume their press and leave the selection alone. To keep rows from ever being selected, cancel `Selection.SELECT` on the list.
+- A press that a control does not consume reaches the list and selects the row. Buttons act on the click unless the platform's conventions say press, so a press on a button selects its row on such a platform; sliders, text boxes and the like consume their press and leave the selection alone. To keep rows from ever being selected, cancel `Selection.SELECT` on the list.
 - Give the list a row height that fits the tallest control, and the row panel `Anchor.FILL` so it spans the row. A weighted [spacer](layout.md#spacer) between the label and the control pushes the control to the right edge.
 
 | Key | Required | Used for |
@@ -787,7 +796,14 @@ A cell can be any component, controls included, so a list of option rows needs n
 | `list.row` | no | Every other row. Nothing if missing. |
 | `list.row.hovered` | no | The row under the pointer. Falls back to `list.row`. |
 | `list.placeholder` | no | Placeholder text style |
+| `list.row.selected.unfocused` | no | The selected row while the list does not have focus. Falls back to `list.row.selected`. |
+| `list.row.ring`, `list.row.ring.unfocused` | no | A one-unit ring just inside the selected row, with focus and without |
+| `list.row.width`, `list.bar.gap` | no | The widest a row gets, and the gap to the scroll bar when that narrows the rows. A wider list centers its rows. 0 and 2. |
+| `list.scroll.rows` | no | Rows per wheel notch. 1. |
+| `list.edge`, `list.edge.outer` | no | One-unit lines just outside the top and bottom edges, and beyond them |
 | `scroll.*` | | The scroll bar, as for `ScrollPanel` |
+
+Row width and the edge lines apply only to lists the factory makes, not to the lists inside tables, trees, combo boxes, suggestions and time pickers.
 
 | Event | Kind | Fires |
 |---|---|---|
@@ -905,23 +921,30 @@ A window with a message and a row of buttons, opened as a [dialog](overlays.md#d
 | `YES_NO_CANCEL` | Yes, No, Cancel | `CANCEL` |
 | `CLOSE` | Close | `CLOSE` |
 
-`results()` lists a set's buttons and `dismissResult()` its last column. The buttons sit at the bottom right, 64 units wide and 4 apart, and the first one is focused when the dialog opens. Their captions are the translated `strata.button.ok`, `strata.button.cancel`, `strata.button.yes`, `strata.button.no` and `strata.button.close` from the [translation keys](../reference/translation-keys.md); `setButtonText(result, caption)` replaces one.
+`results()` lists a set's buttons and `dismissResult()` its last column. By default the buttons sit at the bottom right, 64 units wide and 4 apart, and the first one is focused when the dialog opens. Their captions are the translated `strata.button.ok`, `strata.button.cancel`, `strata.button.yes`, `strata.button.no` and `strata.button.close` from the [translation keys](../reference/translation-keys.md); `setButtonText(result, caption)` replaces one.
 
 A button, pressed with a click, Enter or Space, the window's close button or Escape asks with `MessageBox.ANSWER`. A handler can cancel it to keep the box open, or rewrite it to any result, even one the box has no button for. Unless canceled, the box reports the result once with `MessageBox.ANSWERED` and closes the dialog. Escape counts when focus is inside the box, or when nothing has focus and the box is the content of the top dialog. Closing `window()` from code answers the set's dismiss result too, and reports it without asking.
 
 | Method | Notes |
 |---|---|
-| `setText(message)` | The message. It wraps at 280 units (`MESSAGE_WIDTH`), and `\n` starts a new line. |
+| `setText(message)` | The message. It wraps at 280 units (`MESSAGE_WIDTH`) unless the theme's `messagebox.message.width` says otherwise, and `\n` starts a new line. |
 | `setTitle(title)` | The window's title |
 | `setButtons(buttons)` | Another set. Captions set with `setButtonText` stay for the results that still have a button. |
 | `setButtonText(result, caption)` | One button's caption, such as a more specific word than Yes |
 | `window()` | The window the box is built on, to change its size or other settings |
 
-The box is a composite: the events of its window and buttons reach handlers on those parts and on the box, and nothing outside it, so a handler around the dialog does not hear its buttons' `PRESSED`. Handle `ANSWER` and `ANSWERED` on the box. It draws with the `window.*`, `label.*` and `button.*` keys, plus one of its own:
+The box is a composite: the events of its window and buttons reach handlers on those parts and on the box, and nothing outside it, so a handler around the dialog does not hear its buttons' `PRESSED`. Handle `ANSWER` and `ANSWERED` on the box. It draws with the `window.*`, `label.*` and `button.*` keys, plus its own:
 
 | Key | Required | Used for |
 |---|---|---|
 | `messagebox.padding` | no | Between the window's padding and the message and buttons. 4 on every side. |
+| `messagebox.spacing` | no | Between the message and the buttons. 8. |
+| `messagebox.message.width` | no | Where the message wraps. 280. |
+| `messagebox.message.center` | no | Any value but 0 centers the message's lines. 0. |
+| `messagebox.button.width` | no | Each button's width, with the row at the right. 0 makes the box as wide as the message width and has the buttons share it evenly, centered. 64. |
+| `messagebox.button.width.maximum` | no | The widest a shared button gets. 0, no limit. |
+| `messagebox.button.gap` | no | Between buttons. 4. |
+| `messagebox.close` | no | 0 hides the window's close button; Escape still answers. 1. |
 
 | Event | Kind | Fires |
 |---|---|---|
@@ -952,7 +975,7 @@ A change to a tab shows in its bar at once, and a tab belongs to one bar at a ti
 
 The first tab added to an empty bar is selected, without an event. `addTab(index, tab)` keeps the selection on the same tab, and reports `SELECTED` if its index moved. Removing the selected tab selects the one that takes its place, or the last one, or none when no tab is left. `select(index)` selects a tab from code, enabled or not.
 
-Tabs share the bar's width equally, with `setSpacing` between them (0 by default), and are one line plus 7 units tall. A left click selects an enabled tab, and while the bar has focus Left and Right select the nearest enabled tab that way, without wrapping. Held arrows repeat, and the bar consumes them even at the ends. The bar is focusable and tabbable, and an enabled tab shows the hand cursor. Disabling the whole bar draws every tab disabled, and the selected tab keeps a distinct `tab.selected.disabled` look.
+Tabs share the bar's width equally, with `setSpacing` between them (0 by default), and are one line plus 7 units tall. A left click selects an enabled tab, or the left press on a platform whose [conventions](#button) say so, and while the bar has focus Left and Right select the nearest enabled tab that way, without wrapping. Held arrows repeat, and the bar consumes them even at the ends. The bar is focusable and tabbable, and an enabled tab shows the hand cursor. Disabling the whole bar draws every tab disabled, and the selected tab keeps a distinct `tab.selected.disabled` look.
 
 | Key | Required | Used for |
 |---|---|---|
@@ -962,6 +985,10 @@ Tabs share the bar's width equally, with `setSpacing` between them (0 by default
 | `tab.text`, `tab.text.selected`, `tab.text.disabled` | no | Tab text. The first falls back to `TextStyle.DEFAULT` and the others to it. |
 | `tab.padding` | no | Between an unselected tab's edges and its text. 8 at the sides, 4 at the top and 3 at the bottom. |
 | `tab.padding.selected` | no | The same for the selected tab. Falls back to `tab.padding`. |
+| `tab.selected.hovered` | no | The selected tab while hovered. Falls back to `tab.selected`. |
+| `tab.selected.fill`, `tab.selected.fill.insets` | no | A second layer over the selected tab, and how far in from its edges it is drawn |
+| `tab.underline`, `tab.underline.disabled` | no | A one-unit line under the selected tab's text, as wide as the text. The second falls back to the first. |
+| `tab.clip`, `tab.text.scroll`, `tab.text.scroll.minimum` | no | Where text too wide for its tab is cut, and how it scrolls, as for a [button](#button) |
 
 | Event | Kind | Fires |
 |---|---|---|
@@ -1016,6 +1043,7 @@ The lit dot moves from the first dot to the last and back, one step every 300 mi
 | `busy.dot` | yes | Each unlit dot |
 | `busy.dot.active` | yes | The lit dot |
 | `busy.text` | no | The caption. Falls back to the default text style. |
+| `busy.dots.text` | no | When set, the dots are the letters `o o o` in this style, the lit one a capital `O` |
 
 It fires no events, since the user cannot change anything on it, and `setText` reports nothing.
 
@@ -1029,7 +1057,7 @@ A thin line that divides a panel, across or down.
 
 `factory.separator()` makes a horizontal one, and `factory.separator(orientation)` either. A horizontal separator is one unit tall and stretches across its slot, at the top; a vertical one is one unit wide and stretches down its slot, at the left. Along the line it asks for no length, so it takes the length of the slot. `setThickness` changes the thickness, and `setOrientation` turns it and sets the matching alignment again, so call `setAlignment` after it if you want another.
 
-A separator is not focusable, takes no input and fires no events. Key: `separator` (paint, required), which menus, navigation views and split panes fall back to for their own lines.
+A separator is not focusable, takes no input and fires no events. Key: `separator` (paint, required), which menus, navigation views and split panes fall back to for their own lines. A theme that sets `separator.shadow` (paint, optional) draws a second line as thick as the first below or right of it, which makes every separator twice as thick.
 
 ## RadioButton and RadioGroup
 
@@ -1130,7 +1158,8 @@ It edits like a [`TextBox`](#textbox), with a filter, a length limit, read-only 
 - Up and Down move a row and keep the caret's column across short rows. Page Up and Page Down move a page.
 - Home and End go to the ends of the row; with Ctrl, to the ends of the text.
 - A triple click selects the line. Pasted text keeps its line breaks.
-- `setText` puts the caret at the start and scrolls to the top.
+- `setText` puts the caret at the end, as on a text box, and scrolls to the top.
+- The caret is always a bar; the theme's `textbox.caret.underscore` does not apply.
 
 | Method | Default | Notes |
 |---|---|---|
@@ -1138,6 +1167,7 @@ It edits like a [`TextBox`](#textbox), with a filter, a length limit, read-only 
 | `setVisibleLines(n)` | 4 | How many lines the desired height holds |
 | `setHighlighter(h)` | none | Draws parts of the text in their own styles, measured in those styles, on every row. See [Styled text in fields](text.md#styled-text-in-fields). |
 | `setTextPadding(insets)` | the theme's `textarea.padding`, else `textbox.padding`, else 4 on each side | Space between the edge and the text; `null` follows the theme again |
+| `setPlaceholder(text)` | none | A hint drawn on the first line in `textbox.placeholder` while the area is empty, unless the theme's `textbox.placeholder.hide` hides it while focused. It is never part of `text()`. `placeholder()` returns it. |
 
 The area asks for 160 units of width. Text taller than the view scrolls with the wheel (three lines a notch) and a scroll bar, and follows the caret. It reads the `textbox.*` keys, so it matches the text boxes around it, and the `scroll.*` keys for its bar.
 
@@ -1470,7 +1500,7 @@ An item's page is built the first time the item is selected and kept while the i
 
 ### Keyboard
 
-The view is one tab stop. While it has focus, a cursor marks one of the items the pane shows, starting on the selected one. Up and Down move it without wrapping, skipping headers, separators, disabled items and hidden children, Home and End go to the ends, and held keys repeat. Enter, keypad Enter and Space pick its item and always activate it. Right expands it, or opens its menu in the column of icons, and Left collapses it or moves to its parent; Left does nothing in the column of icons. With the pane hidden in `MINIMAL`, Enter and Space open it. Keys pressed in the pane header, the pane footer or a page do not move the cursor. Tab moves on to the pane header, the pane footer and the content.
+The view is one tab stop. While it has focus, a cursor marks one of the items the pane shows, starting on the selected one, and a click on an item moves it there. Up and Down move it without wrapping, skipping headers, separators, disabled items and hidden children, Home and End go to the ends, and held keys repeat. Enter, keypad Enter and Space pick its item and always activate it. Right expands it, or opens its menu in the column of icons, and Left collapses it or moves to its parent; Left does nothing in the column of icons. With the pane hidden in `MINIMAL`, Enter and Space open it. Keys pressed in the pane header, the pane footer or a page do not move the cursor. Tab moves on to the pane header, the pane footer and the content.
 
 ### Drawing
 
@@ -1570,6 +1600,8 @@ GridView<Item> inventory = factory.<Item>gridView(item -> factory.image(item.ico
 | `grid.cell.hovered` | no | Over the cell under the pointer. Nothing if missing. |
 | `grid.cell.selected` | no | Over the selected cell. Falls back to `grid.cell.hovered`. |
 | `grid.cell.padding` | no | Between a cell's edges and its content. 1 on every side. |
+| `grid.cell.hovered.back` | no | Under the hovered cell's content, over `grid.cell`. Nothing if missing. |
+| `grid.cell.highlight` | no | Insets from a cell's edges where the hovered and selected paints are drawn. The whole cell if missing. |
 
 | Event | Kind | Fires |
 |---|---|---|

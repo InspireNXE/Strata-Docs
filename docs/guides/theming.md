@@ -1,6 +1,6 @@
 # Themes
 
-A theme decides how components look. It maps style keys, such as `button.hovered`, to paints and text styles. Every component in one host shares the host's theme.
+A theme decides how components look. It maps style keys, such as `button.hovered`, to paints, text styles, insets and metrics. Every component in one host shares the host's theme.
 
 ## Built-in themes
 
@@ -24,7 +24,7 @@ Themes are immutable. `toBuilder()` starts a builder holding all of a theme's ke
 
 ## A theme from scratch
 
-`Theme.builder(name)` starts an empty `Theme.Builder`. The name appears in error messages. `paint`, `textStyle` and `insets` set a key's value, replacing any value the builder already holds for it, and `build()` makes the theme. A builder can go on to make more themes after `build()`, and none of them changes when it does.
+`Theme.builder(name)` starts an empty `Theme.Builder`. The name appears in error messages. `paint`, `textStyle`, `insets` and `metric` set a key's value, replacing any value the builder already holds for it, and `build()` makes the theme. A builder can go on to make more themes after `build()`, and none of them changes when it does.
 
 ```java
 --8<-- "theming/ThemeExamples.java:scratch"
@@ -48,7 +48,7 @@ A host checks the theme before it shows anything. When it opens a screen, it col
 
 Your own components declare required keys through `requiredStyleKeys()`. Remember to add them to the theme you use, as the [switch example](extending.md#write-a-new-component) does.
 
-A key may have a paint, a text style, [insets](#insets), or any mix; `has(key)` is true for any of them. Look keys up with `paint(key)`, `textStyle(key)` and `insets(key)`, which return `Optional`, or with `paintOr`, `textStyleOr` and `insetsOr`, which take a fallback.
+A key may have a paint, a text style, [insets](#insets), a [metric](#metrics), or any mix; `has(key)` is true for any of them. Look keys up with `paint(key)`, `textStyle(key)` and `insets(key)`, which return `Optional`, or with `paintOr`, `textStyleOr` and `insetsOr`, which take a fallback. `metric(key)` returns an `OptionalDouble`, and `metricOr` takes a fallback.
 
 ## Paints
 
@@ -129,6 +129,26 @@ Padding set in code wins over the theme: `setTextPadding` on a button, a drop-do
 
 `theme.insets(key)` and `insetsOr(key, fallback)` look them up, and `ThemeRef.override(key, insets)` overrides them like paints. A control that reads insets for several states sizes itself for the largest, so selecting a tab never moves its neighbors. [Theme keys](../reference/theme-keys.md) lists the insets keys with their defaults.
 
+## Metrics
+
+Some things a theme tunes are a single number, such as how long the pointer rests before a tooltip shows or how many rows a wheel notch scrolls. Metrics, the fourth kind of theme value, hold one number per key. Each key's Javadoc states its unit, which is UI units, milliseconds, rows, or a flag that is on for any value but 0.
+
+```java
+Theme theme = Themes.flat().toBuilder()
+        .metric(Tooltip.STYLE_DELAY, 250)
+        .metric(ListView.STYLE_SCROLL_ROWS, 3)
+        .build();
+```
+
+`metric` refuses a value that is not finite with an `IllegalArgumentException`. Every metric key the built-in controls read has a default in code, the control's built-in behavior, and `Themes.flat()` sets none of them. `theme.metric(key)` returns an `OptionalDouble`, `metricOr(key, fallback)` a `float`, and `metrics()` every metric the theme sets. `ThemeRef.override(key, value)` and `ThemeOverrides.with(key, value)` set one the way they set paints:
+
+```java
+ThemeRef theme = ThemeRef.platform()
+        .override(Button.STYLE_TEXT_SCROLL, 40);
+```
+
+[Theme keys](../reference/theme-keys.md) lists every metric key with its default.
+
 ## Per-component overrides
 
 Backgrounds and borders of containers, and the text styles of labels, can be set per component, outside the theme:
@@ -191,7 +211,7 @@ A resolved theme remembers which layer set each key. `theme.layer(key)` returns 
 --8<-- "theming/ThemeExamples.java:registry"
 ```
 
-`ThemeOverrides` holds paints, text styles and insets by style key, with no id, so the same overrides can go to `override`, to `define` or to one ref. Overrides from code apply above every theme file, so your code has the last word over packs and over other projects' theme files, and only a ref's own overrides come after them. Overrides for one id apply in the order they were added.
+`ThemeOverrides` holds paints, text styles, insets and metrics by style key, with no id, so the same overrides can go to `override`, to `define` or to one ref. Overrides from code apply above every theme file, so your code has the last word over packs and over other projects' theme files, and only a ref's own overrides come after them. Overrides for one id apply in the order they were added.
 
 Nothing is written to a theme or a file. The keys apply each time the theme resolves, and closing the subscription brings back whatever lies beneath them. A text style from code replaces the whole style for its key, where a theme file's text entry changes only the fields it names.
 
@@ -216,6 +236,10 @@ A theme file sets only the keys it changes. Where the files live depends on the 
   },
   "insets": {
     "tab.padding": [8, 5, 8, 2]
+  },
+  "metrics": {
+    "tooltip.delay": 250,
+    "textbox.caret.underscore": 1
   }
 }
 ```
@@ -230,6 +254,7 @@ A theme file sets only the keys it changes. Where the files live depends on the 
 | Gradient | `{ "gradient": [top, bottom] }` |
 | Text style | Any of `color`, `bold`, `italic`, `underline`, `strikethrough`, `shadow` and `monospace`. Fields you leave out keep the style a lower layer gave the key, or `TextStyle.DEFAULT` where none did |
 | Insets | One number, `[horizontal, vertical]` or `[left, top, right, bottom]`, in UI units |
+| Metric | A number, in the unit its key states |
 
 A misspelled member, a bad color or broken JSON makes the whole file invalid. The engine logs it and skips that file, and the other packs still apply. Adapters find the files through the SPI's `ThemeSource`, which [Writing an adapter](../platforms/writing-an-adapter.md#themes) describes.
 

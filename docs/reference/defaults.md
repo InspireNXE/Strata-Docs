@@ -1,6 +1,6 @@
 # Defaults and timings
 
-Every number Strata picks for you.
+Every number Strata picks for you. Where a theme [metric](../guides/theming.md#metrics) can change a number, the row names its key.
 
 ## Every component
 
@@ -60,10 +60,12 @@ Every number Strata picks for you.
 | `Button` | Text padding | the theme's `button.padding`, else 8 left and right and 5 top and bottom; `button.padding.icon`, else 2 on every side, with an icon and no caption; none for a link |
 | | Icon size, gap to the caption | 16 by 16, 4 |
 | | Link | off; a link has no minimum size |
-| | Minimum size | 20 by 20 |
+| | Minimum size | 20 wide; asks to be at least 20 tall, though a smaller height set on it applies |
+| | Caption too wide | cut at the theme's `button.clip`, else the padding's left and right; scrolls when the theme's `button.text.scroll` is above 0 |
+| | Acts on | the click, or the press when the platform's `Conventions.activateOnPress` is on |
 | | Cursor | `HAND` |
 | | Focus ring | one unit, inside the edge, if the theme has `button.focus` |
-| `DropDownButton` | Text padding, icon, minimum size, cursor, focus ring | as `Button` |
+| `DropDownButton` | Text padding, icon, minimum size, caption too wide, cursor, focus ring | as `Button` |
 | | Arrow | 7 by 4, 4 after the caption, at the right end of the space inside the padding |
 | | Popup | none |
 | `Image` | Image size and desired size | 16 by 16 |
@@ -88,22 +90,23 @@ Every number Strata picks for you.
 | | Gap between box and caption | 4 |
 | | Mark inset | a fifth of the box size on each side |
 | | Cursor | `HAND` |
+| | Acts on | the click, or the press when the platform's `Conventions.activateOnPress` is on; radio buttons and toggle switches too |
 | `Slider` | Orientation | `HORIZONTAL` |
 | | Desired size | 150 by 20, or 20 by 150 when vertical |
-| | Label padding | the theme's `slider.padding`, else none |
+| | Label padding | the theme's `slider.padding`, else none; a label too wide is cut there, or scrolls when the theme's `slider.text.scroll` is above 0 |
 | | Range | 0 to 1 |
 | | Step | 0 (continuous) |
-| | Key step | the step, or a hundredth of the range |
+| | Key step | the step; with no step, the theme's `slider.key.travel` units of thumb travel when above 0, else a hundredth of the range |
 | | Page Up and Page Down | 10 key steps |
 | | Thumb | 8 along the track, the slider's full thickness across it |
 | | Cursor | `HAND` |
 | `TextBox` | Desired width | 120 |
 | | Text padding | the theme's `textbox.padding`, else 4 left and right and 5 top and bottom |
-| | Minimum size | 20 by 20 |
+| | Minimum size | 20 wide; asks to be at least 20 tall, though a smaller height set on it applies |
 | | Maximum length | `Integer.MAX_VALUE` code points |
 | | Placeholder | none |
 | | Caret width | 1 unit |
-| | Caret blink | every 500 ms |
+| | Caret blink | the theme's `textbox.caret.blink`, else 500 ms shown and 500 ms hidden |
 | | Cursor | `TEXT` |
 | | Filter, read-only, select all on focus | none, off, off |
 | | Suggestion provider | none |
@@ -111,7 +114,7 @@ Every number Strata picks for you.
 | | Suggestion rows | one line plus 4, text 4 in from the left; the list at least as wide as the box |
 | `PasswordTextBox` | Desired width | 120 |
 | | Text padding | the theme's `textbox.padding`, else 4 left and right and 5 top and bottom |
-| | Minimum size | 20 by 20 |
+| | Minimum size | 20 wide; asks to be at least 20 tall, though a smaller height set on it applies |
 | | Mask | `*` |
 | | Revealable | on |
 | | Reveal shortcut | Alt+F8 |
@@ -124,10 +127,11 @@ Every number Strata picks for you.
 | `ListView` | Row height and spacing | 20 and 0 |
 | | Selection | none, in `SINGLE` mode; pressing the selected row does not deselect it; a double click activates |
 | | Smallest desired width | 40 |
-| | Wheel | one row and its spacing a notch |
+| | Wheel | the theme's `list.scroll.rows`, else one, rows and their spacing a notch |
+| | Row width | the theme's `list.row.width`, else the list's width; a narrower column is centered with its scroll bar `list.bar.gap`, else 2, to its right |
 | `CycleButton` | Label, value label function | empty, the value's appearance name (`String.valueOf` for a value with no appearance) |
 | | Selection | the first item once there are items |
-| | Padding, minimum size, cursor | as `Button` |
+| | Padding, minimum size, caption too wide, acts on, cursor | as `Button` |
 | | Desired size | label plus widest value, with 8 and 5 of padding |
 | `ComboBox` | Rows shown before scrolling | 8 |
 | | Selection | the first option once there are options |
@@ -136,12 +140,16 @@ Every number Strata picks for you.
 | | Desired size | the widest option plus the padding, a 4-unit gap and a 7-wide arrow; one line plus the padding tall |
 | | Open list rows | one line plus 4 |
 | | Cursor | `HAND` |
-| `MessageBox` | Message width | wraps at 280 |
-| | Buttons | 64 wide, 4 apart, the first focused |
+| `MessageBox` | Message width | wraps at the theme's `messagebox.message.width`, else 280; lines start at the left unless `messagebox.message.center` is on |
+| | Buttons | the theme's `messagebox.button.width`, else 64 wide, at the right, `messagebox.button.gap`, else 4 apart, the first focused |
+| | Space above the buttons | the theme's `messagebox.spacing`, else 8 |
+| | Close button | shown unless the theme's `messagebox.close` is 0 |
 | | Padding | the theme's `messagebox.padding`, else 4 around the message and buttons |
 | `TabBar` | Tab size | text plus 8 on each side; one line plus 7 |
 | | Spacing | 0 |
 | | Selected | the first tab added |
+| | Text too wide | cut at the theme's `tab.clip`, else the padding's left and right; scrolls when the theme's `tab.text.scroll` is above 0 |
+| | Acts on | the click, or the press when the platform's `Conventions.activateOnPress` is on |
 | `Tab` | Enabled, tooltip | yes, none |
 | `ProgressBar` | Desired size | the wider of 100 and its text plus padding; one line plus padding tall |
 | | Padding | the theme's `progress.padding`, else 2 on every side |
@@ -164,7 +172,8 @@ Every number Strata picks for you.
 | | Text padding | the theme's `textarea.padding`, else `textbox.padding`, else 4 on each side |
 | | Wrapping | on |
 | | Wheel | 3 lines a notch |
-| | Caret after `setText` | at the start, scrolled to the top |
+| | Caret after `setText` | at the end, scrolled to the top |
+| | Placeholder | none |
 | `TableView` | Header height | 20 |
 | | Auto column width | title plus 8, and 11 more when sortable |
 | | Text cells | 4 in from the column's edges, cut short with `...` |
@@ -255,12 +264,14 @@ Every number Strata picks for you.
 | Synthesized key repeat delay | 400 ms |
 | Synthesized key repeat interval | 33 ms |
 | Keys the host repeats itself | Left, Right, Up, Down, Backspace, Delete, Home, End, Page Up, Page Down |
-| Tooltip delay | 500 ms (`Tooltip.DEFAULT_DELAY_MILLIS`), none when moving from one tooltip to another |
-| Tooltip position | 12 right of and 12 above the pointer, flipped left at the right edge, kept inside the host |
+| Tooltip delay | the adapter's, else the theme's `tooltip.delay`, else 500 ms (`Tooltip.DEFAULT_DELAY_MILLIS`); none when moving from one tooltip to another |
+| Tooltip position | the theme's `tooltip.offset.x` and `tooltip.offset.y`, else 12 right of and 12 above the pointer floored to a whole unit, flipped left at the right edge, kept inside the host; just below the component when the theme's `tooltip.below` is on, with `tooltip.below.overlap`, else 3, and `tooltip.below.gap`, else 5 |
 | Tooltip padding | the theme's `tooltip.padding`, else 4; 1 between lines |
 | Toast time | 3000 ms for text toasts |
 | Toast position | 4 in from the top and right edges, stacked 4 apart |
 | Toast padding | the theme's `toast.padding`, else 6; text wraps at a third of the host's width |
+| Toast layout | first line in `toast.title` when the theme sets it; lines `toast.line.gap` apart, else 0; at least `toast.width.minimum` wide, else no minimum; `toast.margin` from the top and right edges and between toasts, else `Overlays.TOAST_MARGIN` |
+| Tab widths | equal; whole units when the room is whole, the spare units one each to the first tabs |
 
 The host synthesizes repeats only for engines whose platform reports `sendsKeyRepeat == false`. Swing sends its own.
 
@@ -300,5 +311,6 @@ The host synthesizes repeats only for engines whose platform reports `sendsKeyRe
 | Swing default theme | `strata:flat` |
 | Swing translations | none: Strata's keys in English, other keys as themselves |
 | `SwingPlatform` capabilities | sends key repeats, has a monospaced font, stores no slicing with images |
+| `SwingPlatform` conventions | `Conventions.DEFAULT`: controls act on the click |
 | `BitmapFont` tinted sheets kept | 256 colors |
 | `SwingSnapshot` text and sprites | `SwingTextMetrics.defaults()`, images from the adapter's class loader, tooltips with no delay |
