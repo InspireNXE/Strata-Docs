@@ -18,13 +18,16 @@ package org.inspirenxe.strata.examples.binding;
 import org.inspirenxe.strata.api.ComponentFactory;
 import org.inspirenxe.strata.api.component.Component;
 import org.inspirenxe.strata.api.control.attribute.item.ItemSource;
+import org.inspirenxe.strata.api.control.attribute.item.MultiSelection;
 import org.inspirenxe.strata.api.control.attribute.item.Selection;
+import org.inspirenxe.strata.api.control.attribute.item.SelectionMode;
 import org.inspirenxe.strata.api.control.attribute.text.HasText;
 import org.inspirenxe.strata.api.control.attribute.text.TextInput;
 import org.inspirenxe.strata.api.control.attribute.value.Ranged;
 import org.inspirenxe.strata.api.control.attribute.value.Toggle;
 import org.inspirenxe.strata.api.control.button.Button;
 import org.inspirenxe.strata.api.control.collection.ListView;
+import org.inspirenxe.strata.api.control.display.InfoBar;
 import org.inspirenxe.strata.api.control.display.Label;
 import org.inspirenxe.strata.api.layout.StackPanel;
 import org.inspirenxe.strata.api.screen.Screen;
@@ -113,6 +116,40 @@ public final class BindingExamples {
                 .bind(Selection.selectedItem(), chosen);         // two way; null means nothing selected
         // --8<-- [end:list]
         return list;
+    }
+
+    /**
+     * Shows a warning while a state says so, and clears the state when the user closes the bar.
+     *
+     * @param ui the factory
+     * @param lowFunds whether the warning shows
+     * @return the bar
+     */
+    public static InfoBar info(final ComponentFactory ui, final State<Boolean> lowFunds) {
+        // --8<-- [start:info]
+        final InfoBar warning = ui.infoBar(InfoBar.Severity.WARNING, "Low funds", "Top up before you buy.")
+                .bind(InfoBar.IS_OPEN, lowFunds);            // the close button sets lowFunds to false
+        // --8<-- [end:info]
+        return warning;
+    }
+
+    /**
+     * Binds a list's items and every selected item.
+     *
+     * @param ui the factory
+     * @param offers the items
+     * @param picked the selected items
+     * @return the list
+     */
+    public static ListView<String> multi(final ComponentFactory ui, final State<List<String>> offers,
+                                         final State<List<String>> picked) {
+        // --8<-- [start:multi]
+        final ListView<String> cart = ui.<String>listView()
+                .setSelectionMode(SelectionMode.MULTIPLE)
+                .bind(ItemSource.itemsKey(), offers)
+                .bind(MultiSelection.selectedItemsKey(), picked);  // two way; each item found by key
+        // --8<-- [end:multi]
+        return cart;
     }
 
     static void network(final SettingsModel model, final Runnable receive) {

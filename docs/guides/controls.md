@@ -16,18 +16,18 @@ Controls that do the same kind of thing share small interfaces called attributes
 |---|---|---|---|---|---|
 | `HasText` | `text` | `text()`, `setText` | | `TEXT` | `Button`, `DropDownButton`, `CycleButton`, `CheckBox`, `RadioButton`, `ToggleSwitch`, `Label`, `InfoBar` and `MessageBox` (the message), `ProgressBar`, `BusyIndicator`, and through `TextInput` the text fields; also the entries `MenuItem`, `CheckMenuItem`, `SubmenuItem`, `Tab`, `NavigationItem` and `NavigationHeader` |
 | `Titled` | `text` | `title()`, `setTitle` | | `TITLE` | `Window`, `MessageBox`, `Expander`, `InfoBar`, `NavigationView`; also the entry `TableColumn` |
-| `TextEntry` | `text` | `length()`, `isEmpty()`, `clear()`, the caret, the selection, `setMaxLength`, `setReadOnly`, `setTextPadding`; nothing that carries the text | `MODIFY`, `MODIFIED` | | `TextBox`, `TextArea`, `PasswordTextBox` |
+| `TextEntry` | `text` | `length()`, `isEmpty()`, `clear()`, the caret, the selection, `setMaxLength`, `setReadOnly`, `setTextPadding`; nothing that carries the text | `MODIFY`, `MODIFIED` | `READ_ONLY` | `TextBox`, `TextArea`, `PasswordTextBox` |
 | `TextInput` | `text` | `TextEntry` plus `text()`, `setText`, `selectedText()` and the highlighter | `EDIT`, `EDITED` | `TEXT` | `TextBox`, `TextArea` |
 | `Toggle` | `value` | `isSelected()`, `setSelected`, `toggle()` | `TOGGLE`, `TOGGLED` | `SELECTED` | `CheckBox`, `ToggleSwitch`, `RadioButton` |
 | `Ranged` | `value` | `value()`, `setValue`, `min()`, `max()`, `setRange` | `CHANGE`, `CHANGED` | `VALUE` | `Slider`, `Spinner`, `ProgressBar`, `ScrollBar` |
 | `Stepped` | `value` | `Ranged` plus `step()`, `setStep` | | | `Slider`, `Spinner` |
-| `HasDate` | `value` | `date()`, `setDate`, `clearDate()`, `minDate()`, `maxDate()`, `setDateRange`, `setDateFilter`, `firstDayOfWeek()`, `setFirstDayOfWeek` | `PICK_DATE`, `DATE_PICKED` | | `CalendarView`, `DatePicker`, `DateTimePicker` |
-| `HasTime` | `value` | `time()`, `setTime`, `clearTime()`, `clockFormat()`, `setClockFormat`, `isSecondsShown()`, `setSecondsShown`, `minuteStep()`, `setMinuteStep` | `PICK_TIME`, `TIME_PICKED` | | `TimePicker`, `DateTimePicker` |
+| `HasDate` | `value` | `date()`, `setDate`, `clearDate()`, `minDate()`, `maxDate()`, `setDateRange`, `setDateFilter`, `firstDayOfWeek()`, `setFirstDayOfWeek` | `PICK_DATE`, `DATE_PICKED` | `DATE` | `CalendarView`, `DatePicker`, `DateTimePicker` |
+| `HasTime` | `value` | `time()`, `setTime`, `clearTime()`, `clockFormat()`, `setClockFormat`, `isSecondsShown()`, `setSecondsShown`, `minuteStep()`, `setMinuteStep` | `PICK_TIME`, `TIME_PICKED` | `TIME` | `TimePicker`, `DateTimePicker` |
 | `ItemSource` | `item` | `items()`, `setItems`, `refresh()`, `setKeyFunction` | | `itemsKey()` | `ListView`, `TableView`, `TreeView`, `ComboBox`, `GridView`, `CycleButton` |
 | `CellSource` | `item` | `setCellFactory` | | | `ListView`, `TreeView`, `GridView`; also the entry `TableColumn` |
 | `Selection` | `item` | `selectedIndex()`, `selected()`, `select(index)`, `selectItem(item)`, `clearSelection()`: the current entry | `SELECT`, `SELECTED` | `SELECTED_INDEX`, `selectedItem()` | every control below that selects |
 | `SingleSelection` | `item` | `Selection` and nothing more: the control only ever selects one entry | | | `ComboBox`, `GridView`, `CycleButton`, `TabBar`, `MenuBar`, `RadioGroup`, `NavigationView` |
-| `MultiSelection` | `item` | `Selection` plus `setSelectionMode`, `selectedIndexes()`, `selectedItems()`, `selectIndexes`, `selectAll()` | `SELECT_MANY`, `SELECTED_MANY` | | `ListView`, `TableView`, `TreeView` |
+| `MultiSelection` | `item` | `Selection` plus `setSelectionMode`, `selectedIndexes()`, `selectedItems()`, `selectIndexes`, `selectItems`, `selectAll()` | `SELECT_MANY`, `SELECTED_MANY` | `SELECTED_INDEXES`, `selectedItemsKey()` | `ListView`, `TableView`, `TreeView` |
 | `Activatable` | `item` | `setActivateOnClick` | `ACTIVATE`, `ACTIVATED` | | `ListView`, `TableView`, `TreeView`, `GridView`, `NavigationView` |
 | `RowView` | `item` | row height and spacing, the placeholder, scrolling, `setDeselectable` | | | `ListView`, `TableView`, `TreeView` |
 | `Closable` | `popup` | `close()` | `CLOSE`, `CLOSED` | | `Window`, `Overlay`, and through `Openable` the others |
@@ -44,7 +44,7 @@ settings.onEvent(Toggle.TOGGLED, event -> save());
 form.onEvent(Selection.SELECTED, event -> updateButtons());
 ```
 
-Every component also has the keys `Component.ENABLED` and `Component.VISIBLE`. A binding key names a property that [`bind`](binding.md) can keep in step with a state, and sits beside the events that report the property's changes:
+Every component also has the keys `Component.ENABLED` and `Component.VISIBLE`, and every component with a tooltip has `HasTooltip.TOOLTIP`. Controls have keys of their own for what no attribute covers, such as `CheckBox.STATE` and `Expander.IS_EXPANDED`; the [binding guide](binding.md#binding-a-control) lists them all. A binding key names a property that [`bind`](binding.md) can keep in step with a state, and sits beside the events that report the property's changes:
 
 ```java
 music.bind(Toggle.SELECTED, model.music);       // works on a checkbox, a switch or a radio button

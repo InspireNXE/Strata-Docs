@@ -29,16 +29,53 @@ The key names the property. Keys are constants beside the events of the attribut
 | Key | Value | Two way through |
 |---|---|---|
 | `Component.ENABLED`, `Component.VISIBLE` | `Boolean` | |
+| `HasTooltip.TOOLTIP` | `Tooltip`, null for none | |
 | `HasText.TEXT` | `Text` | |
+| `TextEntry.READ_ONLY` | `Boolean` | |
 | `TextInput.TEXT` | `String` | `TextInput.EDITED` |
 | `Titled.TITLE` | `Text` | |
 | `Toggle.SELECTED` | `Boolean` | `Toggle.TOGGLED` |
 | `Ranged.VALUE` | `Double` | `Ranged.CHANGED` |
+| `HasDate.DATE` | `LocalDate`, null for none | `HasDate.DATE_PICKED` |
+| `HasTime.TIME` | `LocalTime`, null for none | `HasTime.TIME_PICKED` |
 | `Selection.SELECTED_INDEX` | `Integer` | `Selection.SELECTED` |
-| `Selection.selectedItem()` | the entry type | `Selection.SELECTED` |
+| `Selection.selectedItem()` | the entry type, null for none | `Selection.SELECTED` |
+| `MultiSelection.SELECTED_INDEXES` | `List<Integer>` | `MultiSelection.SELECTED_MANY` |
+| `MultiSelection.selectedItemsKey()` | `List` of the entry type | `MultiSelection.SELECTED_MANY` |
 | `ItemSource.itemsKey()` | `List` of the item type | |
 
-The last two are methods because a constant cannot carry a control's type parameter. `itemsKey()` is not called `items()` because that name is the getter's. Only components bind, so entries such as tabs, menu items and table columns have `HasText` or `Titled` but take no binding.
+The keys written as methods are methods because a constant cannot carry a control's type parameter. `itemsKey()` and `selectedItemsKey()` are not called `items()` and `selectedItems()` because those names are the getters'. Only components bind, so entries such as tabs, menu items and table columns have `HasText` or `Titled` but take no binding.
+
+A control has keys of its own for what no attribute covers, beside its own events:
+
+| Key | Value | Two way through |
+|---|---|---|
+| `CheckBox.STATE` | `CheckState`, for a box that can be mixed | `CheckBox.CHANGED` |
+| `ColorPicker.COLOR` | `Integer`, ARGB | `ColorPicker.PICKED` |
+| `CalendarView.SHOWN_MONTH` | `YearMonth` | `CalendarView.BROWSED` |
+| `DateTimePicker.DATE_TIME` | `LocalDateTime`, null for none | `DateTimePicker.PICKED` |
+| `PasswordTextBox.IS_REVEALED` | `Boolean` | `PasswordTextBox.REVEALED` |
+| `TableView.SORT_ORDER` | `TableView.Sort`, null for the set order | `TableView.SORTED` |
+| `Expander.IS_EXPANDED` | `Boolean` | `Expander.EXPANDED` |
+| `NavigationView.IS_EXPANDED` | `Boolean`, the pane open over the content | `NavigationView.EXPANDED` |
+| `SplitPane.POSITION` | `Float`, from 0 to 1 | `SplitPane.MOVED` |
+| `InfoBar.IS_OPEN` | `Boolean` | `Openable.OPENED` and `Closable.CLOSED` |
+| `InfoBar.SEVERITY` | `InfoBar.Severity` | |
+| `ProgressBar.INDETERMINATE` | `Boolean` | |
+| `Image.VALUE`, `Avatar.VALUE` | any value, null for none | |
+| `Image.SPRITE` | `SpriteId` | |
+| `Avatar.NAME` | `Text` | |
+| `Avatar.BADGE` | `Integer` | |
+
+A key has the property's name, as `SELECTED` does. Where the report already has that name, as `Expander.EXPANDED` does, the key has the getter's name instead: `IS_EXPANDED`, `IS_REVEALED`, `IS_OPEN`.
+
+An info bar bound with `IS_OPEN` writes false when the user closes it, so a state can show a message until it is read:
+
+```java
+--8<-- "binding/BindingExamples.java:info"
+```
+
+Some properties have no key on purpose. Margins, sizes, label styles and the other layout and appearance setters have none, since a screen's data seldom drives them. A range would clamp the value between setting its two ends. Combo boxes, drop-down buttons and the pickers have no open key, since their popups close on a press outside and a state holding them open would fight the user. A window's size and position report only the user's drags, and a password box's text never goes into a state.
 
 ## One way and two ways
 
@@ -71,6 +108,12 @@ A `Source<T>` is anything a property can follow: a state, or a lambda that compu
 --8<-- "binding/BindingExamples.java:list"
 ```
 
+A list, table or tree in `SelectionMode.MULTIPLE` binds its whole selection with `MultiSelection.selectedItemsKey()`, a `List` of the selected items. A change to the state selects those items through `selectItems`, which finds each one by key and skips items the control does not hold; a tree opens the branches the items are in. Null clears the selection, and so does an empty list. `MultiSelection.SELECTED_INDEXES` binds the indexes instead, with the same warning as `SELECTED_INDEX`.
+
+```java
+--8<-- "binding/BindingExamples.java:multi"
+```
+
 When a component is attached, the state wins over what the control held. A combo box selects its first item when its items arrive, but the bound selection replaces it before anything is written back.
 
 ## When updates happen
@@ -97,10 +140,10 @@ A component holds one binding per key name. Binding the same key again replaces 
 
 ## Binding your own control
 
-A control you write gets binding by declaring a `PropertyKey` for each property, beside its events, with `PropertyKey.of(name, reader, writer, report)`. Leave out the report for a property only code changes.
+A control you write gets binding by declaring a `PropertyKey` for each property, beside its events, with `PropertyKey.of(name, reader, writer, report)`. Leave out the report for a property only code changes, and pass two reports where two events between them tell of every change, as an info bar's opening and closing do.
 
 ```java
 --8<-- "extending/ToggleSwitch.java:events"
 ```
 
-The writer must behave like the control's setter, reporting the change and firing no request, and the report must fire after every change of the property with the control as its target. [Extending Strata](extending.md#events-for-your-own-control) shows the rest of the control.
+The writer must behave like the control's setter, reporting the change and firing no request, and between them the reports must fire after every change of the property with the control as their target. [Extending Strata](extending.md#events-for-your-own-control) shows the rest of the control.

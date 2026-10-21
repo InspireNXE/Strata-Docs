@@ -333,4 +333,31 @@ class ExamplesTest {
         list[0].select(1);
         assertEquals("Dev", chosen.get());
     }
+
+    @Test
+    void theInfoBarClearsItsStateWhenClosed() {
+        final ScreenHost host = StrataCore.createScreenHost(new ToyPlatform(), Themes.flat());
+        host.resize(300, 200);
+        final State<Boolean> lowFunds = State.of(true);
+        final InfoBar[] bar = new InfoBar[1];
+        host.open(factory -> bar[0] = BindingExamples.info(factory, lowFunds));
+        host.layout();
+        assertTrue(bar[0].isOpen());
+        bar[0].close();
+        assertFalse(lowFunds.get());
+    }
+
+    @Test
+    void theBoundCartSelectsEveryPickedOffer() {
+        final ScreenHost host = StrataCore.createScreenHost(new ToyPlatform(), Themes.flat());
+        host.resize(300, 200);
+        final State<List<String>> offers = State.of(List.of("Ana's lamp", "Ben's rug", "Cleo's desk"));
+        final State<List<String>> picked = State.of(List.of("Cleo's desk", "Ana's lamp"));
+        final ListView<?>[] cart = new ListView<?>[1];
+        host.open(factory -> cart[0] = BindingExamples.multi(factory, offers, picked));
+        host.layout();
+        assertEquals(List.of(0, 2), cart[0].selectedIndexes());
+        cart[0].selectIndexes(List.of(1));
+        assertEquals(List.of("Ben's rug"), picked.get());
+    }
 }
