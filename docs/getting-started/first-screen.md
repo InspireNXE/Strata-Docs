@@ -75,6 +75,8 @@ The root of a screen is usually an `AnchorPanel` anchored with `FILL`, so it cov
 
 `StrataPanel` is an ordinary `JPanel` that holds a stack of screens. Its last constructor argument is the scale: the number of pixels per UI unit. At a scale of 2, the 200-unit column is 400 pixels wide. Swing objects must be used on the event dispatch thread, hence `invokeLater`.
 
+`setDefault()` makes the panel the place where `Strata.screens()` opens screens. `Strata.screens().open(screen)` is how a screen is opened on every engine, so the line that opens it stays the same when the screen moves to another adapter.
+
 To get a PNG instead of a window, for example in a test or on a build server, use `SwingSnapshot`:
 
 ```java

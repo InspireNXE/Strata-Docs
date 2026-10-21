@@ -16,7 +16,17 @@ The Swing adapter draws Strata with Java2D and takes input from AWT. It is the f
 | `Theme` | The theme for every screen pushed |
 | `scale` | Pixels per UI unit, which must be positive |
 
-`panel.screens()` is the [screen stack](../guides/screens.md#stacks-of-screens): push to show a screen, pop to close the top one. Only the top screen gets input.
+`panel.screens()` is the [screen stack](../guides/screens.md#stacks-of-screens): push or open to show a screen, pop to close the top one. Only the top screen gets input. The stack is also the panel's `ScreenController`.
+
+`panel.setDefault()` marks the panel whose stack `Strata.screens()` returns, so code that opens screens through the API opens them on that panel. Marking another panel moves the mark, and `isDefault()` says which panel has it. Swing has no screens of its own, so until a panel is marked, `Strata.screens()` throws `IllegalStateException` with a message saying to mark one. It does not open a window.
+
+`push` shows a screen in the panel's theme, the one given to the constructor or set later with `screens().setTheme`. `open(screen)` shows it in the platform's default theme, which `ThemeRef.platform()` names. On Swing that is `strata:flat`, until `setDefaultTheme` on the platform's `SwingThemeSource` names another:
+
+```java
+SwingThemeSource themes = new SwingThemeSource(App.class.getClassLoader());
+themes.setDefaultTheme(ThemeId.of("myapp", "dark"));
+StrataPanel panel = new StrataPanel(new SwingPlatform(SwingTextMetrics.defaults(), themes), Themes.flat(), 2f);
+```
 
 Use the panel on the Swing event dispatch thread only, the same as any Swing component.
 

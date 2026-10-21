@@ -148,6 +148,16 @@ ThemeRef theme = ThemeRef.of(ThemeId.of("mymod", "shop"))
 
 The host resolves the ref when it opens. `Themes.FLAT` (`strata:flat`) is registered on every engine, adapters register their engine themes under ids of their own, and code can define more. An id with nothing registered is defined by its files alone and names its starting theme as `parent`.
 
+### The platform's default theme
+
+Each platform has a default theme, the one screens open in when no theme is given. `ThemeRef.platform()` refers to it, so code can change a few keys of the engine's look without naming the adapter's theme:
+
+```java
+--8<-- "screens/ScreenExamples.java:open"
+```
+
+The ref's id is `Themes.PLATFORM` (`strata:platform`). The adapter names the default theme through its `ThemeSource.defaultTheme()`, which is `strata:flat` where the adapter names none; on Swing, `SwingThemeSource.setDefaultTheme` sets it. A ref to `strata:platform` resolves as that theme in full, then takes the overrides added for `strata:platform` with `Strata.themes().override`, then its own. Those overrides apply to whichever theme is the default, on top of the overrides added for that theme's own id. A theme file can name `strata:platform` as its parent. No theme files are read for `strata:platform` itself, and it cannot be defined in code.
+
 When the engine reloads its assets, or code adds or closes [overrides](#overrides-from-code), every host with a ref resolves it again and keeps the ref's overrides. A result that lacks a key the open screen needs is logged and ignored, so the screen keeps its old theme.
 
 ### Layers
@@ -177,7 +187,7 @@ A resolved theme remembers which layer set each key. `theme.layer(key)` returns 
 
 Nothing is written to a theme or a file. The keys apply each time the theme resolves, and closing the subscription brings back whatever lies beneath them. A text style from code replaces the whole style for its key, where a theme file's text entry changes only the fields it names.
 
-`define` gives an id a base that starts from its parent, as a theme file with `parent` does, and packs can restyle a defined theme like any other. Defining an id that is already defined, until that definition's subscription is closed, throws `ThemeException`, and so does defining `strata:flat`. An id that the adapter already gives a base cannot be defined either; that shows when the theme resolves, which then throws `ThemeException`.
+`define` gives an id a base that starts from its parent, as a theme file with `parent` does, and packs can restyle a defined theme like any other. Defining an id that is already defined, until that definition's subscription is closed, throws `ThemeException`, and so does defining `strata:flat` or `strata:platform`. An id that the adapter already gives a base cannot be defined either; that shows when the theme resolves, which then throws `ThemeException`.
 
 ### Theme files
 

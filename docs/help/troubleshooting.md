@@ -38,7 +38,7 @@ Strata does not catch exceptions from handlers or hooks. They propagate out of t
 | Is it visible? | Hidden components take no space and are not drawn. |
 | Is a clipping ancestor too small? | Children are clipped to their container's bounds by default. |
 | Are your colors opaque? | `0xFF0000` has alpha 0 and draws nothing. Write `0xFFFF0000`. |
-| On Swing, was the screen pushed? | `panel.screens().push(screen)`. |
+| On Swing, was the screen opened? | `Strata.screens().open(screen)` after `panel.setDefault()`, or `panel.screens().push(screen)`. |
 | Did you show it on the UI thread? | Hosts are single-threaded. Hand work from other threads to the engine's UI thread first. |
 
 ## Layout looks wrong

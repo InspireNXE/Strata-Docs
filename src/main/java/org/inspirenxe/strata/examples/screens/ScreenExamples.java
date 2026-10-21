@@ -16,13 +16,16 @@
 package org.inspirenxe.strata.examples.screens;
 
 import org.inspirenxe.strata.api.ComponentFactory;
+import org.inspirenxe.strata.api.Strata;
 import org.inspirenxe.strata.api.component.Component;
 import org.inspirenxe.strata.api.control.button.Button;
 import org.inspirenxe.strata.api.layout.Anchor;
 import org.inspirenxe.strata.api.layout.StackPanel;
 import org.inspirenxe.strata.api.screen.Screen;
 import org.inspirenxe.strata.api.screen.ScreenHandle;
+import org.inspirenxe.strata.api.text.Text;
 import org.inspirenxe.strata.api.theme.Paint;
+import org.inspirenxe.strata.api.theme.ThemeRef;
 import org.inspirenxe.strata.api.theme.Themes;
 import org.inspirenxe.strata.swing.StrataPanel;
 import org.inspirenxe.strata.swing.SwingPlatform;
@@ -76,6 +79,46 @@ public final class ScreenExamples {
         }
     }
     // --8<-- [end:rebuild]
+
+    static void open() {
+        // --8<-- [start:open]
+        // Wherever the platform shows screens, in its default theme
+        Strata.screens().open(new ShoppingList());
+
+        // The default theme with one key changed, for this screen only
+        Strata.screens().open(new ShoppingList(), ThemeRef.platform()
+                .override(Button.STYLE_NORMAL, Paint.solid(0xFF2E7D32)));
+        // --8<-- [end:open]
+    }
+
+    // --8<-- [start:above]
+    /**
+     * A list that opens a details screen above itself. Closing the details screen shows the list again, as the user
+     * left it.
+     */
+    public static final class Pantry implements Screen {
+        private ScreenHandle handle;
+
+        @Override
+        public Component<?> build(final ComponentFactory factory) {
+            return factory.anchorPanel()
+                    .add(factory.button("Details")
+                            .onEvent(Button.PRESSED, event -> this.handle.open(new ShoppingList()))
+                            .setAnchor(Anchor.CENTER))
+                    .setAnchor(Anchor.FILL);
+        }
+
+        @Override
+        public Text title() {
+            return Text.of("Pantry");
+        }
+
+        @Override
+        public void opened(final ScreenHandle handle) {
+            this.handle = handle;
+        }
+    }
+    // --8<-- [end:above]
 
     static void dialog() {
         // --8<-- [start:stack]

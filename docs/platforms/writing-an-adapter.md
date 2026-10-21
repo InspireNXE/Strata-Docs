@@ -103,6 +103,16 @@ Create a host with `StrataCore`:
 
 `createScreenHost(platform, theme, closeRequested)` and `createScreenStack(platform, theme)` also take a `ThemeRef`. A host given a ref also compares the version of the overrides code adds with `Strata.themes()`, which core keeps for every engine, and resolves the ref again when it changes. `StrataCore.resolveTheme` resolves a ref once, without a host.
 
+## Opening screens
+
+Code opens screens with `Strata.screens()`, which returns the controller the adapter hands to `StrataCore.setScreenController` when it starts. Hand it over before any project code can run, such as from the engine's plugin or mod entry point, and keep the controller cheap to create, since it may be asked for before the engine has a window.
+
+- An engine without screens of its own can hand over a `ScreenStack`, which is a `ScreenController`: `open(screen, theme)` pushes a screen in a theme of its own.
+- An engine with screens of its own implements `ScreenController.open(screen, theme)`: make an engine screen that holds a host for the Strata screen, show it, and return a `ScreenHandle` for it. Title the engine screen with the screen's `title()`. The default `open(screen)` passes `ThemeRef.platform()`.
+- A screen's handle opens screens above it through the host's opener. Set one with `ScreenHost.setOpener(controller)` that puts the new screen above the host's screen and shows the host's screen again, unchanged, when the new one closes. A host with no opener opens through the platform's controller. A stack sets its own.
+- Name the platform's default theme in `ThemeSource.defaultTheme()`. It must resolve against the source and must not be `strata:platform`, and changes show once the source's `version()` changes.
+- `ScreenHost.handle()` returns the open screen's handle, for a controller that has to return one.
+
 Then forward the engine's callbacks:
 
 ```java

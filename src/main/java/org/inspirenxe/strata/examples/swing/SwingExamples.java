@@ -15,6 +15,7 @@
  */
 package org.inspirenxe.strata.examples.swing;
 
+import org.inspirenxe.strata.api.Strata;
 import org.inspirenxe.strata.api.theme.Themes;
 import org.inspirenxe.strata.examples.quickstart.SettingsScreen;
 import org.inspirenxe.strata.swing.AwtFont;
@@ -53,7 +54,9 @@ public final class SwingExamples {
             final SwingPlatform platform = new SwingPlatform(SwingTextMetrics.defaults());
             // 2 pixels per UI unit
             final StrataPanel panel = new StrataPanel(platform, Themes.flat(), 2f);
-            panel.screens().push(new SettingsScreen());
+            // Strata.screens() opens screens on the default panel
+            panel.setDefault();
+            Strata.screens().open(new SettingsScreen());
 
             final JFrame frame = new JFrame("Settings");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

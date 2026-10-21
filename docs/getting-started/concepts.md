@@ -12,7 +12,7 @@ Strata has three layers, and you only ever compile against the first one.
 | SPI | `org.inspirenxe.strata.spi` | People writing an engine adapter. |
 | Core | `org.inspirenxe.strata.core` | Nobody directly. It implements both, and adapters create hosts from it. |
 
-Each adapter adds one more package for its engine, such as `org.inspirenxe.strata.swing`. You use a few classes from your engine's adapter to show screens (`StrataPanel` on Swing) and nothing else from it.
+Each adapter adds one more package for its engine, such as `org.inspirenxe.strata.swing`. Screens open through the API with `Strata.screens()`. On Swing you also set up a `StrataPanel` in a window, and on engines with screens of their own you may need nothing from the adapter at all.
 
 Because the API is interfaces, the implementation can change between versions without breaking your code.
 

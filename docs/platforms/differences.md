@@ -24,6 +24,8 @@ Strata hides most engine differences, but the SPI leaves some decisions to each 
 | Nine-slice slicing | The `border` argument, or slicing the engine stores with the image | From the `border` argument, in image pixels |
 | `NOT_ALLOWED` cursor | Any cursor the engine has | Shows the default arrow |
 | Screen stack | `ScreenStack`, or one host per engine screen when the engine stacks screens itself | `StrataPanel.screens()` |
+| `Strata.screens()` | The adapter's controller, handed over when it starts | The stack of the panel marked with `StrataPanel.setDefault()`; throws until one is marked |
+| Default theme (`ThemeRef.platform()`) | The theme the adapter's `ThemeSource.defaultTheme()` names | `strata:flat`, or the theme `SwingThemeSource.setDefaultTheme` names |
 | UI thread | The engine's UI or render thread | The event dispatch thread |
 
 The sections below cover the differences most likely to affect a screen.
