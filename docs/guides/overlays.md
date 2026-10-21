@@ -57,6 +57,7 @@ A text toast draws on `toast.background` with `toast.text`, falling back to the 
 | Call | Does |
 |---|---|
 | `overlay.close()` | Closes it and detaches its content. Closing twice does nothing. |
+| `overlay.raise()` | Brings a popup or toast above the other popups and toasts, but no higher than the first dialog opened after it, so a dialog stays above everything opened before it. Does nothing for a dialog or a closed overlay. |
 | `overlay.onEvent(Closable.CLOSED, handler)` | Runs once it has closed, however that happened |
 | `overlays.of(component)` | Finds the overlay a component is shown in, for a button inside a dialog that closes it |
 | `overlays.open()` | Every open overlay, bottom first |

@@ -18,7 +18,7 @@ Because the API is interfaces, the implementation can change between versions wi
 
 ## Components and the tree
 
-A UI is a tree of components. Containers (the panels and windows) hold children and decide where they go; leaves (labels, buttons, text boxes) draw themselves. Each component has at most one parent. A container draws its children in the order they were added, so later children are drawn on top and are hit by the pointer first.
+A UI is a tree of components. Containers (the panels and windows) hold children and decide where they go; leaves (labels, buttons, text boxes) draw themselves. Each component has at most one parent. A container draws its children in the order they were added, so later children are drawn on top and are hit by the pointer first, unless a z index or a call to `raise` or `lower` changes that order (see [Drawing order](../guides/components.md#drawing-order)).
 
 Components are interfaces such as `Button` and `Label`. You get them from a factory, or by subclassing `CustomComponent`. Never implement a component interface yourself. Such a class has no implementation behind it, and adding it to a container throws `IllegalArgumentException`. See [Components](../guides/components.md).
 

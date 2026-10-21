@@ -39,10 +39,14 @@ Setters inherited from `Component` return the specific type: `setEnabled` on a `
 | `parent()` | The component this one was added to, or `null` for a screen's root, an overlay's content or a detached component |
 | `parent(type)` | The parent as `type` if it is one, otherwise empty |
 | `ancestor(type)` | The nearest parent, grandparent and so on that is a `type`, or empty |
-| `Container.add(child)` | Adds at the end, so the child is drawn on top of earlier ones |
+| `Container.add(child)` | Adds at the end, so the child is drawn on top of earlier ones with the same z index |
+| `Container.insert(index, child)` | Adds at a place in the layout order. It is drawn on top, as with `add`. |
+| `Container.move(child, index)` | Moves a child in the layout order without taking it out of the tree |
+| `Container.indexOf(child)` | Where a child is in `children()`, or -1 |
 | `Container.remove(child)` | Removes it. It loses focus, hover and press state and is detached. Does nothing if it is not a child. |
 | `Container.clear()` | Removes every child |
-| `Container.children()` | A live, unmodifiable view in drawing order |
+| `Container.children()` | A live, unmodifiable view in layout order |
+| `Container.paintOrder()` | A copy of the children in drawing order, bottom first |
 
 A parent is not always a `Container`. An expander's content, an info bar's action and a navigation view's page have that control as their parent, and the parts and content of a composite you write have your composite. So ask the parent for what you need instead of casting `parent()`. The type can be a raw interface, such as `Container.class` or an attribute like `Closable.class`:
 
@@ -66,6 +70,30 @@ A component is attached while it is in a tree that a host is showing. `isAttache
 Adding a child to an attached container attaches the child, and the child's theme hook runs before the next layout.
 
 Removing a component does not remove its event handlers. If the component will be reused, register the handlers that must go with `subscribe` and close their [subscriptions](events.md#removing-handlers).
+
+## Drawing order
+
+A container's children have two orders. The layout order is `children()`: layout places children in it, and focus and Tab follow it. The drawing order is `paintOrder()`: children later in it are drawn over earlier ones, and the pointer hits them first. Until you change it, the drawing order is the order children were added.
+
+| Method | What it does |
+|---|---|
+| `setZIndex(z)` | Sets where a component is drawn among its siblings. Higher draws later. 0 by default, and it may be negative. |
+| `Container.raise(child)` | Draws the child over its siblings with the same z index |
+| `Container.lower(child)` | Draws the child under its siblings with the same z index |
+| `Container.move(child, index)` | Changes the layout order only. The drawing order stays. |
+
+```java
+// Bring a panel to the front without moving it in the layout
+panel.raise(details);
+// Keep a toolbar over every panel, whatever is raised
+toolbar.setZIndex(1);
+```
+
+Children are drawn by z index first, then by when they were added, raised or lowered: adding or inserting a child and raising it put it above its siblings with the same z index, and lowering puts it below them. A z index orders siblings only. A child with a high z index is still drawn inside its parent, under anything its parent's later siblings draw.
+
+Raising, lowering and a new z index redraw but lay nothing out again, and they leave focus and Tab where they were. `move` lays the container out again, since the layout order changed, and moves the child in the Tab order too, but it never takes the child out of the tree: the child keeps focus, hover and press state, and no handler sees it leave or return. `insert` and `move` throw `IndexOutOfBoundsException` for an index out of range; `insert` of a child the container already has throws `IllegalArgumentException`, as `add` does, and `move`, `raise` and `lower` throw it for a component that is not a child.
+
+A [window](controls.md#window) raises itself in its parent when it is pressed, so of several windows in an [`AbsolutePanel`](layout.md#absolutepanel) the one the user pressed comes to the front. Overlays are ordered on their own: see [Working with open overlays](overlays.md#working-with-open-overlays).
 
 ## State flags
 

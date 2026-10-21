@@ -778,6 +778,16 @@ window.onEvent(Closable.CLOSED, event -> handle.close());
 
 Dragging the title bar moves the window, through its [offset](layout.md#offset), kept inside the slot its parent gives it (`setMovable(false)` stops that). The close button and an Escape the window acts on fire `Closable.CLOSE`, which a handler can cancel, then call `close()`, which fires `Closable.CLOSED` and closes the overlay showing the window. A window that is a screen's content does not close itself: close the screen from a `CLOSED` handler. With no `CLOSE` or `CLOSED` handler on its path, and outside an overlay, it leaves Escape to the engine. `setClosable(false)` hides the button and ignores Escape. A new window is centered in its slot.
 
+A press with any button anywhere in a window, on its content included, [raises](components.md#drawing-order) it among its siblings before the press is delivered, so of several windows in an `AbsolutePanel` the one the user pressed comes to the front. It works even when a handler inside cancels the press or stops it. A sibling with a higher z index stays above it. `setRaiseOnPress(false)` turns it off. A window that is a screen's content or an overlay's has no siblings, so nothing changes.
+
+```java
+AbsolutePanel desk = factory.absolutePanel();
+desk.add(factory.window("Ana").setSize(150, 90), 10, 10)
+        .add(factory.window("Ben").setSize(150, 90), 90, 40);
+// Notes stays over both, whichever was pressed last
+desk.add(factory.window("Notes").setSize(110, 70).setZIndex(1), 240, 20);
+```
+
 ### Resizing
 
 `setResizable(true)` draws a grip in the bottom-right corner, 10 units square, and dragging it resizes the window with its top-left corner in place. `setEdgeResizable(true)` lets the user drag every edge too: a press within 3 units of an edge moves that edge, and one within 10 units of a corner moves both edges there. The opposite edge stays put.

@@ -192,6 +192,8 @@ Everything required of a custom component applies, plus:
 - Keep per-child data, such as a grid cell, in your own map, and drop it in `onChildRemoved`.
 - Leave drawing the children to Strata. Your `paint` draws under them and `paintOverChildren` over them. While `clipsChildren()` is true they are clipped to `childClip()`, your bounds by default.
 
+Callers order a container's children with `insert`, `move`, `raise`, `lower` and z indexes (see [Drawing order](components.md#drawing-order)), and Strata keeps both orders for you: iterate `children()` in `measure` and `arrange`, and leave the drawing order to Strata. A `CustomComposite`, whose children are private, orders them itself with the protected `insertChild(index, child)`, `moveChild(child, index)`, `raiseChild(child)` and `lowerChild(child)`, which work as the `Container` methods do. A progress tree, for example, can raise the node under the pointer so it draws over its neighbors.
+
 ## Strata's components and yours
 
 Strata provides the components `ComponentFactory` makes. You see them through the interfaces in `api.control` and `api.layout`, such as `Button`, `ListView` and `StackPanel`, and their implementations stay in core.

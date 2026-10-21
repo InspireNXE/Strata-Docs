@@ -185,7 +185,7 @@ Weighted tracks make proportional layouts:
 
 ## AbsolutePanel
 
-Each child sits at a fixed position measured from the top-left corner of the content area. Its slot is exactly its desired size plus margin at that position, so alignment has no effect. Children may overlap; later ones are drawn on top. The panel's desired size is just big enough to cover every child.
+Each child sits at a fixed position measured from the top-left corner of the content area. Its slot is exactly its desired size plus margin at that position, so alignment has no effect. Children may overlap. Later ones are drawn on top, until `raise`, `lower` or a z index changes the [drawing order](components.md#drawing-order), and a window in the panel comes to the front when it is pressed. The panel's desired size is just big enough to cover every child.
 
 ![Three buttons at fixed positions](../assets/images/layout-absolute.png)
 
@@ -193,7 +193,7 @@ Each child sits at a fixed position measured from the top-left corner of the con
 --8<-- "layout/LayoutExamples.java:absolute"
 ```
 
-`add(child)` places a child at (0, 0). `move(child, x, y)` moves one later and does nothing if it is not a child. There is no getter for a child's position, so keep your own if you need it, as the [drag example](events.md#drags) does.
+`add(child)` places a child at (0, 0). `move(child, x, y)` moves one later and does nothing if it is not a child. It is not `move(child, index)`, which every container has and which changes the order of `children()`. There is no getter for a child's position, so keep your own if you need it, as the [drag example](events.md#drags) does.
 
 Use it for free placement, such as a board of draggable pieces. For forms and menus, the other containers adapt to text and screen size, so prefer them.
 

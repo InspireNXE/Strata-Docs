@@ -13,6 +13,7 @@ Every number Strata picks for you.
 | Maximum size | `Float.POSITIVE_INFINITY` both ways |
 | Fixed size | unset (`Float.NaN`) |
 | Alignment | `LEFT`, `TOP`, except windows and message boxes (centered), separators (stretched along their line), info bars (stretched across, at the top), and spacers and navigation views (stretched both ways) |
+| Z index | 0 |
 | Bounds before the first layout | `Rect.ZERO` |
 
 ## Containers
@@ -21,6 +22,7 @@ Every number Strata picks for you.
 |---|---|
 | Padding | `Insets.NONE` |
 | Clips children | yes |
+| Drawing order | the order children were added, until `raise`, `lower` or a z index changes it |
 | Background | `Paint.NONE` |
 | Border | `Border.NONE` |
 | `StackPanel` orientation | `VERTICAL` from `stackPanel()` |
@@ -40,6 +42,7 @@ Every number Strata picks for you.
 | `Window` close button | 12 wide, at the right end of the title bar |
 | `Window` closable, movable | yes, yes |
 | `Window` resizable, edge resizable | no, no |
+| `Window` raises on press | yes |
 | `Window` resize grip | 10 by 10 in the bottom-right corner, drawn as six 2 by 2 squares one unit in from the edges |
 | `Window` resizing edges | 3 in from each edge; within 10 of the next edge they resize both ways |
 | `Window` smallest size by resizing | the title bar's width, and the bar's height plus 10, unless the minimum size is larger |

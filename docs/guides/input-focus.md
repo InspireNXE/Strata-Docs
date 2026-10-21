@@ -103,7 +103,7 @@ There is no public method to clear focus from a component. Requesting focus on a
 
 Tab moves to the next component in tab order and Shift+Tab to the previous one, wrapping at both ends. With nothing focused, Tab goes to the first and Shift+Tab to the last.
 
-The order holds every component that is focusable and tabbable, with all its ancestors visible and enabled. It is sorted by tab index, lowest first, and components with equal indexes keep tree order: depth first, children in the order they were added. A focused component that is not in the order, for example one focused by a click with tabbing turned off, counts as "nothing focused".
+The order holds every component that is focusable and tabbable, with all its ancestors visible and enabled. It is sorted by tab index, lowest first, and components with equal indexes keep tree order: depth first, children in the order of `children()`, which `insert` and `move` change. The [drawing order](components.md#drawing-order) does not count, so raising a window does not change where Tab goes. A focused component that is not in the order, for example one focused by a click with tabbing turned off, counts as "nothing focused".
 
 Ctrl+Tab and Alt+Tab do not move focus, so they stay free for the engine or the operating system. A component that consumes Tab keeps focus where it is; nothing built in does.
 
