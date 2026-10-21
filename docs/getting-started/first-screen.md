@@ -1,6 +1,6 @@
 # Your first screen
 
-This page builds the form below, then shows it in a Swing window. It assumes you have [installed](installation.md) Strata.
+This page builds the form below, then shows it in a Swing window and in Minecraft. It assumes you have [installed](installation.md) Strata.
 
 ![The finished form](../assets/images/quickstart.png)
 
@@ -83,9 +83,19 @@ To get a PNG instead of a window, for example in a test or on a build server, us
 --8<-- "swing/SwingExamples.java:snapshot"
 ```
 
+## Show it in Minecraft
+
+In a mod, the same class opens with the same line, from whatever triggers your UI, such as a key mapping, a command or a packet:
+
+```java
+Strata.screens().open(new SettingsScreen());
+```
+
+The Minecraft adapter shows it in a vanilla `Screen`, drawn with vanilla's sprites and font and following the player's resource packs, and the call works from any thread. Strata's `Screen` and `Component` share their simple names with vanilla's, so keep Strata screens in classes of their own. [Screens on Minecraft](../platforms/minecraft/screens.md) covers the rest, and [Minecraft setup](../platforms/minecraft/index.md#setup) the dependencies for each loader.
+
 ## Next steps
 
 - [Core concepts](concepts.md) explains the model behind what you just wrote.
 - [Layout](../guides/layout.md) covers every container and how sizes are decided.
 - [Events](../guides/events.md) covers `onEvent` in depth: vetoing with Pre events, reacting with Post events, priorities and bubbling.
-- [Platforms](../platforms/index.md) covers the adapters and how engines differ.
+- [Platforms](../platforms/index.md) covers the adapters and how engines differ, and [Minecraft](../platforms/minecraft/index.md) everything specific to mods.

@@ -7,7 +7,7 @@
 | Java | 25 or newer, for building and at run time |
 | Gradle | 9.7.1, through the wrapper in the repository |
 
-Strata itself has no other dependencies. The Swing adapter uses only the JDK.
+Strata itself has no other dependencies. The Swing adapter uses only the JDK. The Minecraft adapter needs the game and a loader; [Minecraft](../platforms/minecraft/index.md#versions-and-loaders) lists the versions.
 
 ## Get the artifacts
 
@@ -46,9 +46,22 @@ dependencies {
 
 Then continue with [Your first screen](first-screen.md), or read the [Swing platform page](../platforms/swing.md).
 
+## Minecraft mods
+
+Depend on the Strata-Minecraft jar for your loader, `strata-minecraft-neoforge`, `-forge` or `-fabric`, or `strata-minecraft-spongevanilla` for a SpongeVanilla plugin, from the same snapshot repository, and add `strata-api` for compiling:
+
+```groovy
+dependencies {
+    implementation 'org.inspirenxe:strata-minecraft-neoforge:0.1.0-SNAPSHOT'
+    compileOnly 'org.inspirenxe:strata-api:0.1.0-SNAPSHOT'
+}
+```
+
+Players install the Strata jar for their loader next to your mod. [Minecraft setup](../platforms/minecraft/index.md#setup) has the exact dependencies and the metadata entry for each loader.
+
 ## Other engines
 
-Strata is a plain Java library. To show screens on an engine other than Swing, depend on that engine's adapter instead of `strata-swing`. For a Minecraft mod, [Minecraft](../platforms/minecraft/index.md#setup) has the setup for each loader. Your screens compile against `strata-api` the same way. [Platforms](../platforms/index.md) lists the adapters, and [Writing an adapter](../platforms/writing-an-adapter.md) shows how to write one for an engine that has none.
+Strata is a plain Java library. To show screens on another engine, depend on its adapter instead of `strata-swing`. Your screens compile against `strata-api` the same way. [Platforms](../platforms/index.md) lists the adapters, and [Writing an adapter](../platforms/writing-an-adapter.md) shows how to write one for an engine that has none.
 
 ## Trying it without a project
 
