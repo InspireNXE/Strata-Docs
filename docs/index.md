@@ -35,7 +35,8 @@ Strata is a GUI library for Java that does not depend on any engine, whether you
 - [Your first screen](getting-started/first-screen.md): a step-by-step walk through the screen above, run in a Swing window.
 - [Core concepts](getting-started/concepts.md): the handful of ideas everything else builds on.
 - [Guides](guides/index.md): components, layout, controls, overlays, events, binding, screens, themes, text and extending, each in depth.
-- [Platforms](platforms/index.md): the Swing adapter, how engines differ, and how to write an adapter of your own.
+- [Platforms](platforms/index.md): the Swing and Minecraft adapters, how engines differ, and how to write an adapter of your own.
+- [Minecraft](platforms/minecraft/index.md): Strata screens in mods on NeoForge, Forge, Fabric and SpongeVanilla, in vanilla's look and following resource packs.
 - [FAQ](help/faq.md) and [Troubleshooting](help/troubleshooting.md): short answers to common questions, and fixes for common errors.
 
 </div>

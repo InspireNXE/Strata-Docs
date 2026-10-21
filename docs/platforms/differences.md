@@ -36,7 +36,7 @@ The sections below cover the differences most likely to affect a screen.
 
 ## Units and rounding
 
-Layout always runs in floats. An adapter for an engine that draws on whole pixels rounds when it draws, so a panel at x = 10.4 with width 20.2 may cover pixels 10 to 31 there and its exact fractional span in Swing. Design with whole numbers and the two look alike.
+Layout always runs in floats. An adapter for an engine that draws on whole pixels rounds when it draws, so a panel at x = 10.4 with width 20.2, which ends at 30.6, covers pixels 10 to 29 on an adapter that moves edges down to whole pixels, as the Minecraft adapter does, or 10 to 30 on one that rounds them to the nearest, and its exact fractional span in Swing. Design with whole numbers and the two look alike.
 
 When an engine has a user scale setting, it changes how many screen pixels a unit is, which changes how many units fit across the screen. Use anchors, stretching and weighted grids rather than fixed positions, so layouts fit every size.
 

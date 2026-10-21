@@ -48,7 +48,7 @@ Then continue with [Your first screen](first-screen.md), or read the [Swing plat
 
 ## Other engines
 
-Strata is a plain Java library. To show screens on an engine other than Swing, depend on that engine's adapter instead of `strata-swing`. Your screens compile against `strata-api` the same way. [Platforms](../platforms/index.md) lists the adapters, and [Writing an adapter](../platforms/writing-an-adapter.md) shows how to write one for an engine that has none.
+Strata is a plain Java library. To show screens on an engine other than Swing, depend on that engine's adapter instead of `strata-swing`. For a Minecraft mod, [Minecraft](../platforms/minecraft/index.md#setup) has the setup for each loader. Your screens compile against `strata-api` the same way. [Platforms](../platforms/index.md) lists the adapters, and [Writing an adapter](../platforms/writing-an-adapter.md) shows how to write one for an engine that has none.
 
 ## Trying it without a project
 
