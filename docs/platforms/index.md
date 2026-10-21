@@ -4,7 +4,7 @@ Strata runs wherever an adapter exists. The Swing adapter lives in the Strata-Sw
 
 | Adapter | Artifact | Show a screen with | One UI unit is |
 |---|---|---|---|
-| [Swing](swing.md) | `strata-canvas-swing` | `Strata.screens()` on a `StrataPanel`, a `JPanel`, marked with `setDefault()` | `scale` pixels |
+| [Swing](swing.md) | `strata-swing` | `Strata.screens()` on a `StrataPanel`, a `JPanel`, marked with `setDefault()` | `scale` pixels |
 
 The Minecraft adapter lives in the [Strata-Minecraft](https://github.com/InspireNXE/Strata-Minecraft) repository.
 

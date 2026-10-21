@@ -24,7 +24,7 @@ tasks.withType(JavaCompile).configureEach {
 dependencies {
     // What a mod or game compiles against, taken from the Strata and Strata-Swing checkouts this build includes
     implementation("org.inspirenxe:strata-api:${strata_version}")
-    implementation("org.inspirenxe:strata-canvas-swing:${strata_version}")
+    implementation("org.inspirenxe:strata-swing:${strata_version}")
     // The adapter guide's example engine creates hosts and runs the SPI contract tests
     implementation("org.inspirenxe:strata-spi:${strata_version}")
     implementation("org.inspirenxe:strata-core:${strata_version}")
@@ -63,7 +63,7 @@ tasks.register('siteJavadoc', Sync) {
     // The Swing adapter's Javadoc comes from the Strata-Swing checkout
     dependsOn(gradle.includedBuild('Strata-Swing').task(':javadoc'))
     from(file('../Strata-Swing/build/docs/javadoc')) {
-        into('canvas-swing')
+        into('swing')
     }
     into(layout.projectDirectory.dir('docs/javadoc'))
 }

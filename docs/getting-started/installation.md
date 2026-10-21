@@ -26,7 +26,7 @@ The build compiles every module, runs the tests and checks that every public typ
 | `strata-api` | The API | Compiling screens and components |
 | `strata-spi` | The SPI | Writing an engine adapter |
 | `strata-core` | The implementation | Run time only, through an adapter |
-| `strata-canvas-swing` | The Swing adapter, built in Strata-Swing | Swing applications and tests |
+| `strata-swing` | The Swing adapter, built in Strata-Swing | Swing applications and tests |
 
 To use these from another Gradle project, publish them to your local Maven repository, in Strata and then in Strata-Swing:
 
@@ -49,7 +49,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.inspirenxe:strata-canvas-swing:0.1.0-SNAPSHOT'
+    implementation 'org.inspirenxe:strata-swing:0.1.0-SNAPSHOT'
 }
 ```
 
@@ -57,7 +57,7 @@ Then continue with [Your first screen](first-screen.md), or read the [Swing plat
 
 ## Other engines
 
-Strata is a plain Java library. To show screens on an engine other than Swing, depend on that engine's adapter instead of `strata-canvas-swing`. Your screens compile against `strata-api` the same way. [Platforms](../platforms/index.md) lists the adapters, and [Writing an adapter](../platforms/writing-an-adapter.md) shows how to write one for an engine that has none.
+Strata is a plain Java library. To show screens on an engine other than Swing, depend on that engine's adapter instead of `strata-swing`. Your screens compile against `strata-api` the same way. [Platforms](../platforms/index.md) lists the adapters, and [Writing an adapter](../platforms/writing-an-adapter.md) shows how to write one for an engine that has none.
 
 ## Trying it without a project
 
