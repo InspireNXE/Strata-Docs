@@ -1,29 +1,30 @@
+<p align="center"><img src=".github/assets/logo.svg" width="128" alt="Strata-Docs logo"></p>
+
 # Strata-Docs
 
-The documentation site for [Strata](../Strata), an engine-agnostic GUI library for Java games. It is a MkDocs Material site whose Java examples are compiled and tested, and whose reference links into Javadoc built from Strata.
+The source of the [documentation site](https://inspirenxe.github.io/Strata/) for [Strata](https://github.com/InspireNXE/Strata). It is a MkDocs Material site whose Java examples are compiled and tested, and whose reference links into Javadoc built from Strata.
 
 | Path | What it is |
 |---|---|
 | `docs/` | The pages: getting started, guides, platforms, reference, help and project. |
-| `src/` | The code the pages include through `--8<--` snippet markers. It compiles against Strata and has its own tests, so every example stays correct. |
-| `mkdocs.yml` | The site configuration and navigation. |
-| `hooks.py` | Adds the design documents and the roadmap to the Project pages from the Strata checkout. They stay in Strata (`docs/design-implemented.md`, `docs/design-pending.md`, `docs/ROADMAP.md`) because the design-first workflow changes them together with the code. |
-| `build.gradle` | Compiles and tests the code in `src`, and `siteJavadoc`, which builds the Javadoc of every Strata library and copies it into `docs/javadoc`. |
-
-Strata-Docs expects the Strata and Strata-Swing repositories next to it (`../Strata` and `../Strata-Swing`). Gradle includes both checkouts through `includeBuild`, the way Strata-Minecraft includes Strata, and the site build reads the design documents from the Strata checkout. Set `STRATA_DIR` to use another location for the documents.
+| `src/` | The code the pages include through `--8<--` snippet markers, compiled and tested against Strata. |
+| `hooks.py` | Pulls the design documents and roadmap in from the Strata checkout. Set `STRATA_DIR` to point elsewhere. |
 
 ## Building
 
-Building needs JDK 25 and Python 3.
+Building needs JDK 25, Python 3, and the Strata and Strata-Swing checkouts beside this one, at `../Strata` and `../Strata-Swing`.
 
 ```bash
-./gradlew build                       # compile and test the examples against ../Strata
-./gradlew siteJavadoc                 # build the Javadoc into docs/javadoc
+./gradlew build
+./gradlew siteJavadoc
 pip install -r docs/requirements.txt
-python -m mkdocs build --strict       # build the site into site/
-python -m mkdocs serve                # preview it
+python -m mkdocs serve
 ```
 
-The example screens in `docs/assets/images` are rendered by `./gradlew renderDocImages`.
+`./gradlew build` compiles and tests the examples, and `siteJavadoc` builds the Javadoc into `docs/javadoc`. Use `python -m mkdocs build --strict` for a full build into `site/`. `./gradlew renderDocImages` renders the example screens in `docs/assets/images`.
 
-When you change Strata's API or controls, update the matching guide, `docs/reference/theme-keys.md` or `docs/reference/defaults.md` here, and the example in `src` the page includes.
+When Strata's API or controls change, update the matching guide or reference page here and the example in `src` it includes.
+
+## License
+
+Strata-Docs is released under the Apache License, Version 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
