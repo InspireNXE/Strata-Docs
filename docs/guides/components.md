@@ -36,13 +36,22 @@ Setters inherited from `Component` return the specific type: `setEnabled` on a `
 
 | Method | What it does |
 |---|---|
-| `parent()` | The container this component was added to, or `null` for a root or a detached component |
+| `parent()` | The component this one was added to, or `null` for a screen's root, an overlay's content or a detached component |
+| `parent(type)` | The parent as `type` if it is one, otherwise empty |
+| `ancestor(type)` | The nearest parent, grandparent and so on that is a `type`, or empty |
 | `Container.add(child)` | Adds at the end, so the child is drawn on top of earlier ones |
 | `Container.remove(child)` | Removes it. It loses focus, hover and press state and is detached. Does nothing if it is not a child. |
 | `Container.clear()` | Removes every child |
 | `Container.children()` | A live, unmodifiable view in drawing order |
 
-`add` throws `IllegalArgumentException` if the child already has a parent, is a screen's root, is the container itself or one of its ancestors, has no Strata implementation, or was made by another factory. Remove a component from its parent before adding it elsewhere.
+A parent is not always a `Container`. An expander's content, an info bar's action and a navigation view's page have that control as their parent, and the parts and content of a composite you write have your composite. So ask the parent for what you need instead of casting `parent()`. The type can be a raw interface, such as `Container.class` or an attribute like `Closable.class`:
+
+```java
+// Close the info bar or flyout this button is in, whichever it is
+button.ancestor(Closable.class).ifPresent(Closable::close);
+```
+
+`add` throws `IllegalArgumentException` if the child already has a parent, is a screen's root, is the container itself or one of its ancestors, has no Strata implementation, or was made by another factory. Remove a component from its parent before adding it elsewhere. To move content a control holds, take it out through the control first, as `expander.setContent(null)` does.
 
 `add` can also throw `ThemeException`: when the container is already on screen, the child is checked against the host's theme right away. See [Themes](theming.md#required-and-optional-keys).
 

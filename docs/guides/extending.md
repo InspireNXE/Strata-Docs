@@ -191,7 +191,7 @@ Everything required of a custom component applies, plus:
 
 Strata provides the components `ComponentFactory` makes. You see them through the interfaces in `api.control` and `api.layout`, such as `Button`, `ListView` and `StackPanel`, and their implementations stay in core.
 
-You write subclasses of `CustomComponent`, `CustomComposite` and `CustomContainer`, and so does any other library that adds components. Strata's own components do not extend these classes, so a component that is an instance of `CustomComponent` was written outside Strata, and anything the factory made is Strata's. Both kinds go into the same containers and lay out, draw and fire events the same way, and either can hold the other.
+You write subclasses of `CustomComponent`, `CustomComposite` and `CustomContainer`, and so does any other library that adds components. Strata's own components do not extend these classes, so a component that is an instance of `CustomComponent` was written outside Strata, and anything the factory made is Strata's. Both kinds go into the same containers and lay out, draw and fire events the same way, and either can hold the other. The parts and content of a `CustomComposite` have the composite as their `parent()`, so code inside them that needs it can find it with `ancestor(YourComposite.class)` (see [The tree](components.md#the-tree)).
 
 ## Things you cannot do
 

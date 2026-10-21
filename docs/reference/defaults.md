@@ -206,9 +206,6 @@ Every number Strata picks for you.
 | | Content inset | the theme's `grid.cell.padding`, else 1 |
 | | Selectable | no |
 | | Activation | a left double click |
-| | Spacing | 4 between the lists, the buttons and the title row |
-| | Titles, items, selection | none, none, none |
-| | Cell factory, key function | a label of `String.valueOf(item)`, the item itself |
 | `ColorPicker` | Color | `0xFFFFFFFF`, opaque white |
 | | Alpha strip | hidden |
 | | Square, strip width, spacing | 96 square, 10, 4 |

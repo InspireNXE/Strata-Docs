@@ -8,7 +8,7 @@ Controls that do the same kind of thing share small interfaces called attributes
 
 | Attribute | Package | What it adds | Events | Controls |
 |---|---|---|---|---|
-| `HasText` | `text` | `text()`, `setText` | | `Button`, `DropDownButton`, `CycleButton`, `CheckBox`, `RadioButton`, `ToggleSwitch`, `Label`, `InfoBar` (the message), `ProgressBar`, `BusyIndicator`, and through `TextInput` the text fields |
+| `HasText` | `text` | `text()`, `setText` | | `Button`, `DropDownButton`, `CycleButton`, `CheckBox`, `RadioButton`, `ToggleSwitch`, `Label`, `InfoBar` and `MessageBox` (the message), `ProgressBar`, `BusyIndicator`, and through `TextInput` the text fields |
 | `Titled` | `text` | `title()`, `setTitle` | | `Window`, `Expander`, `InfoBar`, `NavigationView` |
 | `TextEntry` | `text` | `length()`, `isEmpty()`, `clear()`, the caret, the selection, `setMaxLength`, `setReadOnly`, `setTextPadding`; nothing that carries the text | `MODIFY`, `MODIFIED` | `TextBox`, `TextArea`, `PasswordTextBox` |
 | `TextInput` | `text` | `TextEntry` plus `text()`, `setText`, `selectedText()` and the highlighter | `EDIT`, `EDITED` | `TextBox`, `TextArea` |
