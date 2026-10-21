@@ -17,7 +17,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # Strata-Docs builds against Strata through includeBuild('../Strata'), so the two sit side by side
+      # Strata-Docs builds against Strata and Strata-Swing through includeBuild, so the three sit side by side
       - uses: actions/checkout@v4
         with:
           path: Strata-Docs
@@ -26,6 +26,12 @@ jobs:
         with:
           repository: InspireNXE/Strata
           path: Strata
+
+      # The Java2D/Swing adapter the examples run on, also a sibling checkout
+      - uses: actions/checkout@v4
+        with:
+          repository: InspireNXE/Strata-Swing
+          path: Strata-Swing
 
       - uses: actions/setup-java@v4
         with:
