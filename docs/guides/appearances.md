@@ -32,7 +32,7 @@ Strata registers `Text`, named by itself, and `Visual`, whose icon is itself. Th
 
 | Control | What it shows |
 |---|---|
-| `ListView`, `TreeView`, `GridView` made without a cell factory | `factory.cell(item)`: the icon, then the name in a cell label, and the tooltip |
+| `ListView`, `TreeView`, `GridView` made without a cell factory | `factory.cell(item)`: one cell label with the icon as a [picture in the text](text.md#pictures-in-text), then the name, and the tooltip |
 | `ComboBox` | The name of what the label function returns, the option itself by default |
 | `CycleButton` | The name of what the value label function returns, the value itself by default |
 | `TableView` text columns, `TableColumn.setCellText` | The name of what the function returns; the column sorts by it, ignoring case |

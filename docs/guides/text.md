@@ -59,6 +59,18 @@ Tooltips take a list of texts, one per line:
 --8<-- "text/TextExamples.java:tooltip"
 ```
 
+### Pictures in text
+
+`Text.visual(visual)` puts an engine visual in a line of text at its natural size. `Text.sprite(sprite)` puts a sprite there as a square as tall as the line, so it sits in the text like a character, and `Text.sprite(sprite, width, height)` gives it a size of its own. Both are drawn untinted.
+
+```java
+--8<-- "text/TextExamples.java:inline"
+```
+
+Labels, buttons, tooltips and toasts make each line tall enough for the pictures in it, and center the characters and each picture on the line. Controls whose rows have a fixed height, such as menus, keep it, so keep pictures there no taller than the text. A picture is never cut in two: when a label shortens a line with `...`, a picture that does not fit gives way to the dots.
+
+To text operations a picture is one character, U+FFFC, the object replacement character, which is also what `plain()` returns for it. It is not whitespace, so `trim` keeps it and wrapping keeps it next to the characters it touches. `mapSpans` sees it as a span whose `element()` is set; keep its text when you change the span, or it becomes plain characters.
+
 ## TextStyle
 
 A record of how a span of text looks:
@@ -177,6 +189,5 @@ Strata has no font API, so each adapter picks its fonts. Swing draws with the fo
 
 ## Not supported yet
 
-- Inline images in a line of text. `SpriteSpan` and `InlineElement` are reserved for it, but nothing draws them yet.
 - Markup such as BBCode. Avoid an engine's own formatting codes in text too: Strata does not interpret them, and the engine's text drawing may, so the same text would look different on each engine.
 - Right-to-left text and complex shaping beyond what the engine's own text drawing does.

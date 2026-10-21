@@ -24,7 +24,6 @@ Publishing to Maven and depending on Strata from a separate project have not bee
 ## Not built yet
 
 - Controls: editable table cells.
-- Inline sprites in text. `SpriteSpan` and `InlineElement` are reserved.
 - Narration and other accessibility support.
 - Controller navigation.
 - Drawing beyond fills, gradients, sprites and text.
@@ -37,7 +36,7 @@ These are recorded in the [pending design](../design-pending.md#open-questions):
 - A platform shortcut modifier: Command on macOS, Control elsewhere.
 - Style classes for themes, and whether a host's theme can be set per subtree.
 - A tooltip kind that holds lines and a visual together.
-- Opening screens, and causes, input coalescing and data binding, both proposed and awaiting review.
+- Causes and input coalescing, proposed and awaiting review.
 
 ## Compatibility promise
 

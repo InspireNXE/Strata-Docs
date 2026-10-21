@@ -19,6 +19,8 @@ import org.inspirenxe.strata.api.ComponentFactory;
 import org.inspirenxe.strata.api.component.Tooltip;
 import org.inspirenxe.strata.api.control.display.Label;
 import org.inspirenxe.strata.api.text.Text;
+import org.inspirenxe.strata.api.theme.SpriteId;
+import org.inspirenxe.strata.api.visual.Visual;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,5 +98,14 @@ public final class TextExamples {
                 parts.getLast());
         // --8<-- [end:join]
         return sellers;
+    }
+
+    static Label priced(final ComponentFactory ui, final Visual lantern, final int price) {
+        // --8<-- [start:inline]
+        // The lantern's picture at its own size, then the price with a coin as tall as the text
+        final Text cost = Text.of(price + " ").append(Text.sprite(SpriteId.of("shop", "coin")));
+        final Label row = ui.label(Text.concat(Text.visual(lantern), Text.of(" Lantern  "), cost));
+        // --8<-- [end:inline]
+        return row;
     }
 }
