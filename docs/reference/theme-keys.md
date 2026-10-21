@@ -95,7 +95,7 @@ A password box reads the `TextBox` keys above for its face, text, selection, car
 | Key | Constant | Kind | Required | Fallback |
 |---|---|---|---|---|
 | `passwordbox.mask` | `PasswordTextBox.STYLE_MASK` | text style | no | `textbox.text`; a disabled or read-only box uses `textbox.text.disabled` or `textbox.text.readonly` instead |
-| `passwordbox.reveal` | `PasswordTextBox.STYLE_REVEAL` | paint | no | An eye drawn from fills in the placeholder's color |
+| `passwordbox.reveal` | `PasswordTextBox.STYLE_REVEAL` | paint | no | An eye drawn in the placeholder's color |
 | `passwordbox.reveal.hovered` | `PasswordTextBox.STYLE_REVEAL_HOVERED` | paint | no | `passwordbox.reveal`, else the eye in the text color |
 | `passwordbox.reveal.active` | `PasswordTextBox.STYLE_REVEAL_ACTIVE` | paint | no | The eye with a slash, in the text color |
 | `passwordbox.reveal.disabled` | `PasswordTextBox.STYLE_REVEAL_DISABLED` | paint | no | `passwordbox.reveal`, else the eye in the disabled text color |
@@ -428,6 +428,9 @@ A color picker's hex field uses the `TextBox` keys.
 | `button.focus` | solid `0xFF6A9FFF` |
 | `button.text` | `0xFFF0F0F0` |
 | `button.text.disabled` | `0xFF808080` |
+| `button.link.text` | `0xFF6AA8FF` |
+| `button.link.text.hovered` | `0xFF9CC4FF` underlined |
+| `button.link.text.disabled` | `0xFF808080` |
 | `label.text` | `0xFFE0E0E0` |
 | `checkbox.normal`, `checkbox.checked` | solid `0xFF1B1C1F` |
 | `checkbox.hovered`, `checkbox.checked.hovered` | solid `0xFF2E3136` |
@@ -541,6 +544,10 @@ A color picker's hex field uses the `TextBox` keys.
 | `colorpicker.marker` | solid `0xFFFFFFFF` |
 | `colorpicker.marker.outline` | solid `0xFF000000` |
 | `colorpicker.disabled` | solid `0xA0141518` |
+| `calendar.day.selected` | solid `0xFF3A4D6E` |
+| `calendar.header.text` | `0xFFF0F0F0` |
+| `calendar.weekday.text` | `0xFF909090` |
+| `calendar.day.text` | `0xFFE0E0E0` |
 | `toast.background` | solid `0xF02B2D31` |
 | `toast.text` | `0xFFF0F0F0` |
 | `overlay.backdrop` | solid `0x60000000` |

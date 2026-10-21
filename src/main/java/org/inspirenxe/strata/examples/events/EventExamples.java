@@ -88,7 +88,7 @@ public final class EventExamples {
 
     static void form(final StackPanel form) {
         // --8<-- [start:form]
-        // Every text box in the form, with one handler, before the boxes' own handlers at priority 0
+        // Every text box in the form, with one handler that runs before the form's handlers at priority 0
         form.onEvent(TextInput.EDIT, -100, event -> {
             if (event.value().length() > 32) {
                 event.cancel();

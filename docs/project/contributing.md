@@ -24,7 +24,7 @@ This compiles every module, runs every test, and runs Javadoc with every doclint
 | `core` | The implementation |
 | `build-logic` | The `strata-java` and `strata-documented` convention plugins |
 
-The adapters, the gallery and these docs live in sibling repositories that build against a Strata checkout beside them: Strata-Swing (the Java2D/Swing adapter, `canvas-swing`), Strata-Minecraft, Strata-Gallery and Strata-Docs.
+The adapters, the gallery and these docs live in sibling repositories that build against a Strata checkout beside them: Strata-Swing (the Java2D/Swing adapter, artifact `strata-canvas-swing`), Strata-Minecraft, Strata-Gallery and Strata-Docs.
 
 ## Rules worth knowing before you change code
 
@@ -39,7 +39,7 @@ The adapters, the gallery and these docs live in sibling repositories that build
 
 ## Code style
 
-Strata follows Wintergreen's style: 4-space indents, K&R braces, `final` on parameters and locals that never change, `this.` on every field and method access, records for value types, and self-typed setters that return `T`. Text is American English (color, behavior, canceled), except identifiers that follow JDK naming, such as `isCancelled`. Source files have no license headers.
+Strata follows Wintergreen's style: 4-space indents, K&R braces, `final` on parameters and locals that never change, `this.` on every field and method access, records for value types, and self-typed setters that return `T`. Text is American English (color, behavior, canceled), except identifiers that follow JDK naming, such as `isCancelled`. Every Java source file starts with the Apache License 2.0 header.
 
 ## Documentation rules
 

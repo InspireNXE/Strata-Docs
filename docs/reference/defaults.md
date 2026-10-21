@@ -7,12 +7,12 @@ Every number Strata picks for you.
 | Setting | Default |
 |---|---|
 | Visible, enabled | yes |
-| Focusable, tabbable | no, except buttons, drop-down buttons, checkboxes, radio buttons, toggle switches, sliders, text boxes, text areas, lists (also inside tables and trees), combo boxes, tab bars and expanders, the controls that are `Focusable`. Scroll bars and scroll panels are `Focusable` but start with focus off. Menus and flyouts are focusable but not tabbable. A color picker is neither, but its hex field is. |
+| Focusable, tabbable | no, except the controls that are `Focusable`: buttons, drop-down buttons, cycle buttons, checkboxes, radio buttons, toggle switches, sliders, text boxes, password boxes, text areas, lists (also inside tables and trees), combo boxes, tab bars, expanders, navigation views, calendar views and the date and time pickers. Scroll bars and scroll panels are `Focusable` but start with focus off. Menus and flyouts are focusable but not tabbable. A color picker and a spinner are neither, but their fields are. |
 | Margin | `Insets.NONE` |
 | Minimum size | 0 by 0 |
 | Maximum size | `Float.POSITIVE_INFINITY` both ways |
 | Fixed size | unset (`Float.NaN`) |
-| Alignment | `LEFT`, `TOP`, except windows and message boxes (centered), separators (stretched along their line) and spacers (stretched both ways) |
+| Alignment | `LEFT`, `TOP`, except windows and message boxes (centered), separators (stretched along their line), info bars (stretched across, at the top), and spacers and navigation views (stretched both ways) |
 | Bounds before the first layout | `Rect.ZERO` |
 
 ## Containers
@@ -119,7 +119,7 @@ Every number Strata picks for you.
 | | Read-only, select all on focus | off, off |
 | | Cursor | `TEXT`, and the arrow over the eye |
 | `ListView` | Row height and spacing | 20 and 0 |
-| | Selection | none; deselecting by pressing off; activation by double click |
+| | Selection | none, in `SINGLE` mode; pressing the selected row does not deselect it; a double click activates |
 | | Smallest desired width | 40 |
 | | Wheel | one row and its spacing a notch |
 | `CycleButton` | Label, value label function | empty, `String::valueOf` |
@@ -129,7 +129,8 @@ Every number Strata picks for you.
 | `ComboBox` | Rows shown before scrolling | 8 |
 | | Selection | the first option once there are options |
 | | Label function, key function | `toString`, the option itself |
-| | Desired size | widest option plus 4, 4 and 4 of padding and a 7-wide arrow; one line plus 6 |
+| | Padding | the theme's `combobox.padding`, else 4 at the sides and 3 at the top and bottom |
+| | Desired size | the widest option plus the padding, a 4-unit gap and a 7-wide arrow; one line plus the padding tall |
 | | Open list rows | one line plus 4 |
 | | Cursor | `HAND` |
 | `MessageBox` | Message width | wraps at 280 |

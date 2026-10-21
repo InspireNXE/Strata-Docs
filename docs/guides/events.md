@@ -240,5 +240,6 @@ A control you write declares its events the way the built-ins do, as constants m
 | `KEY` | `KeyEvent` | yes | The focused component, or the root |
 | `CHAR` | `CharEvent` | yes | The focused component only |
 | `FOCUS_GAINED`, `FOCUS_LOST` | `FocusEvent` | no | The component gaining or losing focus |
+| `MODIFIERS_CHANGED` | `ModifiersEvent` | no | The screen's content and each open overlay's content |
 
 The [event type reference](../reference/event-types.md) adds each type's default behavior in the built-in controls. Each control's own events are listed with the control in [Controls](controls.md).

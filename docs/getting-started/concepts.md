@@ -18,7 +18,7 @@ Because the API is interfaces, the implementation can change between versions wi
 
 ## Components and the tree
 
-A UI is a tree of components. Containers (the four panels) hold children and decide where they go; leaves (labels, buttons, text boxes) draw themselves. Each component has at most one parent. A container draws its children in the order they were added, so later children are drawn on top and are hit by the pointer first.
+A UI is a tree of components. Containers (the panels and windows) hold children and decide where they go; leaves (labels, buttons, text boxes) draw themselves. Each component has at most one parent. A container draws its children in the order they were added, so later children are drawn on top and are hit by the pointer first.
 
 Components are interfaces such as `Button` and `Label`. You get them from a factory, or by subclassing `CustomComponent`. Never implement a component interface yourself. Such a class has no implementation behind it, and adding it to a container throws `IllegalArgumentException`. See [Components](../guides/components.md).
 
@@ -48,7 +48,9 @@ Setters that affect size schedule a new layout automatically. Margin is space ou
 
 ## Events
 
-Input reaches components as events. For every component an event reaches, three steps run in order: the component's `BEFORE` handlers, then its default behavior (a button pressing, a text box inserting a character) unless a handler canceled the event, then its `AFTER` handlers. Bubbling events then move on to the parent. Built-in controls consume the input they act on, which stops it there.
+Input reaches components as events. At every component an event reaches, the component's handlers run in priority order, then its default behavior (a button pressing, a text box inserting a character) unless a handler canceled the event. Bubbling events then move on to the parent. Built-in controls consume the input they act on, which stops it there.
+
+Controls report what they do as events too. Before a change the user makes, a control fires a Pre event, such as `Button.PRESS`, which a handler can cancel. After every change, from the user or from code, it fires a Post event, such as `Button.PRESSED`.
 
 When an event finishes, the host tells the adapter whether it was handled. Unhandled input goes on to the engine, so an engine that closes screens on Escape still does. See [Events](../guides/events.md).
 
@@ -62,7 +64,7 @@ A theme maps style keys, such as `button.hovered`, to paints (solid colors, grad
 
 ## Threading
 
-Strata is single-threaded and does no locking. Create, change and read components only on the engine's UI thread: such as the Swing event dispatch thread, or a game's render thread. Handlers run on that thread too.
+Strata is single-threaded and does no locking. Create, change and read components only on the engine's UI thread, such as the Swing event dispatch thread or a game's render thread. Handlers run on that thread too.
 
 ## What Strata leaves out
 

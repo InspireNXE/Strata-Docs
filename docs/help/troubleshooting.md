@@ -46,7 +46,7 @@ Strata does not catch exceptions from handlers or hooks. They propagate out of t
 | Symptom | Fix |
 |---|---|
 | A stretched child is not stretching | Its parent has no width to give. Fix the width somewhere above it. |
-| A child ignores its alignment in a `StackPanel` | Along the stack's direction, each child gets exactly its size. Use a `GridPanel` to distribute space. |
+| A child ignores its alignment in a `StackPanel` | Along the stack's direction, each child gets exactly its size. Give the child a [weight](../guides/layout.md#weights), or use a `GridPanel`. |
 | A label does not wrap | Turn wrapping on and give it a width. See [Wrapping text](../guides/layout.md#wrapping-text). |
 | Text is cut off on another engine but fine in Swing | The engine's font is wider in places, or rounds widths to whole pixels. Leave slack around text, or let it measure. |
 | Things are a pixel off on another engine | The adapter may round fractional positions to whole pixels. Use whole numbers. |

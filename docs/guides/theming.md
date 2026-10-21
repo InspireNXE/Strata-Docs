@@ -114,7 +114,7 @@ Theme theme = Themes.flat().toBuilder()
         .build();
 ```
 
-Every control that puts text or an icon inside a face has a padding key: `button.padding`, `textbox.padding`, `textarea.padding`, `combobox.padding`, `list.cell.padding`, `table.header.padding`, `menu.item.padding`, `menubar.title.padding`, `expander.header.padding`, `window.title.padding`, `window.padding`, `tooltip.padding` and `toast.padding`, besides the two tab keys. Each one's default is the control's built-in padding, so a theme sets only the ones it needs. Controls whose height is a line of text are that line plus the padding's top and bottom, so a theme can make its buttons and fields as tall as its engine's widgets:
+Most controls that put text or an icon inside a face have a padding key, such as `button.padding`, `textbox.padding`, `list.cell.padding`, `menu.item.padding`, `window.padding` and `tooltip.padding`. Each one's default is the control's built-in padding, so a theme sets only the ones it needs. Controls whose height is a line of text are that line plus the padding's top and bottom, so a theme can make its buttons and fields as tall as its engine's widgets:
 
 ```java
 Theme theme = Themes.flat().toBuilder()
@@ -123,7 +123,7 @@ Theme theme = Themes.flat().toBuilder()
         .build();
 ```
 
-Padding set in code wins over the theme: `setTextPadding` on a button, text box or text area, `setPadding` on a window, and `setMargin` on a cell label. Pass `null` to `setTextPadding` or `setPadding` to follow the theme again.
+Padding set in code wins over the theme: `setTextPadding` on a button, a drop-down button, a text box, a password box or a text area, `setPadding` on a window, and `setMargin` on a cell label. Pass `null` to `setTextPadding` or `setPadding` to follow the theme again.
 
 `theme.insets(key)` and `insetsOr(key, fallback)` look them up, and `ThemeRef.override(key, insets)` overrides them like paints. A control that reads insets for several states sizes itself for the largest, so selecting a tab never moves its neighbors. [Theme keys](../reference/theme-keys.md) lists the insets keys with their defaults.
 

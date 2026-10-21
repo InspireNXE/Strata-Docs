@@ -1,6 +1,6 @@
 # Event types
 
-Every type is a constant in `InputEvents`, except the focus events, which are on `Focusable`. All positions in pointer events are in host coordinates, in UI units. See [Events](../guides/events.md) for how delivery works.
+These are the input event types. Each is a constant in `InputEvents`, except the focus events, which are on `Focusable`. Each control's own events are listed with the control in [Controls](../guides/controls.md). All positions in pointer events are in host coordinates, in UI units. See [Events](../guides/events.md) for how delivery works.
 
 ## Pointer
 
@@ -31,7 +31,8 @@ Every type is a constant in `InputEvents`, except the focus events, which are on
 
 | Interface | Methods |
 |---|---|
-| `Event` | `target()`, `current()`, `cancel()`, `isCancelled()`, `stopPropagation()`, `isPropagationStopped()`, `consume()`, `isHandled()`, `snapshot()`, `currentSnapshot()`, `snapshotOf(component)` |
+| `Event` | `target()`, `current()`, `stopPropagation()`, `isPropagationStopped()`, `snapshot()`, `currentSnapshot()`, `snapshotOf(component)` |
+| `Cancelable` | Event, plus `cancel()`, `isCancelled()`, `consume()`, `isHandled()`. Every event on this page is one. |
 | `PointerEvent` | `x()`, `y()`, `localX()`, `localY()`, `modifiers()` |
 | `PointerButtonEvent` | Pointer, plus `button()`, `clicks()` (1, 2 or 3) |
 | `DragEvent` | Pointer, plus `button()`, `clicks()`, `startX()`, `startY()`, `deltaX()`, `deltaY()` |
@@ -51,8 +52,8 @@ Every type is a constant in `InputEvents`, except the focus events, which are on
 | `DRAG` | | | Follows the pointer and consumes it | Extends the selection, by word if the press was a double click |
 | `KEY` | Presses on Enter, keypad Enter or Space (`PRESS` only) and consumes it | Toggles on Enter, keypad Enter or Space (`PRESS` only) and consumes it | Moves on arrows, Page Up, Page Down, Home and End, and consumes them | Edits and moves the caret; consumes what it uses and every printable key without Control or Alt |
 | `CHAR` | | | | Inserts the character and consumes it |
-| `FOCUS_GAINED` | | | | Moves the caret to the end |
+| `FOCUS_GAINED` | | | | Moves the caret to the end, or selects everything after `setSelectAllOnFocus(true)` |
 
-`Label`, `Image`, `Avatar` and the plain panels have no default behavior. The newer controls document theirs in the [controls guide](../guides/controls.md): a `ScrollPanel` scrolls on `SCROLL`, unused keys and drags of its bar; a `ListView` selects on `POINTER_PRESS`, activates on a double press or Enter, and moves on keys; a `ComboBox` opens on `CLICK` and changes on keys; a `DropDownButton` opens on `CLICK` and on keys; a `Flyout` moves focus on Tab; an `InfoBar`'s close button closes the bar on `CLICK` and on Enter or Space; a `NavigationView` picks items, expands them and opens its pane on `CLICK`, and moves its cursor on keys; a `Window` moves on drags of its title bar and closes on Escape; a `TabBar` selects on clicks and Left and Right; a `ScrollBar` pages on `POINTER_PRESS` on its track, follows drags of its thumb, and moves on `SCROLL` and, when made focusable, on keys. Each consumes what it acts on.
+`Label`, `Image`, `Avatar` and the plain panels have no default behavior. The other controls document theirs in the [controls guide](../guides/controls.md): a `ScrollPanel` scrolls on `SCROLL`, unused keys and drags of its bar; a `ListView` selects on `POINTER_PRESS`, activates on a double press or Enter, and moves on keys; a `ComboBox` opens on `CLICK` and changes on keys; a `DropDownButton` opens on `CLICK` and on keys; a `Flyout` moves focus on Tab; an `InfoBar`'s close button closes the bar on `CLICK` and on Enter or Space; a `NavigationView` picks items, expands them and opens its pane on `CLICK`, and moves its cursor on keys; a `Window` moves on drags of its title bar and closes on Escape; a `TabBar` selects on clicks and Left and Right; a `ScrollBar` pages on `POINTER_PRESS` on its track, follows drags of its thumb, and moves on `SCROLL` and, when made focusable, on keys. Each consumes what it acts on.
 
 Anything not listed does nothing by default and is not consumed. Disabled controls do nothing.

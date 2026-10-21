@@ -19,16 +19,16 @@ cd Strata
 ./gradlew build
 ```
 
-The build compiles every module, runs the tests, checks that every public type and member is documented, and compiles every example on this site. The jars land in each module's `build/libs`:
+The build compiles every module, runs the tests and checks that every public type and member is documented. The Swing adapter has a repository of its own, Strata-Swing, which builds against a Strata checkout beside it, so clone it next to Strata and run `./gradlew build` there too. The jars land in each module's `build/libs`:
 
 | Jar | Contents | Use it for |
 |---|---|---|
 | `strata-api` | The API | Compiling screens and components |
 | `strata-spi` | The SPI | Writing an engine adapter |
 | `strata-core` | The implementation | Run time only, through an adapter |
-| `strata-canvas-swing` | The Swing adapter | Swing applications and tests |
+| `strata-canvas-swing` | The Swing adapter, built in Strata-Swing | Swing applications and tests |
 
-To use these from another Gradle project, publish them to your local Maven repository:
+To use these from another Gradle project, publish them to your local Maven repository, in Strata and then in Strata-Swing:
 
 ```bash
 ./gradlew publishToMavenLocal

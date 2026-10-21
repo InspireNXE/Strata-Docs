@@ -1,10 +1,10 @@
 # Platforms
 
-Strata runs wherever an adapter exists. This repository ships one:
+Strata runs wherever an adapter exists. The Swing adapter lives in the Strata-Swing repository:
 
-| Adapter | Module | Show a screen with | One UI unit is |
+| Adapter | Artifact | Show a screen with | One UI unit is |
 |---|---|---|---|
-| [Swing](swing.md) | `canvas-swing` | `StrataPanel`, a `JPanel` | `scale` pixels |
+| [Swing](swing.md) | `strata-canvas-swing` | `StrataPanel`, a `JPanel` | `scale` pixels |
 
 The Minecraft adapter lives in the [Strata-Minecraft](https://github.com/InspireNXE/Strata-Minecraft) repository.
 

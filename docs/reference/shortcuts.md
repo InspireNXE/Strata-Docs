@@ -1,6 +1,6 @@
 # Keyboard shortcuts
 
-Every key the built-in controls and hosts respond to. Control means Control without Alt. On macOS, see the [note on Command](../platforms/differences.md#modifier-keys).
+The keys the hosts and the most keyboard-driven built-in controls respond to. Lists, trees, combo boxes, menus, text areas, spinners and the other controls describe their keys in [Controls](../guides/controls.md). Control means Control without Alt. On macOS, see the [note on Command](../platforms/differences.md#modifier-keys).
 
 ## Hosts
 
@@ -57,8 +57,9 @@ Every key the built-in controls and hosts respond to. Control means Control with
 | Ctrl+C | Copy |
 | Ctrl+X | Cut |
 | Ctrl+V | Paste, with line breaks removed |
+| Enter, keypad Enter | Submit, consumed when a `SUBMIT` or `SUBMITTED` handler is on the box's path |
 
-Not handled, so they bubble to ancestors and the engine: Tab, Escape, Enter, Up, Down, Page Up, Page Down, and every Control combination not listed above.
+Not handled, so they bubble to ancestors and the engine: Tab, Escape, Up, Down, Page Up, Page Down, Enter while nothing hears `SUBMIT` or `SUBMITTED`, and every Control combination not listed above.
 
 With a suggestion provider, Ctrl+Space shows the suggestions. While the suggestion list is open:
 
@@ -78,7 +79,6 @@ The `TextBox` keys above, with these differences:
 | Ctrl+Left, Ctrl+Right, Ctrl+Backspace, Ctrl+Delete | Move or delete to the start or end, since the whole text counts as one word |
 | Ctrl+V | Paste, unless the length limit or the code point filter would change the pasted text |
 | Alt+F8 | Show or hide the text, while the box is revealable |
-| Enter, keypad Enter | Submit, consumed when a `SUBMIT` or `SUBMITTED` handler is on the box's path |
 
 A double click selects everything. The box consumes every typed character while it has focus.
 

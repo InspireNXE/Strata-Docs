@@ -6,7 +6,7 @@ There are three ways to extend Strata. Pick the lightest one that does the job.
 |---|---|---|
 | [Handle a built-in's events](#change-a-built-in-through-its-events) | Add drawing, change sizes, or filter, rewrite or veto what the user does to any control | A lambda |
 | [Compose](#compose-built-ins) | Package several components as one reusable piece | A plain class |
-| [Write a new component](#write-a-new-component) or [layout](#write-a-new-layout) | Make something that does not exist yet | A subclass of `CustomComponent` or `CustomContainer` |
+| [Write a new component](#write-a-new-component) or [layout](#write-a-new-layout) | Make something that does not exist yet | A subclass of `CustomComponent`, `CustomComposite` or `CustomContainer` |
 
 A subclass gets the same hooks Strata's own controls and panels are written with, so you can build anything they do. [Strata's components and yours](#stratas-components-and-yours) says how the two kinds differ.
 
@@ -66,7 +66,7 @@ When the piece is just existing components arranged a certain way, you need no S
 --8<-- "extending/ExtendingExamples.java:compose"
 ```
 
-The class is not a `Component`, so you add `field.component()` rather than `field`. To make a composite that is a component itself, so it can be passed anywhere a component can, extend `CustomContainer` and add the parts as its children.
+The class is not a `Component`, so you add `field.component()` rather than `field`. To make a composite that is a component itself, so it can be passed anywhere a component can, extend `CustomComposite` and add the parts with `addChild`. Its children are private, so callers cannot rearrange them. `CustomContainer` is the same with public children.
 
 ## Write a new component
 
@@ -111,7 +111,7 @@ Declare your control's events as constants on its interface, a Pre request for e
 | `EventType.report(name)` | Post, no value | `report(type)` |
 | `EventType.valueReport(name)` | Post, with a value | `report(type, value, previous)` |
 
-Fire requests only for what the user does, and reports after every change, whoever made it, as the built-ins do. With no handler for a type on the path, `request` and `report` fire nothing and allocate nothing, and `request(type, value, apply)` just calls `apply`. `isHandled(type)` tells you whether anything listens, for work only an event needs. If your component is a `CustomComposite`, the events of the controls you build it from stop at it, so fire your own types for what the outside should hear.
+Fire requests only for what the user does, and reports after every change, whoever made it, as the built-ins do. With no handler for a type on the path, `request` and `report` fire nothing and allocate nothing, and `request(type, value, apply)` just calls `apply`. `isHandled(type)` tells you whether anything listens, for work only an event needs. If your component is a `CustomComposite`, the events of the controls you add with `addChild` stop at it, so fire your own types for what the outside should hear. Events from content added with `addContent` pass through.
 
 ### The hooks
 
@@ -152,11 +152,15 @@ The `Painter` a component draws with:
 | `fillGradient(rect, top, bottom)` | A vertical gradient |
 | `sprite(id, rect, tint)` | An image stretched over the rectangle |
 | `nineSlice(id, rect, border, tint)` | A nine-slice image |
+| `nineSlice(id, rect, size, border, tiled, tint)` | A nine-slice whose image stands for `size` units, with its edges and center repeated when `tiled` |
+| `tiled(id, rect, size, tint)` | An image repeated from the top left, one copy per `size` |
+| `visual(visual, rect, tint)` | An engine visual, such as an image the adapter made |
 | `text(span, x, y)` | One line of text, top-left at the point |
 | `clipped(rect, draw)` | Runs `draw` with drawing limited to the rectangle, intersected with any clip in place |
 | `translated(dx, dy, draw)` | Runs `draw` with every coordinate shifted |
+| `scaled(scale, draw)` | Runs `draw` with every coordinate and size multiplied by `scale` |
 
-Coordinates are host coordinates in UI units. Later calls draw over earlier ones. Clipping and translation take a callback, so the engine's state is always restored, even if the callback throws. Any `Paint` from a theme draws itself with `paint.paint(painter, rect)`.
+Coordinates are host coordinates in UI units. Later calls draw over earlier ones. Clipping, translation and scaling take a callback, so the engine's state is always restored, even if the callback throws. Any `Paint` from a theme draws itself with `paint.paint(painter, rect)`.
 
 ### The environment
 
@@ -168,6 +172,7 @@ Coordinates are host coordinates in UI units. Later calls draw over earlier ones
 | `millis()` | The host's clock in milliseconds. Only differences mean anything. |
 | `clipboardText()` | The clipboard text, or empty |
 | `setClipboardText(text)` | Puts text on the clipboard. Engines without one ignore it. |
+| `modifiers()` | The modifier keys held as of the latest input, or `NONE` before any |
 
 It works before the component is attached.
 
@@ -185,7 +190,7 @@ Everything required of a custom component applies, plus:
 - In `arrange`, give every child a slot with `context.arrange(child, slot)`, hidden children included. The slot includes the child's margin; the child shrinks it by the margin and aligns itself inside. `context.outerSize(child)` returns what the child asked for in the last measure. A child you do not arrange keeps stale bounds.
 - Handle the padding yourself: take it off the space you offer children, add it to the size you return, and place children inside `contentBox()`.
 - Keep per-child data, such as a grid cell, in your own map, and drop it in `onChildRemoved`.
-- Leave drawing the children to Strata. Your `paint` draws under them, and they are clipped to your bounds while `clipsChildren()` is true.
+- Leave drawing the children to Strata. Your `paint` draws under them and `paintOverChildren` over them. While `clipsChildren()` is true they are clipped to `childClip()`, your bounds by default.
 
 ## Strata's components and yours
 

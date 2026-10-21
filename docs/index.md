@@ -15,10 +15,10 @@ Strata is a GUI library for Java games that does not depend on any engine. You d
 
 ## What you get
 
-- Two-pass layout (measure, then arrange) with four containers: `AnchorPanel`, `StackPanel`, `GridPanel` and `AbsolutePanel`.
-- Labels with word wrapping, images, buttons, checkboxes, sliders with steps and labels, a single-line text box with selection, clipboard and word movement, and a password box that keeps its text out of events, snapshots and the clipboard.
+- Two-pass layout (measure, then arrange) with five containers: `AnchorPanel`, `StackPanel`, `GridPanel`, `AbsolutePanel` and `ScrollPanel`.
+- Built-in controls: labels with word wrapping, images, buttons, checkboxes, sliders, text boxes and text areas with selection and the clipboard, lists, tables, trees, combo boxes, menus, tabs, date and time pickers, windows and message boxes. The password box keeps its text out of events, snapshots and the clipboard.
 - Click counting, dragging, hover, keyboard focus and tab order, handled the same way on every engine.
-- Typed events with a before and an after phase, cancellation that really skips the default behavior, and bubbling to ancestors.
+- Typed events with priorities and bubbling to ancestors. A Pre event can be canceled, which skips the default behavior, or given another value; a Post event reports every change, whether the user or code made it.
 - Lazy event snapshots, so a handler can compare a component's state at the moment an event fired with its state now.
 - Themes that map style keys to colors, gradients, sprites and nine-slices. A missing key is reported before anything draws, along with every other missing key.
 - Three ways to extend: decorate a built-in control, compose several, or write your own component or layout on the same base classes the built-ins use.

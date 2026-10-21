@@ -87,7 +87,7 @@ Strata handles this through focus. When a component that accepts text input gain
 
 At most one component per host has keyboard focus. Keys go to it, or to the screen's root when nothing has focus. Characters go only to it.
 
-A component can take focus when it is attached, focusable, visible and enabled, and every ancestor is visible and enabled. Built-in buttons, checkboxes, sliders and text boxes are focusable; labels and panels are not, until you call `setFocusable(true)`.
+A component can take focus when it is attached, focusable, visible and enabled, and every ancestor is visible and enabled. Built-in controls you work with the keyboard, such as buttons, checkboxes, sliders and text boxes, are focusable; [Components](components.md#what-only-some-components-have) lists them all. Labels and panels are not. Scroll panels and scroll bars are focusable once you call `setFocusable(true)`.
 
 Focus moves when:
 

@@ -35,8 +35,8 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 /**
- * Renders the documentation's example screens with the Swing adapter, at 2 pixels per unit, onto the sandbox's
- * background color. Run it with {@code ./gradlew :docs-examples:renderDocImages}.
+ * Renders the documentation's example screens with the Swing adapter, at 2 pixels per unit, onto the background
+ * color a {@code StrataPanel} shows where no screen draws. Run it with {@code ./gradlew renderDocImages}.
  */
 public final class RenderDocImages {
     private static final float SCALE = 2f;

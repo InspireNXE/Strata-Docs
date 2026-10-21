@@ -128,10 +128,10 @@ public final class ThemeExamples {
     static void missing() {
         // --8<-- [start:missing]
         try {
-            // The settings screen has buttons and a text box, whose required keys an empty theme lacks
+            // The settings screen has a button and a text box, whose required keys an empty theme lacks
             SwingSnapshot.render(new SettingsScreen(), Theme.builder("empty").build(), 320, 200, 1f);
         } catch (final ThemeException e) {
-            // "Theme 'empty' is missing style keys: button.normal, textbox.focused, ..." with every missing key
+            // "Theme 'empty' is missing style keys: ...", naming every key the button and the text box require
             System.out.println(e.getMessage());
             final java.util.Set<String> keys = e.missingKeys();
         }

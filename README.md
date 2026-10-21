@@ -10,7 +10,7 @@ The documentation site for [Strata](../Strata), an engine-agnostic GUI library f
 | `hooks.py` | Adds the design documents and the roadmap to the Project pages from the Strata checkout. They stay in Strata (`docs/design-implemented.md`, `docs/design-pending.md`, `docs/ROADMAP.md`) because the design-first workflow changes them together with the code. |
 | `build.gradle` | Compiles and tests the code in `src`, and `siteJavadoc`, which builds the Javadoc of every Strata library and copies it into `docs/javadoc`. |
 
-Strata-Docs expects the Strata and Strata-Swing repositories next to it (`../Strata` and `../Strata-Swing`). Gradle includes both checkouts through `includeBuild`, the way Strata-Minecraft includes Strata, and the site build reads the design documents from it. Set `STRATA_DIR` to use another location for the documents.
+Strata-Docs expects the Strata and Strata-Swing repositories next to it (`../Strata` and `../Strata-Swing`). Gradle includes both checkouts through `includeBuild`, the way Strata-Minecraft includes Strata, and the site build reads the design documents from the Strata checkout. Set `STRATA_DIR` to use another location for the documents.
 
 ## Building
 

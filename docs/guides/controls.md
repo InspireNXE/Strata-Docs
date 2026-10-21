@@ -9,7 +9,7 @@ Controls that do the same kind of thing share small interfaces called attributes
 | Attribute | Package | What it adds | Events | Controls |
 |---|---|---|---|---|
 | `HasText` | `text` | `text()`, `setText` | | `Button`, `DropDownButton`, `CycleButton`, `CheckBox`, `RadioButton`, `ToggleSwitch`, `Label`, `InfoBar` and `MessageBox` (the message), `ProgressBar`, `BusyIndicator`, and through `TextInput` the text fields |
-| `Titled` | `text` | `title()`, `setTitle` | | `Window`, `Expander`, `InfoBar`, `NavigationView` |
+| `Titled` | `text` | `title()`, `setTitle` | | `Window`, `MessageBox`, `Expander`, `InfoBar`, `NavigationView` |
 | `TextEntry` | `text` | `length()`, `isEmpty()`, `clear()`, the caret, the selection, `setMaxLength`, `setReadOnly`, `setTextPadding`; nothing that carries the text | `MODIFY`, `MODIFIED` | `TextBox`, `TextArea`, `PasswordTextBox` |
 | `TextInput` | `text` | `TextEntry` plus `text()`, `setText`, `selectedText()` and the highlighter | `EDIT`, `EDITED` | `TextBox`, `TextArea` |
 | `Toggle` | `value` | `isSelected()`, `setSelected`, `toggle()` | `TOGGLE`, `TOGGLED` | `CheckBox`, `ToggleSwitch`, `RadioButton` |
@@ -113,7 +113,7 @@ The square shows the first of these it has:
 
 1. A sprite or visual set with `setSprite` or `setVisual`, stretched over the square.
 2. The icon of the value's [appearance](appearances.md). An adapter that registers an appearance for its player or account type makes `factory.avatar(account)` show that face with no more code.
-3. Initials: those set with `setInitials`, else worked out from the name set with `setName`, else from the value's name. They are the first letter of the first word and the first letter of the last word, upper cased for the language, so Ana Lima shows `AL`, Cleo shows `C`, and a name with no letters shows none.
+3. Initials: those set with `setInitials`, else worked out from the name set with `setName`, else from the value's name. They are the first letter of the first word and the first letter of the last word, uppercased for the language, so Ana Lima shows `AL`, Cleo shows `C`, and a name with no letters shows none.
 4. The theme's `avatar.placeholder`, or `avatar.placeholder.group` for a group, when it has one. Otherwise only the background shows.
 
 | Method | Default | Notes |
@@ -127,7 +127,7 @@ The square shows the first of these it has:
 | `setBadge(count)` | 0 | 0 hides the badge, and a count above 99 shows as `99+`. Negative counts throw. |
 | `setBadgeVisual(visual)` | none | A visual shown in place of the number, such as a status dot, in a square a third of the avatar's size |
 
-The initials draw centered in the `avatar.initials` style. They are scaled by a whole number so that a line takes at most two fifths of the square, and never drawn smaller than the font's own size, which keeps bitmap fonts crisp: with a 9-unit line, a 24 unit avatar draws them at their own size and a 48 unit one at twice it. Translated names follow the language.
+The initials draw centered in the `avatar.initials` style. They are scaled by a whole number so that a line takes at most two fifths of the square, and never drawn smaller than the font's own size, which keeps bitmap fonts crisp: with a 9-unit line, a 24-unit avatar draws them at their own size and a 48-unit one at twice it. Translated names follow the language.
 
 `avatar.background` draws behind the square and `avatar.frame` over the picture, so a theme can round the corners with a frame sprite whose corners are the color behind the avatar. An avatar is always square, since canvases clip only to rectangles; in bounds of another shape it draws the largest square that fits, centered.
 
@@ -405,7 +405,7 @@ It is focusable and tabbable and shows the hand cursor. A horizontal slider want
 
 ## TextBox
 
-A single-line text field ported from Wintergreen's.
+A single-line text field.
 
 ```java
 TextBox name = factory.textBox()
@@ -669,15 +669,15 @@ As a text box: 120 units wide and one line plus the text padding tall, at least 
 
 ## ListView
 
-A scrolling list of items with single selection. Each row is built by a cell factory, and only the rows in view exist, so a list of thousands of items costs no more than a screenful.
+A scrolling list of items that selects one row, or several in `MULTIPLE` mode. Each row is built by a cell factory, and only the rows in view exist, so a list of thousands of items costs no more than a screenful.
 
 ```java
 ListView<Listing> listings = factory.<Listing>listView(listing -> factory.label(listing.name()))
         .setRowHeight(24)
         .setKeyFunction(Listing::record)
         .setPlaceholder("No results found.")
-        .onEvent(Selection.SELECTED, event -> updateButtons())
-        .onEvent(Activatable.ACTIVATED, event -> buy(listings.items().get(event.value()), 1));
+        .onEvent(Selection.SELECTED, event -> updateButtons());
+listings.onEvent(Activatable.ACTIVATED, event -> buy(listings.items().get(event.value()), 1));
 listings.setItems(fromServer);
 ```
 
@@ -817,7 +817,7 @@ A window with a message and a row of buttons, opened as a [dialog](overlays.md#d
 --8<-- "overlays/OverlayExamples.java:message-box"
 ```
 
-The buttons come in sets: `OK`, `OK_CANCEL`, `YES_NO`, `YES_NO_CANCEL` and `CLOSE`. The first one is focused when the dialog opens. A button, the close button or Escape asks with `MessageBox.ANSWER`, which a handler can cancel to keep the box open or rewrite, then reports the `Result` once with `MessageBox.ANSWERED` and closes the dialog; the close button and Escape answer No or Cancel. `setButtonText(result, caption)` translates a caption, and `window()` gives the window for its title or size. The message wraps at 280 units.
+The buttons come in sets: `OK`, `OK_CANCEL`, `YES_NO`, `YES_NO_CANCEL` and `CLOSE`. The first one is focused when the dialog opens. A button, the close button or Escape asks with `MessageBox.ANSWER`, which a handler can cancel to keep the box open or rewrite, then reports the `Result` once with `MessageBox.ANSWERED` and closes the dialog. The close button and Escape answer the set's `dismissResult()`: Cancel when the set has it, No for `YES_NO`, and the only button for `OK` and `CLOSE`. `setText` changes the message and `setTitle` the window's title, `setButtonText(result, caption)` translates a caption, and `window()` gives the window to change its size. The message wraps at 280 units.
 
 | Event | Kind | Fires |
 |---|---|---|
@@ -1064,8 +1064,8 @@ Items in a hierarchy, such as store categories, each indented under its parent.
 ```java
 TreeView<Category> categories = factory.<Category>treeView(category -> factory.label(category.name()))
         .setChildren(Category::subcategories)
-        .setItems(store.categories())
-        .onEvent(Selection.SELECTED, event -> categories.selected().ifPresent(this::showCategory));
+        .setItems(store.categories());
+categories.onEvent(Selection.SELECTED, event -> categories.selected().ifPresent(this::showCategory));
 ```
 
 The tree asks the children function for an item's children only when it shows them, so a large hierarchy costs what is expanded. Rows are indented 10 units per level (`setIndent`), then a 12-unit arrow column, then the cell. Clicking an arrow expands or collapses its item. Right expands the selected item or moves into it; Left collapses it or moves to its parent. The other keys and the scrolling work as in a list.
@@ -1229,7 +1229,7 @@ The pane holds, from the top: the toggle and the title, the pane header (`setPan
 | Item method | Default | Notes |
 |---|---|---|
 | `setText(text)` | | The item's text |
-| `setIcon(sprite)`, `setIcon(visual)`, `clearIcon()` | none | A square one line tall before the text, and all the column of icons shows |
+| `setIcon(sprite)`, `setIcon(visual)`, `clearIcon()` | none | A square one line tall before the text. In the column of icons, the icon is all the item shows. |
 | `setPage(builder)` | none | Builds the item's page with the view's factory the first time it is selected; see below |
 | `setSelectable(selectable)` | `true` | Not selectable: a pick only activates it, as for Sign out |
 | `setEnabled(enabled)` | `true` | A disabled item cannot be picked; its tooltip still shows |
@@ -1278,7 +1278,7 @@ An item is a line plus `nav.item.padding`'s top and bottom tall, 19 units with a
 | `nav.header.text` | no | Headers. Falls back to `nav.item.text.disabled`. |
 | `nav.title.text` | no | The title |
 | `nav.separator` | no | Separators. Falls back to `separator`. |
-| `nav.toggle`, `nav.toggle.hovered` | no | Behind the toggle. Nothing, and `nav.item.hovered`, if missing. |
+| `nav.toggle`, `nav.toggle.hovered` | no | Behind the toggle, and while the pointer is over it. If missing, `nav.toggle` draws nothing and `nav.toggle.hovered` falls back to `nav.item.hovered`. |
 | `nav.focus` | no | The ring around the keyboard cursor's item. Falls back to `button.focus`. |
 | `nav.item.padding` | no | Around an item's icon and text. 6 at the sides and 5 at the top and bottom. |
 | `nav.pane.padding` | no | Between the pane's edges and what it holds. 2 on every side. |
@@ -1314,7 +1314,7 @@ The value is the scroll offset, as in a scroll panel: how far the content is scr
 | `setValue(offset)` | 0 | Clamped. NaN throws. |
 | `setScrollRate(rate)` | 10 | How far a scroll notch or an arrow key moves |
 | `setOrientation(orientation)` | `VERTICAL` | `HORIZONTAL` for content that scrolls sideways |
-| `setSlim(boolean)` | no | A 2-unit bar with a thumb at least 16 long, drawn with the `scroll.slim.*` keys, for chat logs, tooltips and other tight places |
+| `setSlim(boolean)` | off | A 2-unit bar with a thumb at least 16 long, drawn with the `scroll.slim.*` keys, for chat logs, tooltips and other tight places |
 
 Input:
 
@@ -1473,7 +1473,7 @@ The date shows as day, month and year in the language's order and with its separ
 - Delete clears the date while the picker is clearable (`setClearable`, true by default).
 - The button, Alt+Down and F4 open the calendar, with the picker's range, filter and first day of the week. It shows the date's month or today's, and takes focus. Picking a day sets the date, closes the calendar and gives focus back to the field. Escape and a press outside close it with no change.
 
-The picker asks for the width of its widest possible text in the current font and language, or of its placeholder, plus its padding and the 12 unit button, so it never resizes as the date changes. A disabled picker takes no focus, draws the text box's disabled face and cannot open.
+The picker asks for the width of its widest possible text in the current font and language, or of its placeholder, plus its padding and the 12-unit button, so it never resizes as the date changes. A disabled picker takes no focus, draws the text box's disabled face and cannot open.
 
 | Event | Kind | Fires |
 |---|---|---|
@@ -1492,12 +1492,12 @@ A time of day in parts, with columns of hours, minutes, seconds and the halves o
 ```java
 TimePicker alarm = factory.timePicker(LocalTime.of(7, 30))
         .setMinuteStep(5)
-        .onEvent(HasTime.TIME_PICKED, event -> alarm.setTime(event.value()));
+        .onEvent(HasTime.TIME_PICKED, event -> settings.setAlarm(event.value()));
 ```
 
-The time shows as hour and minute, the second while shown, and on a 12 hour clock the half of the day, such as `14:05` or `02:05 PM`. The field edits as a date picker's does. On the half of the day, the first letter of either name picks it, and Up and Down flip it. Up and Down on the minutes move by the minute step, and an empty part starts from the current time's.
+The time shows as hour and minute, the second while shown, and on a 12-hour clock the half of the day, such as `14:05` or `02:05 PM`. The field edits as a date picker's does. On the half of the day, the first letter of either name picks it, and Up and Down flip it. Up and Down on the minutes move by the minute step, and an empty part starts from the current time's.
 
-The button, Alt+Down and F4 open a row of lists: hours (12 and 1 to 11, or 0 to 23), minutes in the minute step, seconds while shown, and the two halves on a 12 hour clock. Rows are a line plus 4 tall and at most seven show. A row picked sets that part of the time at once; when the time was empty, the other parts start at zero. Focus stays in the field, whose focused part is the column the keys work on: Left and Right move between columns, Up and Down pick the row above or below at once, and Enter and Escape close the popup.
+The button, Alt+Down and F4 open a row of lists: hours (12 and 1 to 11, or 0 to 23), minutes in the minute step, seconds while shown, and the two halves on a 12-hour clock. Rows are a line plus 4 tall and at most seven show. A row picked sets that part of the time at once; when the time was empty, the other parts start at zero. Focus stays in the field, whose focused part is the column the keys work on: Left and Right move between columns, Up and Down pick the row above or below at once, and Enter and Escape close the popup.
 
 | Event | Kind | Fires |
 |---|---|---|

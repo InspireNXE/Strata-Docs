@@ -4,7 +4,7 @@
 
 ### What engines does Strata support?
 
-This repository has the Swing (Java2D) adapter, which runs on any desktop JVM. [Platforms](../platforms/index.md) lists the adapters that live elsewhere. Other engines need an adapter, which is a small amount of code; see [Writing an adapter](../platforms/writing-an-adapter.md).
+The Swing (Java2D) adapter, in the Strata-Swing repository, runs on any desktop JVM. [Platforms](../platforms/index.md) lists the adapters. Other engines need an adapter, which is a small amount of code; see [Writing an adapter](../platforms/writing-an-adapter.md).
 
 ### Is it ready for production?
 
@@ -12,7 +12,7 @@ Not yet. Strata is at 0.1.0, unreleased, and the API will change. See [Status an
 
 ### Is it a port of MalisisCore?
 
-No. Strata takes ideas from MalisisCore (a retained component tree, anchors, cancellable events) and from Wintergreen (measure-and-arrange layout, click and drag handling, focus, typed events, the text box), but it is new code with no engine dependency. The [design document](../design-implemented.md) records where each idea comes from and what Strata does differently.
+No. Strata takes ideas from MalisisCore (a retained component tree, anchors, cancelable events) and from Wintergreen (measure-and-arrange layout, click and drag handling, focus, typed events, the text box), but it is new code with no engine dependency. The [design document](../design-implemented.md) records where each idea comes from and what Strata does differently.
 
 ### What license?
 
@@ -30,7 +30,7 @@ Plugin systems often give each plugin its own class loader, and one application 
 
 ### Can I implement `Component` or `Button` myself?
 
-No. A class that implements a component interface directly is rejected with `IllegalArgumentException`. Extend `CustomComponent` or `CustomContainer`. See [Extending Strata](../guides/extending.md).
+No. A class that implements a component interface directly is rejected with `IllegalArgumentException`. Extend `CustomComponent`, `CustomComposite` or `CustomContainer`. See [Extending Strata](../guides/extending.md).
 
 ### Can I subclass the built-in controls?
 
@@ -46,7 +46,7 @@ Layout runs before the next frame, not when you call a setter. Before the first 
 
 ### How do I make something fill the rest of a column?
 
-Use a `GridPanel` with a `weighted` row or column. A `StackPanel` never shares out leftover space. See [Filling the remaining space](../guides/layout.md#filling-the-remaining-space).
+Give the child a weight in its `StackPanel` and stretch it, or use a weighted row or column in a `GridPanel`. See [Filling the remaining space](../guides/layout.md#filling-the-remaining-space).
 
 ### How do I center a dialog?
 
@@ -76,15 +76,15 @@ Nothing prevents it. The API is plain Java interfaces and records. The examples 
 
 ### Why doesn't my panel's click handler see clicks on its buttons?
 
-Buttons consume the clicks that press them, and consuming stops bubbling. Put the handler on the button. See [the warning in Events](../guides/events.md#canceling-and-stopping).
+Buttons consume the clicks that press them, and consuming stops bubbling. Handle `Button.PRESSED` on the panel instead, since control events bubble, or put the handler on the button. See [the warning in Events](../guides/events.md#canceling-and-stopping).
 
 ### What's the difference between `cancel`, `stopPropagation` and `consume`?
 
 `cancel` skips default behavior, `stopPropagation` stops bubbling, and `consume` does both. See [Canceling and stopping](../guides/events.md#canceling-and-stopping).
 
-### My `AFTER` handler ran even though I canceled the event. Is that a bug?
+### A handler ran even though I canceled the event. Is that a bug?
 
-No. Canceling skips the default behavior only. `AFTER` handlers always run.
+No. Canceling skips the default behavior, or for a control's request the change itself. The other handlers on the path still run, so a handler that should not act on a canceled event checks `isCancelled()`.
 
 ### How do I tell a double click from a single click?
 
@@ -104,7 +104,7 @@ No. Snapshots are shallow. A child has its own snapshot only if it was captured.
 
 ### Can I fire my own events?
 
-Not yet. You can create `EventType`s, but there is no public way to fire them. Use listener methods on your components instead.
+Yes. Declare event types with `EventType.request`, `valueRequest`, `report` and `valueReport`, and fire them from your `CustomComponent` with `request` and `report`. See [Events for your own control](../guides/extending.md#events-for-your-own-control).
 
 ### Do I need to remove handlers when a screen closes?
 

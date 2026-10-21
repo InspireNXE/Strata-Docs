@@ -56,9 +56,9 @@ Snapshots are shallow. A snapshot of a panel holds the panel's own state and not
 
 | Group | Fields |
 |---|---|
-| Identity | `component()` (the live component), `id` |
+| Identity | `component()`, the live component |
 | Flags | `visible`, `enabled`, `hovered`, `pressed`, `focused` |
-| Layout inputs | `margin`, `minWidth`, `maxWidth`, `minHeight`, `maxHeight`, `horizontalAlignment`, `verticalAlignment`, `background` |
+| Layout inputs | `margin`, `minWidth`, `maxWidth`, `minHeight`, `maxHeight`, `horizontalAlignment`, `verticalAlignment` |
 | Layout results | `bounds`, `desiredWidth`, `desiredHeight` |
 | Kind-specific | `state()`, or `state(Class)` for a typed `Optional` |
 
@@ -73,13 +73,27 @@ The `state` is what the component's kind adds. The built-ins record a nested `St
 | `TextBox` | `TextBox.State` | `text`, `caret`, `anchor`, `maxLength`, plus `selectionStart()`, `selectionEnd()` and `hasSelection()` |
 | `PasswordTextBox` | `PasswordTextBox.State` | `length`, `caret`, `anchor`, `maxLength`, `revealed`, plus `selectionStart()`, `selectionEnd()` and `hasSelection()`. Never the text. |
 | `Button` | `Button.State` | `text` |
-| `CheckBox` | `CheckBox.State` | `checked`, `text` |
+| `TextArea` | `TextArea.State` | `text`, `caret`, `anchor`, `maxLength` |
+| `DropDownButton` | `DropDownButton.State` | `text`, `open` |
+| `CheckBox` | `CheckBox.State` | `state` (a `CheckState`), `text` |
+| `RadioButton`, `ToggleSwitch` | `RadioButton.State`, `ToggleSwitch.State` | `selected`, `text` |
 | `Slider` | `Slider.State` | `value`, `min`, `max`, `step` |
-| `Image` | `Image.State` | `sprite`, `tint`, `imageWidth`, `imageHeight`, `scaling` |
+| `Spinner` | `Spinner.State` | `value`, `min`, `max`, `step`, `decimals` |
+| `ScrollBar` | `ScrollBar.State` | `value`, `min`, `max`, `visibleAmount` |
+| `ColorPicker` | `ColorPicker.State` | `color`, `hue`, `saturation`, `brightness`, `alphaShown` |
+| `CalendarView` | `CalendarView.State` | `date`, `shownMonth`, `zoom` |
+| `DatePicker`, `TimePicker`, `DateTimePicker` | `DatePicker.State`, `TimePicker.State`, `DateTimePicker.State` | `date`, `time` or `dateTime`, and `open` |
+| `Image` | `Image.State` | `sprite`, `visual`, `tint`, `imageWidth`, `imageHeight`, `scaling` |
+| `Avatar` | `Avatar.State` | `value`, `name`, `initials`, `group`, `badge` |
+| `InfoBar` | `InfoBar.State` | `severity`, `title`, `text`, `open` |
 | `Label` | `Label.State` | `text`, `style`, `wraps`, `textAlignment` |
-| `StackPanel` | `StackPanel.State` | `orientation`, `spacing` |
+| `Flyout` | `Flyout.State` | `open` |
+| `Expander` | `Expander.State` | `expanded`, `title` |
+| `NavigationView` | `NavigationView.State` | `selectedIndex`, `shownMode`, `expanded` |
+| `StackPanel` | `StackPanel.State` | `orientation`, `spacing`, `spread` |
 | `GridPanel` | `GridPanel.State` | `columns`, `rows`, `columnSpacing`, `rowSpacing`. Not the children or their cells. |
-| `AnchorPanel`, `AbsolutePanel` | none | `state()` is null |
+| `ScrollPanel` | `ScrollPanel.State` | `scrollX`, `scrollY`, `maxScrollX`, `maxScrollY` |
+| `AnchorPanel`, `AbsolutePanel` and the controls not listed | none | `state()` is null |
 
 `state(Class)` returns empty when there is no state or it is of another type, so it is safe to call on any snapshot.
 
@@ -117,8 +131,8 @@ A component that joins the path while the event is being delivered, for example 
 
 ## Cost
 
-An event whose path has no handler for its type costs nothing extra, but then nothing listens anyway. An event that does have one allocates one snapshot per captured component, plus whatever `snapshotState()` builds. Prefer narrow event types: a handler for `POINTER_MOVE` on a root panel snapshots the hovered component on every mouse move.
+An event whose path has no handler for its type costs nothing extra. An event that does have one allocates one snapshot per captured component, plus whatever `snapshotState()` builds. Prefer narrow event types: a handler for `POINTER_MOVE` on a root panel snapshots the hovered component on every mouse move.
 
 ## Why snapshot whenever something listens?
 
-Asking for snapshots handler by handler added a second registration method, and forgetting it gave a handler an exception at the worst moment. A snapshot is a small record taken only on the paths that have a listener, never while painting, so taking it for every listener keeps the API to one method at a cost that only input with handlers pays. This is recorded in the [design](../design-implemented.md#8-decisions).
+Letting each handler ask for snapshots would need a second registration method, and a handler that forgot to ask would get an exception at the worst moment. A snapshot is a small record taken only on the paths that have a listener, never while painting, so taking it for every listener keeps the API to one method at a cost that only input with handlers pays. This is recorded in the [design](../design-implemented.md#8-decisions).

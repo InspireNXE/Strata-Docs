@@ -17,7 +17,7 @@ Button same = factory.button("Save");             // the shorthand
 ListView<Offer> offers = factory.<Offer>listView(); // cells show String.valueOf(item) until setCellFactory
 ```
 
-The defaults with no arguments are empty text and titles, cells and options shown as `String.valueOf(item)`, `HORIZONTAL` orientation, an image that draws nothing, and a message box with only an OK button. [Defaults](../reference/defaults.md) lists the rest.
+The defaults with no arguments are empty text and titles, cells and options shown as `String.valueOf(item)`, horizontal separators, sliders and split panes, vertical stack panels and scroll bars, an image that draws nothing, and a message box with only an OK button. [Defaults](../reference/defaults.md) lists the rest.
 
 !!! danger "Do not implement the component interfaces"
     A class that implements `Component`, `Button` or any other component interface directly has no Strata implementation behind it. Adding it to a container, or returning it from `Screen.build`, throws `IllegalArgumentException`. Subclass `CustomComponent` instead.
@@ -65,7 +65,7 @@ A component is attached while it is in a tree that a host is showing. `isAttache
 
 Adding a child to an attached container attaches the child, and the child's theme hook runs before the next layout.
 
-Removing a component does not remove its event handlers. Close the subscriptions, or use an [owner token](events.md#removing-handlers), if the component will be reused.
+Removing a component does not remove its event handlers. If the component will be reused, register the handlers that must go with `subscribe` and close their [subscriptions](events.md#removing-handlers).
 
 ## State flags
 
@@ -85,8 +85,8 @@ Hiding or disabling a component also hides or disables everything inside it, and
 
 | Interface | Gives | Who has it |
 |---|---|---|
-| `Focusable` | Keyboard focus and tab order | Buttons, cycle buttons, checkboxes, radio buttons, toggle switches, sliders, text boxes, text areas, combo boxes, lists, menus, expanders and tab bars. Scroll bars and scroll panels have it too, turned off until you call `setFocusable(true)`. |
-| `HasCursor` | `setCursor` | Every container, and every control except separators and busy indicators |
+| `Focusable` | Keyboard focus and tab order | Buttons, drop-down buttons, cycle buttons, checkboxes, radio buttons, toggle switches, sliders, text boxes, password boxes, text areas, combo boxes, lists, calendars, the date and time pickers, menus, flyouts, expanders, navigation views and tab bars. Scroll bars and scroll panels have it too, turned off until you call `setFocusable(true)`. |
+| `HasCursor` | `setCursor` | Every container, and every control except separators, busy indicators and flyouts |
 | `HasTooltip` | `setTooltip` | Every container, and every control except separators and busy indicators |
 | `Container` | Children, padding, background and border | Panels, windows |
 

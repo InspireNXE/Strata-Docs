@@ -69,8 +69,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * The controls guide's examples for images, avatars, info bars, checkboxes, sliders, password boxes, rows of controls
- * in a list, date and time pickers and navigation views.
+ * The controls guide's examples for images, avatars, info bars, navigation views, date and time pickers, a drop-down
+ * button, a flyout, checkboxes, sliders, a highlighter, password boxes and rows of controls in a list.
  */
 public final class ControlExamples {
 
@@ -434,7 +434,7 @@ public final class ControlExamples {
     }
 
     /**
-     * A settings panel with every new control.
+     * A settings panel with an image, checkboxes and sliders.
      *
      * @return the screen
      */

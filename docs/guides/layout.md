@@ -26,7 +26,7 @@ A change that affects size, such as new label text, a new child or a different m
 | Fixed width and height | unset (`NaN`) | Replaces the measured size and overrides `STRETCH` |
 | Horizontal alignment | `LEFT` | Where it sits across its slot's width |
 | Vertical alignment | `TOP` | Where it sits across its slot's height |
-| Offset | 0, 0 | Moves it after layout places it; see [Offset](#offset) |
+| Offset | 0, 0 | Moves it after layout places it. Windows and custom components can set it; see [Offset](#offset) |
 
 Containers add padding (`Insets.NONE` by default): space inside their edges that children stay out of.
 

@@ -31,7 +31,7 @@ While a dialog is open:
 - Nothing below it gets the pointer, focus or Tab. Keys go to it when nothing in it has focus.
 - The screen below stays visible, under the theme's `overlay.backdrop` paint if it has one.
 - Focus moves to the first tabbable component in it when it opens, and back to where it was when it closes.
-- An Escape press that nothing consumed closes it. A window closes its dialog itself, telling its close listeners first.
+- An Escape press that nothing consumed closes it. A window in a dialog handles Escape itself, as a close by the user, so a `Closable.CLOSE` handler can keep it open.
 
 A [`MessageBox`](controls.md#messagebox) is a ready-made dialog for confirmations:
 
@@ -82,7 +82,7 @@ Any component can have a tooltip. It shows once the pointer has rested for half 
 
 Text tooltips draw on the `tooltip.background` paint inside the `tooltip.padding` insets, 4 units on every side by default, or on a dark box with a purple edge when the theme lacks the key.
 
-Adapters can make styled-lines tooltips from the engine's own tooltip text, for objects such as an engine visual.
+Adapters can build a lines tooltip from an engine object's own tooltip text.
 
 ## Held modifiers
 
