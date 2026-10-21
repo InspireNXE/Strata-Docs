@@ -11,43 +11,34 @@ Strata itself has no other dependencies. The Swing adapter uses only the JDK.
 
 ## Get the artifacts
 
-Strata is not published to a public Maven repository yet. Until it is, build it from source.
+Strata is published to Maven Central under the group `org.inspirenxe`. Until 0.1.0 is released there are snapshots only, which Central keeps in a repository of its own, so add it next to `mavenCentral()`:
 
-```bash
-git clone https://github.com/InspireNXE/Strata.git
-cd Strata
-./gradlew build
+```groovy
+repositories {
+    mavenCentral()
+    maven {
+        url = uri('https://central.sonatype.com/repository/maven-snapshots/')
+        mavenContent {
+            snapshotsOnly()
+        }
+    }
+}
 ```
 
-The build compiles every module, runs the tests and checks that every public type and member is documented. The Swing adapter has a repository of its own, Strata-Swing, which builds against a Strata checkout beside it, so clone it next to Strata and run `./gradlew build` there too. The jars land in each module's `build/libs`:
-
-| Jar | Contents | Use it for |
+| Artifact | Contents | Use it for |
 |---|---|---|
 | `strata-api` | The API | Compiling screens and components |
-| `strata-spi` | The SPI | Writing an engine adapter |
+| `strata-spi` | The SPI, with the adapter contract tests as test fixtures | Writing an engine adapter |
 | `strata-core` | The implementation | Run time only, through an adapter |
 | `strata-swing` | The Swing adapter, built in Strata-Swing | Swing applications and tests |
 
-To use these from another Gradle project, publish them to your local Maven repository, in Strata and then in Strata-Swing:
-
-```bash
-./gradlew publishToMavenLocal
-```
-
-They are then available as `org.inspirenxe:strata-<module>:0.1.0-SNAPSHOT` from `mavenLocal()`.
-
-!!! warning "Not yet tried from outside the repository"
-    The published metadata has not been consumed from a separate project yet. The snippet below follows the build's own setup. If it fails for you, please open an issue with the error.
+Every artifact comes with a sources jar and a javadoc jar. A Java 17 build of `strata-api`, `strata-spi` and `strata-core` has `-java17` in its version, such as `0.1.0-java17-SNAPSHOT`.
 
 ## Swing applications
 
 Depend on the Swing adapter. It brings `strata-api` and `strata-spi` with it and keeps `strata-core` on the runtime classpath only, so your code compiles against the API alone.
 
 ```groovy
-repositories {
-    mavenLocal()
-}
-
 dependencies {
     implementation 'org.inspirenxe:strata-swing:0.1.0-SNAPSHOT'
 }
@@ -61,7 +52,7 @@ Strata is a plain Java library. To show screens on an engine other than Swing, d
 
 ## Trying it without a project
 
-The Strata-Gallery repository, checked out beside Strata, opens every control in a window:
+Strata-Gallery opens every control in a window. Clone it and run it; it takes Strata from Maven Central unless Strata is checked out beside it:
 
 ```bash
 ./gradlew run
@@ -72,3 +63,15 @@ On a machine without a display, render every page to PNGs instead:
 ```bash
 ./gradlew run --args="--snapshot gallery"
 ```
+
+## Building from source
+
+To try a change to Strata in your own project, build it and publish it to your local Maven repository:
+
+```bash
+git clone https://github.com/InspireNXE/Strata.git
+cd Strata
+./gradlew build publishToMavenLocal
+```
+
+The build compiles every module, runs the tests and checks that every public type and member is documented. Add `mavenLocal()` to your repositories to pick up the result. Strata-Swing publishes the same way from its own checkout.

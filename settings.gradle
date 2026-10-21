@@ -11,7 +11,8 @@ plugins {
 
 rootProject.name = 'Strata-Docs'
 
-// Strata itself, built from the sibling checkout until it is published
+// Strata itself, from the checkout beside this one. The site documents the source it is built from, so it always
+// includes the checkouts, and its Javadoc and design pages come from them too.
 includeBuild('../Strata') {
     dependencySubstitution {
         ['api', 'spi', 'core'].each { name ->

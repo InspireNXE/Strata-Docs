@@ -12,7 +12,7 @@ The source of the [documentation site](https://inspirenxe.github.io/Strata/) for
 
 ## Building
 
-Building needs JDK 25, Python 3, and the Strata and Strata-Swing checkouts beside this one, at `../Strata` and `../Strata-Swing`.
+Building needs JDK 25, Python 3, and the Strata and Strata-Swing checkouts beside this one, at `../Strata` and `../Strata-Swing`. The site documents that source: the examples compile against it, and the Javadoc and design pages are built from it.
 
 ```bash
 ./gradlew build

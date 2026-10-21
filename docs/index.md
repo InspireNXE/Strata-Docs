@@ -31,7 +31,7 @@ Strata is a GUI library for Java that does not depend on any engine, whether you
 
 <div class="grid cards" markdown>
 
-- [Installation](getting-started/installation.md): requirements, building from source, and adding Strata to a Swing app.
+- [Installation](getting-started/installation.md): requirements, the Maven setup, adding Strata to a Swing app, and building from source.
 - [Your first screen](getting-started/first-screen.md): a step-by-step walk through the screen above, run in a Swing window.
 - [Core concepts](getting-started/concepts.md): the handful of ideas everything else builds on.
 - [Guides](guides/index.md): components, layout, controls, overlays, events, binding, screens, themes, text and extending, each in depth.

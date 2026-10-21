@@ -7,14 +7,13 @@ Strata is at version 0.1.0 and has not been released. This page lists what is te
 | Area | How |
 |---|---|
 | Layout, sibling order, input, focus, events, snapshots, binding, extension, the controls, scrolling, lists, overlays, tooltips, screens and `Strata.screens()`, and theme resolution | Unit tests in `core` against a test platform with a manual clock |
-| Building real screens | Mock-ups of Almura's Exchange and Store screens in Strata-Gallery, rendered in a dozen states by `--mocks` |
 | The SPI contracts | Contract tests run on the test platform, on the Swing adapter, and on the example adapter in these docs |
 | The Swing adapter | Every contract, sprite, tint and nine-slice drawing on generated images, key and button mapping, a panel driven with synthetic AWT events, end-to-end snapshots |
 | These docs | Every Java example compiles, and the example adapter and snapshot timing are tested |
 
 ## What is not tested
 
-Publishing to Maven and depending on Strata from a separate project have not been tried. Adapters in other repositories list their own status.
+Snapshots are published to Maven Central's snapshot repository, and Strata-Swing and Strata-Minecraft build against them in their own workflows. No release has gone to Maven Central yet. Adapters in other repositories list their own status.
 
 ## Known issues
 

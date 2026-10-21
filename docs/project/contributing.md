@@ -24,7 +24,7 @@ This compiles every module, runs every test, and runs Javadoc with every doclint
 | `core` | The implementation |
 | `build-logic` | The `strata-java` and `strata-documented` convention plugins |
 
-The adapters, the gallery and these docs live in sibling repositories that build against a Strata checkout beside them: Strata-Swing (the Java2D/Swing adapter, artifact `strata-swing`), Strata-Minecraft, Strata-Gallery and Strata-Docs.
+The adapters, the gallery and these docs live in repositories of their own: Strata-Swing (the Java2D/Swing adapter, artifact `strata-swing`), Strata-Minecraft, Strata-Gallery and Strata-Docs. Clone them beside this one to work on several at once. Strata-Swing, Strata-Minecraft and Strata-Gallery then build against your Strata checkout instead of the published snapshot, and Strata-Docs always builds from the checkouts.
 
 ## Rules worth knowing before you change code
 
