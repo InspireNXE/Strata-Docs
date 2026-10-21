@@ -5,7 +5,7 @@ hide:
 
 # Strata
 
-Strata is a GUI library for Java games that does not depend on any engine. You describe a screen as a tree of components: labels, images, buttons, checkboxes, sliders, text boxes and the panels that lay them out. An adapter then draws that tree and feeds it input on a particular engine. The same screen code runs in a Swing window on your desktop and on any engine that has an adapter.
+Strata is a GUI library for Java that does not depend on any engine, whether you are writing a game, a business application or a tool. You describe a screen as a tree of components: labels, images, buttons, checkboxes, sliders, text boxes and the panels that lay them out. An adapter then draws that tree and feeds it input on a particular engine. The same screen code runs in a Swing window on your desktop and on any engine that has an adapter.
 
 ![A small form drawn by Strata](assets/images/quickstart.png)
 

@@ -10,4 +10,4 @@ The Minecraft adapter lives in the [Strata-Minecraft](https://github.com/Inspire
 
 Screens written against the API run on every adapter unchanged, and `Strata.screens().open(screen)` opens them on every adapter. A few behaviors differ between engines, mostly in fonts, modifier keys and nine-slices; [Platform differences](differences.md) lists what an adapter may decide for itself.
 
-To run Strata on another engine, see [Writing an adapter](writing-an-adapter.md).
+To run Strata on another engine or toolkit, such as JavaFX, see [Writing an adapter](writing-an-adapter.md).

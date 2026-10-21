@@ -2,7 +2,7 @@
 
 An adapter runs Strata on an engine. It implements the SPI's `Platform`, with the clipboard, clock, text input sink and theme source a platform returns, and its `Canvas`. When it starts it hands core a `Translator` and a screen controller, then it creates a host from `core` and forwards the engine's frames and input to it. This page builds a complete adapter for an imaginary engine. Its code is compiled and passes Strata's contract tests as part of this site's build.
 
-You need this only to bring Strata to a new engine: LWJGL directly, libGDX, a game of your own, or an ImGui backend. To use Strata with an adapter that already exists, see the [Platforms](index.md) page instead.
+You need this only to bring Strata to a new engine: a UI toolkit such as JavaFX, LWJGL directly, libGDX, a game of your own, or an ImGui backend. To use Strata with an adapter that already exists, see the [Platforms](index.md) page instead.
 
 ## What an adapter depends on
 

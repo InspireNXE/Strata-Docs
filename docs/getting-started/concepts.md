@@ -82,7 +82,7 @@ A theme maps style keys, such as `button.hovered`, to paints (solid colors, grad
 
 ## Threading
 
-Strata is single-threaded and does no locking. Create, change and read components only on the engine's UI thread, such as the Swing event dispatch thread or a game's render thread. Handlers run on that thread too.
+Strata is single-threaded and does no locking. Create, change and read components only on the engine's UI thread, such as the Swing event dispatch thread, the JavaFX application thread or a game's render thread. Handlers run on that thread too.
 
 ## What Strata leaves out
 
