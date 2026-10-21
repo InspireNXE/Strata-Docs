@@ -264,11 +264,54 @@ Slots and bounds are in host coordinates, so place children relative to `bounds`
 
 Callers order a container's children with `insert`, `move`, `raise`, `lower` and z indexes (see [Drawing order](components.md#drawing-order)), and Strata keeps both orders for you: iterate `children()` in `measure` and `arrange`, and leave the drawing order to Strata. A `CustomComposite`, whose children are private, orders them itself with the protected `insertChild(index, child)`, `moveChild(child, index)`, `raiseChild(child)` and `lowerChild(child)`, which work as the `Container` methods do. A progress tree, for example, can raise the node under the pointer so it draws over its neighbors.
 
+## Share your components
+
+A component you write can be made by anyone with a `ComponentFactory`, without them knowing your classes or your entry points. Register it with the component registry, under the type callers see it as and an id:
+
+```java
+--8<-- "extending/SwitchLibrary.java:library"
+```
+
+List the class in `META-INF/services/org.inspirenxe.strata.api.component.registry.ComponentLibrary`, one name per line:
+
+```text
+com.example.switches.SwitchLibrary
+```
+
+Strata finds it the first time anyone uses the registry, so the people who use your library never call an init method. On an engine that gives each plugin its own class loader, the engine's adapter tells Strata about each plugin's loader with `Strata.components().load(loader)`. If `register` throws, Strata removes what it registered, logs the error and goes on without your library. You can also register from code at any time with `Strata.components().register(...)`, which returns a `Subscription` that removes the registration.
+
+The type is the key, so your implementation class can stay package-private. Every component the maker returns must be an instance of that type, made with the factory the maker is given; the factory checks both and throws `IllegalStateException` naming your registration if either is wrong. Strata's own control types and the `strata` namespace are closed to registration.
+
+### Making a registered component
+
+```java
+--8<-- "extending/ExtendingExamples.java:create"
+```
+
+| Call | Returns | When nothing is registered |
+|---|---|---|
+| `create(Type.class)` | A new component of that type | Throws `IllegalStateException` |
+| `tryCreate(Type.class)` | The component, or empty | Empty |
+| `create(id)` | A new `Component<?>` | Throws `IllegalStateException` |
+| `tryCreate(id)` | The component, or empty | Empty |
+
+A type with no registration of its own finds the newest registration of a subtype, so you can ask for an interface the registered type extends, or for an attribute such as `Ranged`. Strata's controls are registered too, under their interfaces and ids such as `strata:button` and `strata:list_view`, so `factory.create(Slider.class)` is the same as `factory.slider()`. A later registration for the same type or id hides an earlier one until it is removed.
+
+### Using a component you do not compile against
+
+Attributes own their events, so a component made by id can be used through every attribute it implements, with nothing from its library on your class path:
+
+```java
+--8<-- "extending/ExtendingExamples.java:attributes"
+```
+
+This is the reason to implement every [attribute](controls.md#attributes) that fits a component you share: a slider-like component should be `Ranged`, an on/off one `Toggle`, a list one `SingleSelection`. Code written against the attributes then works with your component and with Strata's alike.
+
 ## Strata's components and yours
 
 Strata provides the components `ComponentFactory` makes. You see them through the interfaces in `api.control` and `api.layout`, such as `Button`, `ListView` and `StackPanel`, and their implementations stay in core.
 
-You write subclasses of `CustomComponent`, `CustomComposite` and `CustomContainer`, and so does any other library that adds components. Strata's own components do not extend these classes, so a component that is an instance of `CustomComponent` was written outside Strata, and anything the factory made is Strata's. Both kinds go into the same containers and lay out, draw and fire events the same way, and either can hold the other. The parts and content of a `CustomComposite` have the composite as their `parent()`, so code inside them that needs it can find it with `ancestor(YourComposite.class)` (see [The tree](components.md#the-tree)).
+You write subclasses of `CustomComponent`, `CustomComposite` and `CustomContainer`, and so does any other library that adds components. Strata's own components do not extend these classes, so a component that is an instance of `CustomComponent` was written outside Strata, and anything the factory's named methods (`button()`, `listView()` and the rest) made is Strata's. `create` makes whatever is [registered](#share-your-components), which can be either. Both kinds go into the same containers and lay out, draw and fire events the same way, and either can hold the other. The parts and content of a `CustomComposite` have the composite as their `parent()`, so code inside them that needs it can find it with `ancestor(YourComposite.class)` (see [The tree](components.md#the-tree)).
 
 ### How the base classes work
 

@@ -4,9 +4,10 @@ Everything on screen is a `Component`. This page covers what all components shar
 
 ## Getting components
 
-There are exactly two ways to get a component:
+There are three ways to get a component:
 
 - From the `ComponentFactory` a screen receives, such as `anchorPanel()`, `stackPanel()`, `label()`, `button()` and `textBox()`, and the rest of the [controls](controls.md). To change what a built-in does, handle its [events](events.md).
+- From the same factory by type or id, with `create(Gauge.class)` or `create(ComponentId.of("fancy", "gauge"))`, for components a library registered. See [Share your components](extending.md#share-your-components).
 - By subclassing `CustomComponent` or `CustomContainer`. See [Extending Strata](extending.md).
 
 Each factory call returns a new component with default settings, not attached to anything. Every factory method has a form that takes no arguments, and some have shorthands that take the setting most callers make at once:

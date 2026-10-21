@@ -17,6 +17,8 @@ package org.inspirenxe.strata.examples.extending;
 
 import org.inspirenxe.strata.api.ComponentFactory;
 import org.inspirenxe.strata.api.component.Component;
+import org.inspirenxe.strata.api.component.registry.ComponentId;
+import org.inspirenxe.strata.api.control.attribute.value.Ranged;
 import org.inspirenxe.strata.api.control.attribute.text.TextInput;
 import org.inspirenxe.strata.api.control.button.Button;
 import org.inspirenxe.strata.api.control.display.Label;
@@ -165,6 +167,34 @@ public final class ExtendingExamples {
         }
     }
     // --8<-- [end:compose]
+
+    /**
+     * Components made from the registry.
+     *
+     * @return the screen
+     */
+    public static Screen registeredComponents() {
+        return factory -> {
+            // --8<-- [start:create]
+            // By type, from a library you compile against
+            final ToggleSwitch music = factory.create(ToggleSwitch.class).setOn(true);
+
+            // By id, from a library that may not be installed, with a fallback of your own
+            final Component<?> volume = factory.tryCreate(ComponentId.of("fancy", "gauge"))
+                    .orElseGet(factory::progressBar);
+            // --8<-- [end:create]
+
+            // --8<-- [start:attributes]
+            // Through the attributes it implements, without the library's types
+            if (volume instanceof Ranged<?> ranged) {
+                ranged.setRange(0, 100).setValue(80);
+                ranged.onEvent(Ranged.CHANGED, event -> System.out.println("Volume " + event.value()));
+            }
+            // --8<-- [end:attributes]
+
+            return factory.stackPanel().setSpacing(6).setPadding(8).add(music).add(volume);
+        };
+    }
 
     /**
      * The switch and wrap panel in use.
