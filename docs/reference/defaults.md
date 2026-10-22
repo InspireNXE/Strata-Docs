@@ -7,13 +7,17 @@ Every number Strata picks for you. Where a theme [metric](../guides/theming.md#m
 | Setting | Default |
 |---|---|
 | Visible, enabled | yes |
-| Focusable, tabbable | no, except the controls that are `Focusable`: buttons, drop-down buttons, cycle buttons, checkboxes, radio buttons (one Tab stop for a whole group), toggle switches, sliders, text boxes, password boxes, text areas, lists (also inside tables and trees), combo boxes, tab bars, expanders, navigation views, calendar views and the date and time pickers. Scroll bars and scroll panels are `Focusable` but start with focus off. Menus and flyouts are focusable but not tabbable. A color picker and a spinner are neither, but their fields are. |
+| Focusable, tabbable | no, except the controls that are `Focusable`: buttons, toggle buttons, drop-down buttons, cycle buttons, checkboxes, radio buttons (one Tab stop for a whole group), toggle switches, sliders, text boxes, password boxes, text areas, spinners (one stop, the field), lists, tables and trees (one stop, the inner list), grid views, combo boxes, tab bars, expanders, split panes (the divider), color pickers, navigation views, calendar views and the date and time pickers. Scroll bars and scroll panels are `Focusable` but start with focus off. Menus and flyouts are focusable but not tabbable. Tab index 0. |
 | Margin | `Insets.NONE` |
 | Minimum size | 0 by 0 |
 | Maximum size | `Float.POSITIVE_INFINITY` both ways |
 | Fixed size | unset (`Float.NaN`) |
 | Alignment | `LEFT`, `TOP`, except windows and message boxes (centered), separators (stretched along their line), info bars (stretched across, at the top), and spacers and navigation views (stretched both ways) |
 | Z index | 0 |
+| Opacity | 1 |
+| Id | none; Strata never checks it |
+| Flow direction | the parent's; the top of a screen follows the translator's language, and overlays follow the screen |
+| Context menu | none; text boxes, text areas and password boxes start with one |
 | Bounds before the first layout | `Rect.ZERO` |
 
 ## Containers
@@ -34,6 +38,10 @@ Every number Strata picks for you. Where a theme [metric](../guides/theming.md#m
 | `GridPanel` spacing | 0 by 0 |
 | `AbsolutePanel` position from plain `add` | (0, 0) |
 | `GridPanel` cell from plain `add` | row 0, column 0, spanning 1 by 1 |
+| `WrapPanel` orientation | `HORIZONTAL` from `wrapPanel()`: children fill rows |
+| `WrapPanel` spacing, line spacing | 0, 0 |
+| `WrapPanel` line alignment | `LEFT`, which is the top in columns |
+| `Container` text style patch | none |
 | `ScrollPanel` policies | horizontal `NEVER`, vertical `AUTO` |
 | `ScrollPanel` scroll rate | 10 units a wheel notch or arrow key |
 | `ScrollPanel` scroll bar | 6 wide, 2 from the viewport; thumb at least 32 long and at most the track less 8 |
@@ -41,6 +49,9 @@ Every number Strata picks for you. Where a theme [metric](../guides/theming.md#m
 | `Window` title bar | one line plus 3 above and below |
 | `Window` close button | 12 wide, at the right end of the title bar |
 | `Window` closable, movable | yes, yes |
+| `Window` maximizable, collapsible | no, no |
+| `Window` title buttons | `Window.BUTTON_WIDTH`, 12 wide each, one unit apart, left of the close button |
+| `Window` active | while focus is within it; with focus in none of its sibling windows, the one pressed last, else the frontmost |
 | `Window` resizable, edge resizable | no, no |
 | `Window` raises on press | yes |
 | `Window` resize grip | 10 by 10 in the bottom-right corner, drawn as six 2 by 2 squares one unit in from the edges |
@@ -57,6 +68,7 @@ Every number Strata picks for you. Where a theme [metric](../guides/theming.md#m
 | | Spans | none: plain text |
 | | Text scale | 1 |
 | | Overflow | `VISIBLE` |
+| | Mnemonic parsing | off |
 | `Button` | Text padding | the theme's `button.padding`, else 8 left and right and 5 top and bottom; `button.padding.icon`, else 2 on every side, with an icon and no caption; none for a link |
 | | Icon size, gap to the caption | 16 by 16, 4 |
 | | Link | off; a link has no minimum size |
@@ -65,18 +77,28 @@ Every number Strata picks for you. Where a theme [metric](../guides/theming.md#m
 | | Acts on | the click, or the press when the platform's `Conventions.activateOnPress` is on |
 | | Cursor | `HAND` |
 | | Focus ring | one unit, inside the edge, if the theme has `button.focus` |
+| | Icon placement | `START`, before the caption |
+| | Default, cancel | no, no |
+| | Mnemonic | the letter after the first single underscore of the caption, with Alt |
+| | Command | none |
+| `ToggleButton` | Selected | off |
+| | Caption | empty |
+| | Padding, icon, icon placement, minimum size, caption too wide, acts on, cursor, focus ring | as `Button` |
+| | Faces while on | the theme's `button.selected`, `button.selected.hovered` and `button.selected.disabled` |
 | `DropDownButton` | Text padding, icon, minimum size, caption too wide, cursor, focus ring | as `Button` |
 | | Arrow | 7 by 4, 4 after the caption, at the right end of the space inside the padding |
 | | Popup | none |
 | `Image` | Image size and desired size | 16 by 16 |
 | | Made with `image()` | draws nothing until given a sprite or a visual |
-| | Scaling | `STRETCH` |
+| | Scaling | `STRETCH`; `FIT`, `COVER` and `NONE` are the others |
 | | Tint | `0xFFFFFFFF` |
+| | Pixels | none |
 | `Avatar` | Size and desired size | 24 by 24 |
 | | Made with `avatar()` | the background alone, or the theme's placeholder |
 | | Initials | the first letter of the first and last words of the name, scaled by whole steps to at most two fifths of the size |
 | | Badge | none; a count above 99 shows as `99+`; padding the theme's `badge.padding`, else 2 at the sides and 1 at the top and bottom |
 | | Badge visual | a third of the size, at the bottom-right corner |
+| | Corner radius | the theme's `avatar.radius`, else 0: square |
 | | Focusable | no |
 | `InfoBar` | Severity, title, message, action | `INFO`, none, none, none |
 | | Open, closable, icon shown | yes, yes, yes |
@@ -99,6 +121,9 @@ Every number Strata picks for you. Where a theme [metric](../guides/theming.md#m
 | | Key step | the step; with no step, the theme's `slider.key.travel` units of thumb travel when above 0, else a hundredth of the range |
 | | Page Up and Page Down | 10 key steps |
 | | Thumb | 8 along the track, the slider's full thickness across it |
+| | Ticks | none; when set, major ticks 4 units long and minor ticks 2, left out where closer than 3 units |
+| | Snap to ticks | off |
+| | Adjusting | false, until a left press; true until the release |
 | | Cursor | `HAND` |
 | `TextBox` | Desired width | 120 |
 | | Text padding | the theme's `textbox.padding`, else 4 left and right and 5 top and bottom |
@@ -112,6 +137,12 @@ Every number Strata picks for you. Where a theme [metric](../guides/theming.md#m
 | | Suggestion provider | none |
 | | Suggestions shown before scrolling | 8 |
 | | Suggestion rows | one line plus 4, text 4 in from the left; the list at least as wide as the box |
+| | Text alignment | `LEFT` |
+| | Drop-down | off |
+| | Undo history | 100 edits (`historyLimit`); typing merges into one entry until a space or a pause of 1000 ms |
+| | Validation | valid, no validator |
+| | Context menu | Undo, Redo, Cut, Copy, Paste, Delete and Select all |
+| | Dragging | the selection can be dragged out, allowing a move and a copy, or only a copy when read-only |
 | `PasswordTextBox` | Desired width | 120 |
 | | Text padding | the theme's `textbox.padding`, else 4 left and right and 5 top and bottom |
 | | Minimum size | 20 wide; asks to be at least 20 tall, though a smaller height set on it applies |
@@ -124,11 +155,20 @@ Every number Strata picks for you. Where a theme [metric](../guides/theming.md#m
 | | Placeholder | none |
 | | Read-only, select all on focus | off, off |
 | | Cursor | `TEXT`, and the arrow over the eye |
+| | Text alignment | `LEFT` |
+| | Undo history | none; Ctrl+Z is left to the engine |
+| | Context menu | Paste, Delete and Select all |
+| | Dragging | never a source or a target |
 | `ListView` | Row height and spacing | 20 and 0 |
 | | Selection | none, in `SINGLE` mode; pressing the selected row does not deselect it; a double click activates |
 | | Smallest desired width | 40 |
 | | Wheel | the theme's `list.scroll.rows`, else one, rows and their spacing a notch |
 | | Row width | the theme's `list.row.width`, else the list's width; a narrower column is centered with its scroll bar `list.bar.gap`, else 2, to its right |
+| | Type-ahead | on, by the item's appearance name; the prefix lasts the theme's `list.typeahead.timeout`, else 1000 ms, and a space never starts it |
+| | Drag transfer | none: rows are not dragged |
+| | Drag scrolling | on |
+| | Cell editor | none |
+| | Drop line | 2 units high, in the theme's `list.drop` |
 | `CycleButton` | Label, value label function | empty, the value's appearance name (`String.valueOf` for a value with no appearance) |
 | | Selection | the first item once there are items |
 | | Padding, minimum size, caption too wide, acts on, cursor | as `Button` |
@@ -139,12 +179,17 @@ Every number Strata picks for you. Where a theme [metric](../guides/theming.md#m
 | | Padding | the theme's `combobox.padding`, else 4 at the sides and 3 at the top and bottom |
 | | Desired size | the widest option plus the padding, a 4-unit gap and a 7-wide arrow; one line plus the padding tall |
 | | Open list rows | one line plus 4 |
+| | Placeholder | empty |
+| | Type-ahead | on, by the label function |
 | | Cursor | `HAND` |
 | `MessageBox` | Message width | wraps at the theme's `messagebox.message.width`, else 280; lines start at the left unless `messagebox.message.center` is on |
 | | Buttons | the theme's `messagebox.button.width`, else 64 wide, at the right, `messagebox.button.gap`, else 4 apart, the first focused |
 | | Space above the buttons | the theme's `messagebox.spacing`, else 8 |
 | | Close button | shown unless the theme's `messagebox.close` is 0 |
 | | Padding | the theme's `messagebox.padding`, else 4 around the message and buttons |
+| | Default result | the first result of the button set |
+| | Severity, content | none, none |
+| | Icon | a square of `MessageBox.ICON_SIZE`, 24 units, 8 units before the message; shown only with a severity and a theme icon |
 | `TabBar` | Tab size | text plus 8 on each side; one line plus 7 |
 | | Spacing | 0 |
 | | Selected | the first tab added |
@@ -154,6 +199,7 @@ Every number Strata picks for you. Where a theme [metric](../guides/theming.md#m
 | `ProgressBar` | Desired size | the wider of 100 and its text plus padding; one line plus padding tall |
 | | Padding | the theme's `progress.padding`, else 2 on every side |
 | | Range, value | 0 to 1, 0 |
+| | Orientation | `HORIZONTAL`; a vertical bar asks for 100 units of height |
 | | Indeterminate | no; when on, a segment a quarter of the width (at least 8) crosses every 1.5 s |
 | `BusyIndicator` | Dots | 3, each 4 square, 4 apart |
 | | Lit dot | moves first, second, third, second, one step every 300 ms |
@@ -169,26 +215,41 @@ Every number Strata picks for you. Where a theme [metric](../guides/theming.md#m
 | `Spinner` | Desired width | 60, of which the buttons take 12 |
 | | Range, step, decimals, value | 0 to 100, 1, 0, 0 |
 | | Page Up and Page Down | 10 steps |
+| | Held step button | repeats after 400 ms, then every 33 ms |
+| | Trackpad scrolling | one step for each 10 units of `PRECISE` scroll; a wheel notch is one step |
+| | Text alignment | `LEFT` |
 | `TextArea` | Desired size | 160 wide, 4 lines plus padding tall |
 | | Text padding | the theme's `textarea.padding`, else `textbox.padding`, else 4 on each side |
 | | Wrapping | on |
 | | Wheel | 3 lines a notch |
 | | Caret after `setText` | at the end, scrolled to the top |
+| | Accepts Tab | no |
+| | Text alignment | `LEFT` |
+| | Undo history | 100 edits, as `TextBox` |
 | | Placeholder | none |
 | `TableView` | Header height | 20 |
 | | Auto column width | title plus 8, and 11 more when sortable |
 | | Text cells | 4 in from the column's edges, cut short with `...` |
 | | Sort | the set order; text columns sortable, ignoring case |
+| | Horizontal policy, scroll X | `NEVER`, 0 |
+| | Sort order | empty |
+| | Type-ahead | on, by the first column whose cells are text |
 | `TableColumn` | Width, cells, sorting | weighted 1, the item's appearance name as text (`String.valueOf` for an item with no appearance), not sortable |
+| | Width limits | 0 to infinite |
+| | Resizable, movable, shown | yes, yes, yes |
+| | Cell editor | none |
 | `TreeView` | Indent | 10 a level |
 | | Arrow column | 12 |
 | | Children | none: every item is a leaf |
+| | Has-children test | none: the children function decides |
+| | Cell editor | none |
 | `Menu` | Item height | one line plus 6 |
 | | Gutters | the theme's `menu.item.padding` at each side of an item, else 14; `menu.padding` around the items, else 2 |
 | | Separator height | 5 |
 | | Smallest width | 60, or the width set with `setMinWidth`, or the drop-down button's width while one opened it, whichever is widest |
 | `MenuItem` | Enabled, shortcut, action | yes, none, does nothing |
 | `CheckMenuItem` | Checked, enabled, action | no, yes, does nothing |
+| `RadioMenuItem` | Selected, group, enabled, action | no, none (items with no group form one group per menu), yes, does nothing |
 | `SubmenuItem` | Menu, enabled | none, yes |
 | `Flyout` | Content | none |
 | | Padding | the theme's `flyout.padding`, else 4 on every side |
@@ -197,9 +258,13 @@ Every number Strata picks for you. Where a theme [metric](../guides/theming.md#m
 | `MenuBar` | Title size | text plus 8 on each side; one line plus 6 |
 | `Expander` | Header | one line plus 6 tall |
 | | Expanded | no |
+| | Header component | none: the title |
 | `SplitPane` | Divider | 4 thick |
 | | Position | 0.5 |
 | | Minimum side when dragging | 20 |
+| | Resize policy | `PROPORTIONAL` |
+| | Collapsible sides, collapsed | neither, none |
+| | Key step | `SplitPane.KEY_STEP`, 10 units; 1 with Shift |
 | `NavigationView` | Display mode | `AUTO`: `EXPANDED` from 400 units wide, `COMPACT` from 240, `MINIMAL` below |
 | | Pane width | 120 |
 | | Column of icons | an item's height plus the pane padding wide, 23 with a 9-unit line |
@@ -215,10 +280,13 @@ Every number Strata picks for you. Where a theme [metric](../guides/theming.md#m
 | | Focusable | yes, one tab stop |
 | `NavigationItem` | Enabled, selectable, expanded | yes, yes, no |
 | | Icon, badge, page, children, tooltip | none, 0, none, none, none |
+| | Icon size | 16 by 16 |
 | `ScrollBar` | Orientation | `VERTICAL` |
 | | Desired size | 6 by 100, or 100 by 6 across; 2 thick when slim |
 | | Range, visible amount, value | 0 to 0, 0, 0: nothing to scroll |
 | | Scroll rate | 10 a notch or arrow key |
+| | Arrows | hidden; shown, they are as long as the bar is thick and repeat while held |
+| | Held track | pages again after 400 ms, then every 33 ms, until the thumb reaches the pointer |
 | | Page | the visible amount less one scroll rate, at least one rate |
 | | Thumb | at least 32 long (16 when slim), at most the track less 8 |
 | | Focusable | no |
@@ -226,12 +294,18 @@ Every number Strata picks for you. Where a theme [metric](../guides/theming.md#m
 | `GridView` | Columns, cell size, spacing | 9, 18, 0 |
 | | Content inset | the theme's `grid.cell.padding`, else 1 |
 | | Selectable | no |
-| | Activation | a left double click |
+| | Activation | a left double click, or Enter or Space on the cursor cell |
+| | Selection mode | `SINGLE` |
+| | Scroll Y | 0; with a limited height the grid builds only the rows in view and draws its own bar |
+| | Focusable | yes, one tab stop, with the cursor on the selected cell or the first |
+| | Cell editor | none |
 | `ColorPicker` | Color | `0xFFFFFFFF`, opaque white |
 | | Alpha strip | hidden |
 | | Square, strip width, spacing | 96 square, 10, 4 |
 | | Checkerboard cells | 4, white and `0xFFC8C8C8` |
 | | Cursor | `CROSSHAIR`, and `TEXT` over the hex field |
+| | Focusable | yes, a tab stop before the hex field |
+| | Key steps | 1 percent of saturation and brightness, 1 degree of hue; 10 with Shift |
 | `CalendarView` | Date | none |
 | | Month in view | today's |
 | | Zoom | `MONTH` |
@@ -249,6 +323,7 @@ Every number Strata picks for you. Where a theme [metric](../guides/theming.md#m
 | | Button | 12 wide |
 | | Width | the widest text the parts can show, or the placeholder if wider, plus the padding and the button |
 | | Range, filter, first day of the week | none, every day, the language's |
+| | Limits | 1 January 0001 to 31 December 9999; dates and range ends outside move to the nearer limit |
 | | Clock format, seconds, minute step | the language's, hidden, 1 |
 | | Default time (`DateTimePicker`) | midnight |
 | | Time columns | rows a line plus 4 tall, at most 7 showing |
@@ -264,6 +339,12 @@ Every number Strata picks for you. Where a theme [metric](../guides/theming.md#m
 | Drag threshold | more than 4 units on either axis |
 | Synthesized key repeat delay | 400 ms |
 | Synthesized key repeat interval | 33 ms |
+| Hold repeat of buttons and tracks | 400 ms, then every 33 ms, by the same timing |
+| Long press | 500 ms of a first touch held within the drag threshold opens the context menu |
+| Two-finger scroll | one `PRECISE` notch for each 10 units the midpoint of the two touches moves |
+| Drag image | 8 units right of and below the pointer |
+| Edge scrolling during a drag | within 16 units of a viewport's edge, by a line times how deep into the zone the pointer is (a scroll panel's scroll rate, a list's row step), from an eighth of a line to a whole one, every 16 ms |
+| Transfers a drag allows | `MOVE` and `COPY` from lists and text boxes, `COPY` only from a read-only box |
 | Keys the host repeats itself | Left, Right, Up, Down, Backspace, Delete, Home, End, Page Up, Page Down |
 | Tooltip delay | the adapter's, else the theme's `tooltip.delay`, else 500 ms (`Tooltip.DEFAULT_DELAY_MILLIS`); none when moving from one tooltip to another |
 | Tooltip position | the theme's `tooltip.offset.x` and `tooltip.offset.y`, else 12 right of and 12 above the pointer floored to a whole unit, flipped left at the right edge, kept inside the host; just below the component when the theme's `tooltip.below` is on, with `tooltip.below.overlap`, else 3, and `tooltip.below.gap`, else 5 |
@@ -275,6 +356,104 @@ Every number Strata picks for you. Where a theme [metric](../guides/theming.md#m
 | Tab widths | equal; whole units when the room is whole, the spare units one each to the first tabs |
 
 The host synthesizes repeats only for engines whose platform reports `sendsKeyRepeat == false`. Swing sends its own.
+
+## Threading and frames
+
+| Setting | Value |
+|---|---|
+| UI thread of a platform with no executor | tasks run at the start of the next flush, layout or render of any host of the platform |
+| UI thread of a platform with no check | the first thread that drives a host, for good |
+| A task that throws | logged as an error; the next one runs. `submit` fails its future instead. |
+| `execute` on the UI thread | queues the task; it runs after the current dispatch |
+| Cause frame around a task | none, so what it changes reports `Origin.CODE` unless it pushes a frame |
+| Opening a screen from another thread | a handle at once; its calls wait for the screen, and `factory()` throws until it has opened |
+| A host needs a frame | after input, a layout or binding change, a task handed over, a report, an overlay opening or closing, a theme, size or density change, `repaint()` and every running animation |
+| Frame requester | called when a host turns from clean to dirty, possibly on any thread, and not again before the next render |
+| Sliding caption, animation, anything else that moves continuously | asks for its next frame 16 ms later (`FrameRequests.CONTINUOUS_MILLIS`) |
+| Caret, busy indicator, indeterminate progress bar | ask for their next change as they paint |
+| Calendar's today | read again a minute after the last reading |
+
+## Animation
+
+| Setting | Value |
+|---|---|
+| Built-in motion | off: `toggle.animation`, `expander.animation`, `nav.animation`, `scroll.smooth`, `toast.fade` and `progress.animation` are 0 milliseconds |
+| `Easing.LINEAR` | the identity |
+| `Easing.EASE_IN` | cubic Bezier with control points (0.42, 0) and (1, 1) |
+| `Easing.EASE_OUT` | cubic Bezier with control points (0, 0) and (0.58, 1) |
+| `Easing.EASE_IN_OUT` | cubic Bezier with control points (0.42, 0) and (0.58, 1) |
+| Easing of built-in motion | `EASE_OUT`; a toast's fade out uses `EASE_IN` |
+| Next step of an animation | 16 ms after each step |
+| An animation of 0 milliseconds | one step on the next frame |
+| Cause of a step | the `Animation`, with `Origin.CODE`, so requests do not fire |
+| Component opacity | 1 |
+| Animations when a screen closes | stop where they are |
+
+## Drawing
+
+| Setting | Value |
+|---|---|
+| Density, `Environment.pixelsPerUnit()` | 1 until the adapter calls `setPixelsPerUnit`; the painter multiplies it by every `scaled` in progress |
+| `Stroke.of(width)` | butt caps and miter joins |
+| Radius of a rounded rectangle, a round clip or a shadow | limited to half the shorter side; below 0 counts as 0 |
+| Fill rule of a shape | nonzero |
+| Smoothing | on where the engine can; `smoothed(false, ...)` asks for hard edges |
+| Rounded paint without a radius | a solid color |
+| `PixelBuffer` | transparent black, version 0, at most 268,435,456 pixels |
+| Shapes on an engine that draws none | rows one device pixel high (`1 / pixelsPerUnit`), scanned in at most 2048 rows at a time, from fills that merge with the row above when they match; gradients at an angle in at most 1024 columns; shadows in up to 6 rings; miter joins as bevels; no anti-aliasing; round clips square |
+| `Capabilities.drawsShapes`, `shapesRightToLeft` | false unless the constructor says so; the two- and three-argument constructors give false for both |
+| `Canvas.pushOpacity`, `popOpacity` | do nothing, so part-opaque components draw opaque |
+| `Canvas.pushRoundClip` | `pushClip` |
+| `Canvas.pixels` | the unknown visual's placeholder |
+| `TextMetrics.ascent` | 0.8 of the line height |
+| Cursor kinds a canvas shows | the eight older kinds (`showsCursor`); a kind it lacks falls back: the diagonals to `RESIZE_ALL`, `GRAB` and `GRABBING` to `HAND`, `NO_DROP` to `NOT_ALLOWED`, the others to `ARROW` |
+| Input device of a form with no `InputContext` | `MOUSE` for pointer input, `KEYBOARD` for keys; pointer 0, pressure 1 |
+
+## Screens
+
+| Setting | Value |
+|---|---|
+| `Screen.title()` | empty text |
+| `Screen.closeRequested` | true: the screen agrees |
+| `ScreenHost.title()` | empty with no screen; the screen's title, or what `setTitle` set, while it is open |
+| `ScreenHost.requestClose()` | true with no screen open |
+| `ScreenHost.preferredSize`, `ScreenStack.preferredSize` | `Size.ZERO` with no screen |
+| Escape closing a screen | not in core: an adapter whose engine does it calls `requestClose()` |
+
+## Validation, converters and text editing
+
+| Setting | Value |
+|---|---|
+| Validation of a control | `Validation.VALID`, with no validator |
+| Outline of an error, of a warning | one unit inside the bounds, in the theme's `validation.error`, else solid `0xFFE04848`, and `validation.warning`, else solid `0xFFE0A030` |
+| Number converters | written in the locale's digits without grouping; read with grouping allowed, spaces around the number ignored; rounded half up; `decimals` from 0 to 15 |
+| Edit history | 100 edits per field; 0 keeps none |
+| Typing merges into the entry before | while less than 1000 ms passed and no whitespace closed it |
+| `setText`, from code or a binding | clears the history |
+| Accepts Tab (text area) | no |
+| Text alignment (text box, password box, text area, spinner) | `LEFT`; `STRETCH` counts as `LEFT` |
+| Field text | grapheme clusters stay whole in moves, deletes, wrapping, ellipsis and `maxLength`, which counts code points |
+
+## Internationalization
+
+| Setting | Value |
+|---|---|
+| Flow direction | the parent's; the top of a screen follows `FlowDirection.of` the translator's locale, worked out again when the language changes |
+| Plural categories | the CLDR cardinal rules of the translator's locale for whole numbers; a language Strata has no rule for uses English's |
+| Plural text | `key.<category>`, else `key.other`, else `key.other` shown as itself with one warning |
+| Numbers a spinner writes | in the locale's digits, decimal separator and minus sign, without grouping |
+| Numbers a spinner reads | ASCII and the locale's digits, the locale's separator or a period, the locale's minus sign or a hyphen |
+
+## The test kit
+
+| Setting | Value |
+|---|---|
+| `TesterOptions.DEFAULT` | 800 by 600 units, `Themes.flat()`, `Translator.NONE`, and the wall clock at noon UTC on 15 January 2026 |
+| Text | 6 units per code point, 7 in a monospaced style, 9 per line |
+| Clock | stands still until `advance` |
+| Key repeat | none: the platform reports that the engine sends its own |
+| Pointer modifiers | none, unless `press` names some |
+| `settle()` | gives up after a minute of animation |
 
 ## Binding
 
@@ -302,16 +481,21 @@ The host synthesizes repeats only for engines whose platform reports `sendsKeyRe
 
 | Setting | Value |
 |---|---|
-| `StrataPanel` preferred size | 960 by 600 pixels |
+| `StrataPanel` preferred size | what the top screen asks for, at the panel's scale plus the insets; 960 by 600 pixels while no screen is open; a size set with `setPreferredSize` wins |
 | `StrataPanel` background | `0xFF1E1F22` |
-| `StrataPanel` repaint rate | about 60 per second (every 16 ms) |
+| `StrataPanel` repainting | when its screens ask for a frame, and at the next timed change through a one-shot timer, so an idle panel with a blinking caret paints twice a second and one with nothing timed does not paint |
 | Swing missing sprite | solid magenta |
 | Swing visual from another adapter | solid magenta |
 | Swing sprite path | `assets/<namespace>/sprites/<path>.png` on the adapter's class loader |
 | Swing theme file path | `assets/<namespace>/themes/<path>.json` on the class path |
 | Swing default theme | `strata:flat` |
+| Swing UI thread | the event dispatch thread |
+| Swing density | the panel's scale times the display's scale, followed to another display; denser sprites are `@2x.png` from 2 device pixels per unit and `@1.5x.png` from 1.5, falling back to the plain image |
+| Swing cursors | native for the arrow, text, hand, crosshair, resize kinds and wait; drawn in code for not allowed, progress, grab, grabbing, copy, no drop and help, which do not exist headless and fall back there |
+| Swing file dialogs | AWT's file dialog, and a file chooser for folders off macOS; none headless |
 | Swing translations | none: Strata's keys in English, other keys as themselves |
-| `SwingPlatform` capabilities | sends key repeats, has a monospaced font, stores no slicing with images |
-| `SwingPlatform` conventions | `Conventions.DEFAULT`: controls act on the click |
+| `SwingPlatform` capabilities | sends key repeats, has a monospaced font, stores no slicing with images, draws shapes, and shapes right to left text |
+| `SwingPlatform` conventions | controls act on the click, mnemonics are on, and the shortcut modifier is Command where the menu shortcut mask is Meta (macOS) and Control elsewhere |
+| `Conventions.DEFAULT` | controls act on release, the shortcut modifier is Control, mnemonics are on |
 | `BitmapFont` tinted sheets kept | 256 colors |
 | `SwingSnapshot` text and sprites | `SwingTextMetrics.defaults()`, images from the adapter's class loader, tooltips with no delay |

@@ -16,8 +16,61 @@ Strata's built-in controls show these keys through [translated text](../guides/t
 | `strata.datetime.placeholder` | Pick a date and time | An empty date and time picker |
 | `strata.calendar.title` | `%1$s %2$s` | The calendar's month view title: the month name, then the year. A language can put the year first with `%2$s %1$s`. |
 | `strata.calendar.decade` | `%1$s - %2$s` | The calendar's decade view title: the first and last year of the decade |
+| `strata.validation.integer` | Enter a whole number | The message of a field bound through `Converters.integer()` that holds text that is not a whole number |
+| `strata.validation.integer_range` | `Enter a whole number from %1$s to %2$s` | The same for `Converters.integer(min, max)`, with the ends formatted in the translator's locale |
+| `strata.validation.decimal` | Enter a number | The message of a field bound through `Converters.decimal(decimals)` that holds text that is not a number |
+| `strata.validation.decimal_range` | `Enter a number from %1$s to %2$s` | The same for `Converters.decimal(min, max, decimals)` |
+| `strata.edit.undo` | Undo | The default context menu of text boxes, text areas and password boxes |
+| `strata.edit.redo` | Redo | The same, except in a password box |
+| `strata.edit.cut` | Cut | The same, except in a password box |
+| `strata.edit.copy` | Copy | The same, except in a password box |
+| `strata.edit.paste` | Paste | The same |
+| `strata.edit.delete` | Delete | The same |
+| `strata.edit.select_all` | Select all | The same |
 
 `MessageBox.setButtonText` replaces a button's text with your own.
+
+## Key names
+
+`ComponentFactory.keyText(KeyStroke)` names a key stroke for a hint, and a menu item whose command has a stroke and no hint text draws it that way. Modifiers come first, in the order Control, Alt, Shift, Super, each followed by the separator. Strata has English for every key, so an adapter's translator can replace any of them, such as `strata.modifier.super` with the Command symbol.
+
+| Key | English | Names |
+|---|---|---|
+| `strata.modifier.control` | Ctrl | The Control modifier |
+| `strata.modifier.alt` | Alt | The Alt modifier |
+| `strata.modifier.shift` | Shift | The Shift modifier |
+| `strata.modifier.super` | Super | The Super modifier |
+| `strata.modifier.separator` | + | What goes between the parts of a stroke |
+| `strata.key.keypad` | `Num %1$s` | A keypad key, with the key's own name |
+| `strata.key.unknown` | ? | A key Strata has no name for |
+| `strata.key.space` | Space | Space |
+| `strata.key.escape` | Esc | Escape |
+| `strata.key.enter` | Enter | Enter |
+| `strata.key.tab` | Tab | Tab |
+| `strata.key.backspace` | Backspace | Backspace |
+| `strata.key.insert` | Ins | Insert |
+| `strata.key.delete` | Del | Delete |
+| `strata.key.left`, `.right`, `.up`, `.down` | Left, Right, Up, Down | The arrow keys |
+| `strata.key.page_up` | PgUp | Page Up |
+| `strata.key.page_down` | PgDn | Page Down |
+| `strata.key.home` | Home | Home |
+| `strata.key.end` | End | End |
+| `strata.key.caps_lock` | Caps Lock | Caps Lock |
+| `strata.key.num_lock` | Num Lock | Num Lock |
+| `strata.key.scroll_lock` | Scroll Lock | Scroll Lock |
+| `strata.key.print_screen` | PrtSc | Print Screen |
+| `strata.key.pause` | Pause | Pause |
+| `strata.key.left_shift`, `.right_shift` | Shift | The Shift keys |
+| `strata.key.left_control`, `.right_control` | Ctrl | The Control keys |
+| `strata.key.left_alt`, `.right_alt` | Alt | The Alt keys |
+| `strata.key.left_super`, `.right_super` | Super | The Super keys |
+| `strata.key.menu` | Menu | The Menu key |
+
+Letters, digits, F1 to F12 and the punctuation keys are named by what they show on a US keyboard and have no key, and a keypad key is `strata.key.keypad` around the name of the key it stands for, such as "Num 5" or "Num +". Any other key is `strata.key.` followed by its `Key` constant in lower case.
+
+## Plurals
+
+`Text.plural(key, count, args)` asks the translator for `key.<category>`, where the category is `zero`, `one`, `two`, `few`, `many` or `other` for the translator's language and the count, and falls back to `key.other`. These keys belong to your project, so Strata has no English for them. A language file lists the forms its language uses and always `other`.
 
 ## Dates and times
 
