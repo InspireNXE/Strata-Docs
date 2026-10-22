@@ -36,5 +36,11 @@ public final class MonospaceTextMetrics implements TextMetrics {
     public float lineHeight(final TextStyle style) {
         return 9f;
     }
+
+    @Override
+    public float ascent(final TextStyle style) {
+        // This font puts its baseline 7 units below the top of a line. Panels line text up by it.
+        return 7f;
+    }
 }
 // --8<-- [end:metrics]

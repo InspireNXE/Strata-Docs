@@ -187,7 +187,7 @@ Open it from whatever triggers your UI, such as a key mapping, a command or a pa
 Strata.screens().open(new SettingsScreen());
 ```
 
-`Strata.screens().open` may be called from any thread. Off the render thread, the screen opens on the render thread's next task. The adapter shows it in a new `StrataScreen`, a vanilla `Screen` titled with the screen's `title()`, which vanilla uses for narration. The screen opens in the vanilla theme, and input Strata does not use goes on to vanilla, so Escape still closes it.
+`Strata.screens().open` may be called from any thread. Off the client thread, the screen opens on the client thread's next task. The adapter shows it in a new `StrataScreen`, a vanilla `Screen` titled with the screen's `title()`, which vanilla uses for narration and which follows `handle.setTitle`. The screen opens in the vanilla theme, and input Strata does not use goes on to vanilla, so Escape closes it once the screen's `closeRequested` agrees. [Screens](screens.md) covers closing and titles.
 
 Strata's `Screen` and `Component` share their simple names with vanilla's `Screen` and `Component`. Keep Strata screens in classes of their own, or write one of the two with its full name where both are needed.
 

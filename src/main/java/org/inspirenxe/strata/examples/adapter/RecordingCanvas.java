@@ -33,19 +33,23 @@ import java.util.List;
  * A canvas for an imaginary engine that takes a list of draw commands each frame. It keeps its own transform
  * and clip stacks, since the commands use absolute coordinates.
  */
-public final class RecordingCanvas implements Canvas {
+public class RecordingCanvas implements Canvas {
     private final List<String> commands = new ArrayList<>();
     private final Deque<float[]> transforms = new ArrayDeque<>();
     private final Deque<Rect> clips = new ArrayDeque<>();
+    private final Deque<Float> opacities = new ArrayDeque<>();
     private float dx;
     private float dy;
     private float scale = 1f;
+    private float opacity = 1f;
     private CursorKind cursor = CursorKind.ARROW;
 
     /** Starts a frame. A frame without a cursor request shows the default cursor. */
     public void begin() {
         this.commands.clear();
         this.cursor = CursorKind.ARROW;
+        this.opacities.clear();
+        this.opacity = 1f;
     }
 
     /** Returns this frame's commands, for the engine to draw in order. */
@@ -61,14 +65,14 @@ public final class RecordingCanvas implements Canvas {
     @Override
     public void fill(final Rect rect, final int argb) {
         if ((argb >>> 24) != 0) {
-            this.commands.add("fill " + this.place(rect) + " " + Integer.toHexString(argb));
+            this.commands.add("fill " + this.place(rect) + " " + Integer.toHexString(this.faded(argb)));
         }
     }
 
     @Override
     public void fillGradient(final Rect rect, final int topArgb, final int bottomArgb) {
-        this.commands.add("gradient " + this.place(rect) + " " + Integer.toHexString(topArgb) + " "
-                + Integer.toHexString(bottomArgb));
+        this.commands.add("gradient " + this.place(rect) + " " + Integer.toHexString(this.faded(topArgb)) + " "
+                + Integer.toHexString(this.faded(bottomArgb)));
     }
 
     @Override
@@ -124,6 +128,25 @@ public final class RecordingCanvas implements Canvas {
     }
 
     @Override
+    public void pushOpacity(final float factor) {
+        // Factors multiply when nested. This engine fades by scaling the alpha of the colors it is given.
+        this.opacities.push(this.opacity);
+        this.opacity *= factor;
+    }
+
+    @Override
+    public void popOpacity() {
+        this.opacity = this.opacities.pop();
+    }
+
+    @Override
+    public boolean showsCursor(final CursorKind cursor) {
+        // The default accepts the original eight kinds. This engine also has a busy cursor; the host asks for the
+        // fallback of every kind this returns false for.
+        return cursor == CursorKind.WAIT || Canvas.super.showsCursor(cursor);
+    }
+
+    @Override
     public void visual(final Visual visual, final Rect rect, final int tint) {
         // This engine knows no visuals of its own, so every one gets the placeholder
         this.commands.add("placeholder " + this.place(rect));
@@ -139,7 +162,33 @@ public final class RecordingCanvas implements Canvas {
         this.cursor = cursor;
     }
 
-    private Rect place(final Rect rect) {
+    /** Adds a command to this frame's list. */
+    protected final void record(final String command) {
+        this.commands.add(command);
+    }
+
+    /** Returns a color with the current opacity multiplied into its alpha. */
+    protected final int faded(final int argb) {
+        final int alpha = Math.round((argb >>> 24) * this.opacity);
+        return (alpha << 24) | (argb & 0xFFFFFF);
+    }
+
+    /** Returns the horizontal position in the engine's pixels. */
+    protected final float placeX(final float x) {
+        return x * this.scale + this.dx;
+    }
+
+    /** Returns the vertical position in the engine's pixels. */
+    protected final float placeY(final float y) {
+        return y * this.scale + this.dy;
+    }
+
+    /** Returns the current scale, which sizes in UI units are multiplied by. */
+    protected final float currentScale() {
+        return this.scale;
+    }
+
+    protected final Rect place(final Rect rect) {
         return new Rect(rect.x() * this.scale + this.dx, rect.y() * this.scale + this.dy,
                 rect.width() * this.scale, rect.height() * this.scale);
     }

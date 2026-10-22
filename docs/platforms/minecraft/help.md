@@ -44,9 +44,10 @@ Not yet. Both directions are planned as hosting adapters, without mixins. See [N
 | The log says "Strata's core answered with another screen controller" | A second copy of `strata-core` is loaded, usually bundled in another mod. Keep exactly one, the one in the Strata jar. |
 | `IllegalStateException: No screen controller is set` | `Strata.screens()` ran before Strata's entry point did, such as in a mod constructed before Strata. Declare the dependency with `ordering = "AFTER"` on NeoForge and Forge or `"load-order": "after"` on SpongeVanilla, or open screens later, from a key mapping, a command or an event. |
 | `IllegalStateException: Screens cannot open before the game has started` | A screen was opened before the game client existed. Open screens from something that happens once the game runs. |
-| Escape closes the screen while typing | Built-in controls pass Escape on to vanilla, which closes the screen. Strata keeps Escape only when it closes an open popup, menu, dialog or closable window, or a text box's suggestion list. To keep the screen open, consume Escape in a handler, or subclass `StrataScreen` and override vanilla's `shouldCloseOnEsc()`. |
+| Escape closes the screen while typing | Built-in controls pass Escape on to vanilla, which closes the screen once the screen's `closeRequested` agrees. Strata keeps Escape only when it closes an open popup, menu, dialog or closable window, or a text box's suggestion list. To keep the screen open, refuse in `closeRequested`, consume Escape in a handler, or subclass `StrataScreen` and override vanilla's `shouldCloseOnEsc()`. |
 | Typing does nothing in a custom component | Minecraft sends typed characters only while a text field has focus. Override `acceptsTextInput()` to return true, and the adapter turns text input on while the component has focus. See [Input](input.md). |
-| Modifier checks never pass in game | Minecraft sends no modifiers with pointer moves, scrolls or typed characters, so those events report `Modifiers.NONE`. Remember the modifiers from the press that started a drag. |
+| Modifier checks never pass in game | Typed characters report `Modifiers.NONE`, since some layouts type with Control and Alt held. Moves and scrolls carry Shift, Control and Alt but not Super. Button presses and keys carry all four. |
+| A change to a component throws `IllegalStateException` naming a thread | The component is shown and the change ran off the client thread. Hand the work over with `Strata.uiThread().execute(...)`, or set a `State` the screen is bound to. See [Screens](screens.md#threading). |
 | Closing goes back to the game instead of the previous screen | The previous screen was a vanilla screen. A `StrataScreen` returns to the Strata screen it was opened above, or else to the game. Subclass `StrataScreen` and override `onClose()` to return to a vanilla screen. See [Screens](screens.md). |
 | Vanilla widgets in a `StrataScreen` subclass never get clicks | Strata takes every press that hits one of its components, and a root anchored with `FILL` covers the screen. Mixing them is not supported yet. |
 | Text is cut off in game but fine in Swing | Minecraft's font has other widths and measures in whole GUI pixels. Leave slack around text in fixed widths, or let components measure. |
@@ -63,7 +64,7 @@ The adapter compiles against the real 26.3 classes, and its unit tests run again
 | Area | How it is tested |
 |---|---|
 | Input mapping | Every key constant in the real `InputConstants` maps to a distinct Strata key; mouse buttons, modifiers and scroll direction and kind |
-| The canvas | Against a mocked `GuiGraphicsExtractor`: fills, gradients, clips, translations, layers, sprites, nine-slices, text and cursors, and item visuals made from real item stacks |
+| The canvas | Against a mocked `GuiGraphicsExtractor`: fills, gradients, clips, translations, layers, sprites, nine-slices, text, fills in device pixels, opacity, cursors and pixel buffers over fake textures, and item visuals made from real item stacks |
 | Player faces | Against a mocked `GuiGraphicsExtractor`, from skin textures and profile lookups |
 | Formatted text and item tooltips | Styles and `§` codes against real chat components |
 | Translations | Language codes turned into Java locales, with fallbacks for languages the JDK lacks |
@@ -73,6 +74,7 @@ The adapter compiles against the real 26.3 classes, and its unit tests run again
 | Theme files | Pack order, mods' files above the player's packs, reloads and registration, over a mocked resource manager |
 | The vanilla theme | Every key the flat theme sets comes from the vanilla theme's own file, and every required key is set |
 | Opening screens | Screens above screens, closing several at once, the controller and the default theme, with the game mocked and vanilla's screen switching replaced by a stand-in |
+| Closing, titles and drops | Escape, `onClose`, `handle.requestClose()` and `handle.close()` against a screen that refuses and one that agrees, `setTitle` reaching vanilla's title and narration, the density, and files dropped on the window reaching a component |
 | Sponge causes | Strata's frames opening and closing Sponge's, over a stand-in for Sponge's cause stack manager |
 | Loader packaging | The processed mod and plugin metadata and the entry points on each loader, and that the NeoForge and Forge mods start without SpongeAPI on the class path |
 
@@ -83,9 +85,14 @@ Strata screens have run in a Fabric 26.3 client only through a separate test mod
 - HUD layers, through NeoForge's `RegisterGuiLayersEvent` and Fabric's `HudElementRegistry`, are planned.
 - Vanilla widgets inside Strata screens, and Strata components inside vanilla screens. Both are planned as hosting adapters, `MinecraftUi.wrap` and a `StrataElement`, without mixins.
 - Narration of Strata components. Vanilla narrates the screen's title only.
-- Controller and gamepad navigation.
+- Controller and gamepad navigation. The game reports a mouse and a keyboard only, so input reaches Strata without an `InputContext`. A controller mod could send its buttons as keys with `new InputContext(Device.CONTROLLER, 0, 1f)`.
+- File dialogs. `ComponentFactory.fileDialogs()` reports them as not supported and answers every request empty. LWJGL's tinyfd could offer them later, shown off the client thread, since they block.
+- Shapes drawn by the game. Vanilla's GUI renderer draws rectangles, sprites, textures, text and items only, so Strata's core draws lines, rounded rectangles, ovals, arcs, angled gradients and shadows from fills one screen pixel high, with no anti-aliasing, and round clips stay rectangular.
+- Clipboard formats other than text. The game's clipboard is SDL's text clipboard. Other formats of a copy stay inside the screen.
+- Plural rules of the game's own. Vanilla has none, so core's rules for the player's language apply.
+- Grab, grabbing, copy, no-drop and help cursors. SDL has none, so they show their fallbacks.
+- Fading item visuals. The game's item renderer takes no color.
 - Tooltip images, such as a bundle's contents, in item tooltips built with `MinecraftTooltips`.
 - Slots that scroll or move with Strata's layout after the menu's constructor placed them. A `MenuPanel` cannot sit inside a `ScrollPanel`.
 - Client-only slots, such as filter or ghost slots, outside a menu.
 - Changing a `StrataScreen`'s theme after it is made. It takes its theme in the constructor and has no setter, though a `ThemeRef` given there follows resource reloads.
-- A platform shortcut modifier. On macOS, Strata's text box uses Control for its edit shortcuts where vanilla uses Command.

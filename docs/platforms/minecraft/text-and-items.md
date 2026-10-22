@@ -14,7 +14,9 @@ Text draws in the hosting screen's font, which follows the player's resource pac
 | Shadow | Vanilla's text shadow |
 | Monospace | The normal font. Vanilla's default font has no monospaced form, so `Capabilities.monospaceFont` is false and monospaced text is measured and drawn in the default font. Columns of monospaced text do not line up. |
 
-`MinecraftTextMetrics` measures with the font's `width` and `lineHeight`. Widths are whole GUI pixels and include vanilla's extra pixel for bold, and the line height is the font's, 9 for the default font. Color and shadow do not change widths. Text that just fits on Swing may wrap or overflow in game, so let components measure their text and leave room in fixed widths around it. Text positions round to the nearest GUI pixel.
+`MinecraftTextMetrics` measures with the font's `width` and `lineHeight`. Widths are whole GUI pixels and include vanilla's extra pixel for bold, and the line height is the font's, 9 for the default font. Color and shadow do not change widths. The ascent, which panels use to line text up on its baseline with `VerticalAlignment.BASELINE`, is 7: vanilla places every font's glyphs on a baseline 7 below the top of the line (`GlyphProvider.BASELINE`), each glyph by its own ascent, so a resource pack's font keeps the same baseline. Text that just fits on Swing may wrap or overflow in game, so let components measure their text and leave room in fixed widths around it. Text positions round to the nearest GUI pixel.
+
+Minecraft's font draws characters left to right one by one and does not join Arabic letters, so `Capabilities.shapesRightToLeft` is false. Strata's core puts each right-to-left run of a line in display order and mirrors its brackets before drawing, which reads correctly for Hebrew, and Arabic draws with its letters unjoined. Plural forms (`Text.plural`) follow core's rules for the player's language, since vanilla has no plural rules of its own. See [Internationalization](../../guides/internationalization.md).
 
 Keep vanilla's `§` formatting codes out of plain Strata text. Strata does not interpret them and vanilla's text drawing may, so the same string would look different on Swing and in game. Wrap formatted text with `MinecraftText.of`, as the next section shows.
 
@@ -58,6 +60,9 @@ Strata's own button keys, `strata.button.ok`, `strata.button.cancel`, `strata.bu
 - `strata.password.show` and `strata.password.hide`, the tooltips of a password box's eye
 - `strata.date.placeholder`, `strata.time.placeholder` and `strata.datetime.placeholder`
 - `strata.calendar.title` and `strata.calendar.decade`
+- `strata.validation.integer`, `strata.validation.integer_range`, `strata.validation.decimal` and `strata.validation.decimal_range`, the messages of the number converters
+- `strata.edit.undo`, `.redo`, `.cut`, `.copy`, `.paste`, `.delete` and `.select_all`, the items of a text field's context menu
+- `strata.modifier.control`, `.alt`, `.shift`, `.super` and `.separator`, and the `strata.key.*` names, which spell the shortcuts that menus and tooltips show
 
 [Translation keys](../../reference/translation-keys.md) lists every key with its English.
 

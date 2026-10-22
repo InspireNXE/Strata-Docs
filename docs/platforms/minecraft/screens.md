@@ -37,7 +37,26 @@ Where the new screen goes depends on what vanilla shows:
 
 Vanilla draws its usual screen background before `extractRenderState`, so the background shows wherever the Strata tree draws nothing.
 
-A Strata screen that calls `handle.close()` gets vanilla's `onClose()`, the same as pressing Escape. A `StrataScreen` that is shown again after it was removed makes a new host and builds a new tree.
+A `StrataScreen` that is shown again after it was removed makes a new host and builds a new tree.
+
+## Closing
+
+A Strata screen can refuse to close, as the [Screens](../../guides/screens.md) guide describes. On Minecraft the asking happens in `StrataScreen`:
+
+| What closes the screen | Asks `closeRequested` |
+|---|---|
+| Escape that Strata does not use, while `shouldCloseOnEsc()` is true | Yes |
+| `handle.requestClose()`, such as a Cancel button | Yes |
+| Any other call to vanilla's `onClose()` | Yes |
+| The inventory key in a `StrataContainerScreen` | Yes |
+| `handle.close()` | No. It calls `onClose()` at once. |
+| A close the game makes for its own reasons, such as a disconnect, another screen replacing this one, or `removed()` | No |
+
+When the screen refuses, nothing closes and the screen stays as it was, so a screen with unsaved changes can show a message box and call `handle.close()` from its Discard button. A subclass that overrides `onClose()` still asks on Escape. When other code calls its `onClose()`, the asking happens where the override calls `super.onClose()`.
+
+## Titles
+
+The title vanilla shows and narrates, `getTitle()`, is the Strata screen's: its `title()` when it opened, then whatever it sets with `handle.setTitle`. It is read again when the player changes language. A `StrataScreen` constructed with a vanilla title keeps that title until the Strata screen sets another. A `StrataContainerScreen` narrates the menu's title from the server the same way. Minecraft's screens fill the window, so the host's `preferredSize` has no use here.
 
 Minecraft keeps its own screens, so each `StrataScreen` holds exactly one Strata screen. `hidesBackground()` has no effect, and vanilla decides what is drawn behind a screen. Dialogs and other [overlays](../../guides/overlays.md) live inside the screen's host and need no vanilla screen of their own, so the content behind a dialog keeps drawing.
 
@@ -135,8 +154,15 @@ A screen opened through `Strata.screens()` is a plain `StrataScreen` and always 
 
 ## Threading
 
-The adapter runs on Minecraft's client thread, the render thread that runs vanilla's screens. Build and change Strata components only there. From the server thread, a network thread or your own threads, move to it with `Minecraft.getInstance().execute(...)`.
+The adapter runs on Minecraft's client thread, the render thread that runs vanilla's screens, and that is Strata's [UI thread](../../guides/threading.md). Build and change Strata components only there. From the server thread, a network thread or your own threads, hand the work over with `Strata.uiThread().execute(...)`, with `factory.uiThread()` where you hold a factory, or by setting a `State` the screen is bound to, which any thread may do:
 
-`Strata.screens().open` may be called from any thread. On the client thread it shows the screen at once. On any other thread it queues the screen as a task for the client thread, and returns before the screen shows. Use the handle it returns on the client thread, once the screen has shown.
+```java
+// In a network handler: the rows reach the screen on the client thread
+Strata.uiThread().execute(() -> listings.setItems(rows));
+```
 
-Vanilla's `setScreen`, which opens a `StrataScreen` subclass, must run on the client thread.
+Tasks go on the game's own task queue, which the client runs between frames, in the order they were handed over. A task handed over on the client thread also queues, and runs after the current call returns instead of inside it. A change to a shown component from another thread throws an `IllegalStateException` that names the thread.
+
+`Strata.screens().open` may be called from any thread and moves to the client thread itself, as the [Screens](../../guides/screens.md) guide describes. The handle it returns works from the moment the screen shows. Vanilla's `setScreen`, which opens a `StrataScreen` subclass, must run on the client thread.
+
+The game draws every frame, so the adapter renders Strata screens every frame and ignores Strata's frame scheduling (`needsFrame`, `nextFrameNanos` and the frame requester), which adapters that draw on demand use.

@@ -6,11 +6,13 @@ This page covers how Strata-Minecraft draws a screen in game, where sprites come
 
 One UI unit is one GUI pixel: screen pixels divided by the player's GUI scale. A 200-unit panel is 200 GUI pixels wide and grows with the GUI scale setting, as vanilla's widgets do. The host is resized whenever vanilla lays the screen out again, such as when the window is resized. A screen at GUI scale 4 has half as many units across as at GUI scale 2, so use anchors, stretching and weighted grids rather than fixed positions.
 
+The adapter tells Strata the GUI scale as the density, so `Environment.pixelsPerUnit()` and `Painter.pixelsPerUnit()` are 2 at GUI scale 2, and a line `1 / pixelsPerUnit()` units wide is one screen pixel wide. The game asks SDL for a framebuffer of high pixel density, so on a Retina or other scaled display the framebuffer already holds the display's own pixels and the GUI scale counts them. The window's content scale is not multiplied in again. A change of GUI scale or window size lays the screen out again.
+
 `MinecraftCanvas` records Strata's drawing into vanilla's `GuiGraphicsExtractor`, which renders it later in the frame. `StrataScreen` makes the canvas and points it at each frame's graphics, so a mod never touches it.
 
 | Strata draws | On Minecraft |
 |---|---|
-| Fills and gradients | `fill` and `fillGradient`. Each edge of the rectangle moves down to the whole GUI pixel it lies in, as vanilla's integer coordinates would put it, so a rectangle of whole size keeps that size wherever it sits. A fill with alpha 0 draws nothing. |
+| Fills and gradients | `fill` and `fillGradient`. Each edge of the rectangle moves down to the whole GUI pixel it lies in, as vanilla's integer coordinates would put it, so a rectangle of whole size keeps that size wherever it sits. A fill less than one GUI pixel across or down, such as a hairline or a row of a shape, is drawn in screen pixels instead when the GUI scale is above 1, so it neither vanishes nor swells to a whole GUI pixel. A fill with alpha 0 draws nothing. |
 | Sprites | `blitSprite` with the `GUI_TEXTURED` pipeline, from the `minecraft:gui` sprite atlas, with edges moved down to whole pixels as for fills. The paint's tint is passed as vanilla's sprite color. The sprite's `.png.mcmeta` decides whether it stretches, tiles or nine-slices. |
 | Nine-slices | The same as sprites. Vanilla applies the scaling in the sprite's `.png.mcmeta`, and the paint's border is ignored. |
 | Sized nine-slices and tiled sprites | The same as sprites. The platform reports `Capabilities.slicesSprites`, so core hands these paints to the canvas whole instead of drawing them from pieces, and the `.png.mcmeta` decides. |
@@ -18,7 +20,10 @@ One UI unit is one GUI pixel: screen pixels divided by the player's GUI scale. A
 | Clips | Vanilla's scissor stack, which intersects nested clips and follows the pose. The edges move down to whole pixels. |
 | Translations and scales | The pose matrix, pushed and popped |
 | Layers, such as overlays and the tooltip | A new vanilla stratum, so what draws after it covers what drew before |
-| Cursors | `requestCursor` with vanilla's cursor types. Every `CursorKind` has one, `NOT_ALLOWED` included. |
+| Shapes (lines, rounded rectangles, ovals, arcs, gradients at an angle, shadows) | Vanilla's GUI renderer draws only rectangles and sprites, so the platform reports `Capabilities.drawsShapes` as false and Strata's core draws each shape from fills, in rows one screen pixel high, without anti-aliasing. Round clips stay rectangular. |
+| Opacity, such as a fading card or toast | The alpha of every fill, gradient, text color, sprite tint and player face is multiplied by it. Item visuals do not fade: the game's item renderer takes no color, so an item stays opaque until its component stops drawing it. |
+| Cursors | `requestCursor` with vanilla's cursor types for the arrow, I-beam, hand, crosshair, the horizontal, vertical and four-way resize arrows and the "not allowed" sign, and SDL's own system cursors, which vanilla does not name, for the diagonal resize arrows, the busy cursor and the arrow with a busy sign. SDL has no grab, grabbing, copy, no-drop or help cursor, so `showsCursor` answers false for them and the host asks for their fallback: the hand for the grab cursors, the "not allowed" sign for no-drop, and the arrow for the rest. |
+| Pixel buffers (`Image.setPixels`) | A `DynamicTexture` per buffer, drawn with `blit` stretched over the rectangle, sampled nearest so pixel art stays sharp, and tinted. The pixels are copied to the texture again only when the buffer's version moved, after `changed()`. A texture is released once its buffer has gone undrawn for 600 frames or the screen closes. |
 | Item and player face visuals | Vanilla's GUI item rendering, and the face from the player's skin. See [Text and items](text-and-items.md). |
 | Other visuals | A magenta box, `MinecraftCanvas.MISSING_VISUAL_COLOR` (`0xFFFF00FF`) |
 
@@ -129,6 +134,17 @@ Focus shows through the hovered sprites on buttons and toggle switches, whose `b
 
 The theme sets none of the password box's own keys. `passwordbox.mask` falls back to `textbox.text`, so a pack that recolors text boxes recolors the mask with them. The reveal eye falls back to core's drawn eye, in the text box's colors: the placeholder's `0xFF555555`, `0xFFE0E0E0` when hovered or while the text shows, and `0xFF707070` while the user cannot reveal the text. Vanilla 26.3 has no eye among its gui sprites. A pack or a mod that has one can set `passwordbox.reveal`, `passwordbox.reveal.hovered`, `passwordbox.reveal.active` and `passwordbox.reveal.disabled` in a theme file. The theme also sets no `avatar.placeholder` and no `infobar.icon.*` keys.
 
+Looks for the controls and features Strata has gained since the first theme file:
+
+- A toggle button that is on draws the button sprite tinted darker, so it looks pressed in, and the highlighted sprite lightly tinted while hovered (`button.selected`). Vanilla has no toggle button. A default button looks like any other (`button.default` is the normal sprite), since vanilla's screens mark none.
+- Slider ticks are light gray marks over the bottom of the dark track, with darker gray minor ticks (`slider.tick`, `slider.tick.minor`). Vanilla's slider has no ticks.
+- `button.focus` is `none` here, so the keys that fall back to it are set. The split pane's divider and the color picker get the white one-unit ring a focused checkbox has (`splitpane.focus`, `colorpicker.focus`). Vanilla has no keyboard cursor over slots, and a grid draws its focus paint over the whole cell, so the cursor's cell is washed with `0x40FFFFFF` (`grid.focus`), twice the white vanilla lays over a hovered slot.
+- A list's drop line during a drag is white, like vanilla's selection (`list.drop`).
+- An invalid field keeps its vanilla face and draws a one-unit outline inside its edge, red for an error and gold for a warning, the colors of chat formatting (`validation.error`, `validation.warning`). The message shows in the tooltip. Every vanilla widget the fields use has a one-pixel ring at its edge, so the outline takes its place. The theme sets no `textbox.invalid`, `slider.invalid`, `checkbox.invalid` or `combobox.invalid`: a face would replace the focused look as the outline does, and a check box's mark is part of its sprite, so an invalid face would hide it.
+- Table headers are buttons, 20 tall with their titles 6 down (`table.header.height`, `table.header.padding`). A table scrolls sideways with `setHorizontalPolicy(AUTO)`, and a grid taller than its room scrolls with a bar of its own. Both use the `scroll.*` keys, so they show vanilla's scroller. Vanilla's creative inventory draws its own scroller sprite, `container/creative_inventory/scroller`, which a grid screen can set as `scroll.thumb` in a theme override.
+- Motion stays off. `toggle.animation`, `expander.animation`, `nav.animation`, `scroll.smooth`, `toast.fade` and `progress.animation` are 0, since vanilla has no switch, expander or navigation pane, its lists and text fields do not glide, and its progress bars jump. Vanilla's toasts slide in from the right, which `toast.fade` does not model, so they appear at once.
+- The theme leaves these unset on purpose: the invalid faces above; the scroll bar arrows (`scroll.arrow` and its direction forms), since vanilla's scroll bars have none and a bar shown with arrows draws triangles in the scroller's paint; the message box icons (`messagebox.icon.*`), which fall back to `infobar.icon.*`, since vanilla's popups have no icons; the type-ahead pause (`list.typeahead.timeout`), which keeps its default of 1000 milliseconds; and the avatar radius (`avatar.radius`), because avatars sit on the square slot sprite. Rounded color paints work in theme files, drawn with stepped corners, but vanilla's look is all sprites.
+
 Some values copy vanilla's metrics where Strata has a key for them:
 
 - Captions too wide for a button, tab or slider are cut at `button.clip`, `tab.clip` or the slider's padding, and slide back and forth at 500 milliseconds per unit of overflow, each sweep at least 3000 milliseconds.
@@ -154,6 +170,10 @@ Borders and insets with four numbers are in the order left, top, right and botto
 | `button.pressed` | nine-slice `minecraft:widget/button_highlighted`, border 3 |
 | `button.disabled` | nine-slice `minecraft:widget/button_disabled`, border 1 |
 | `button.focus` | `none` |
+| `button.default` | nine-slice `minecraft:widget/button`, border 3 |
+| `button.selected` | nine-slice `minecraft:widget/button`, border 3, tint `0xFFA0A0A0` |
+| `button.selected.hovered` | nine-slice `minecraft:widget/button_highlighted`, border 3, tint `0xFFC0C0C0` |
+| `button.selected.disabled` | nine-slice `minecraft:widget/button_disabled`, border 1 |
 | `checkbox.normal` | sprite `minecraft:widget/checkbox` |
 | `checkbox.hovered` | sprite `minecraft:widget/checkbox` |
 | `checkbox.checked` | sprite `minecraft:widget/checkbox_selected` |
@@ -171,6 +191,8 @@ Borders and insets with four numbers are in the order left, top, right and botto
 | `slider.thumb` | nine-slice `minecraft:widget/slider_handle`, border 2, 2, 2 and 3 |
 | `slider.thumb.hovered` | nine-slice `minecraft:widget/slider_handle_highlighted`, border 2, 2, 2 and 3 |
 | `slider.thumb.disabled` | nine-slice `minecraft:widget/slider_handle`, border 2, 2, 2 and 3 |
+| `slider.tick` | solid `0xFFA0A0A0` |
+| `slider.tick.minor` | solid `0xFF6F6F6F` |
 | `textbox.normal` | nine-slice `minecraft:widget/text_field`, border 1 |
 | `textbox.focused` | nine-slice `minecraft:widget/text_field_highlighted`, border 1 |
 | `textbox.disabled` | nine-slice `minecraft:widget/text_field`, border 1 |
@@ -186,6 +208,7 @@ Borders and insets with four numbers are in the order left, top, right and botto
 | `list.row.selected` | nine-slice `minecraft:widget/text_field_highlighted`, border 1 |
 | `list.row.selected.unfocused` | solid `0xFF000000` |
 | `list.row.ring.unfocused` | solid `0xFF808080` |
+| `list.drop` | solid `0xFFFFFFFF` |
 | `list.edge` | solid `0xBF000000` |
 | `list.edge.outer` | solid `0x33FFFFFF` |
 | `combobox.normal` | nine-slice `minecraft:widget/button`, border 3 |
@@ -194,6 +217,7 @@ Borders and insets with four numbers are in the order left, top, right and botto
 | `combobox.popup` | nine-slice `minecraft:widget/text_field`, border 1 |
 | `window.background` | nine-slice `minecraft:popup/background`, border 6 |
 | `window.title` | `none` |
+| `window.title.inactive` | `none` |
 | `tab.normal` | nine-slice `minecraft:widget/tab`, border 2, 2, 2 and 0 |
 | `tab.hovered` | nine-slice `minecraft:widget/tab_highlighted`, border 2, 2, 2 and 0 |
 | `tab.selected` | nine-slice `minecraft:widget/tab_selected`, border 2, 2, 2 and 0 |
@@ -237,10 +261,12 @@ Borders and insets with four numbers are in the order left, top, right and botto
 | `expander.header.hovered` | nine-slice `minecraft:widget/button_highlighted`, border 3 |
 | `split.divider` | solid `0x33FFFFFF` |
 | `split.divider.hovered` | solid `0x80FFFFFF` |
+| `splitpane.focus` | solid `0xFFFFFFFF` |
 | `grid.cell` | sprite `minecraft:container/slot` |
 | `grid.cell.hovered` | solid `0x20FFFFFF` |
 | `grid.cell.hovered.back` | solid `0x60FFFFFF` |
 | `grid.cell.selected` | solid `0x20FFFFFF` |
+| `grid.focus` | solid `0x40FFFFFF` |
 | `scroll.slim.track` | `none` |
 | `scroll.slim.thumb` | solid `0xFF3333AA` |
 | `scroll.slim.thumb.hovered` | solid `0xFFCCCCCC` |
@@ -252,6 +278,7 @@ Borders and insets with four numbers are in the order left, top, right and botto
 | `colorpicker.marker` | solid `0xFFFFFFFF` |
 | `colorpicker.marker.outline` | solid `0xFF000000` |
 | `colorpicker.disabled` | solid `0xA0000000` |
+| `colorpicker.focus` | solid `0xFFFFFFFF` |
 | `picker.button` | nine-slice `minecraft:widget/button`, border 3 |
 | `picker.button.hovered` | nine-slice `minecraft:widget/button_highlighted`, border 3 |
 | `picker.button.disabled` | nine-slice `minecraft:widget/button_disabled`, border 1 |
@@ -285,6 +312,8 @@ Borders and insets with four numbers are in the order left, top, right and botto
 | `slot.highlight_front` | sprite `minecraft:container/slot_highlight_front` |
 | `tooltip.background` | nine-slice `minecraft:tooltip/background`, border 9 |
 | `tooltip.frame` | nine-slice `minecraft:tooltip/frame`, border 10 |
+| `validation.error` | solid `0xFFFF5555` |
+| `validation.warning` | solid `0xFFFFAA00` |
 
 #### Text styles
 
@@ -368,6 +397,7 @@ Borders and insets with four numbers are in the order left, top, right and botto
 | `grid.cell.highlight` | 1 on every side |
 | `toast.padding` | 18, 7, 12 and 4 |
 | `list.padding` | 0, 2, 0 and 2 |
+| `table.header.padding` | 4, 6, 4 and 5 |
 
 #### Metrics
 
@@ -402,6 +432,13 @@ Borders and insets with four numbers are in the order left, top, right and botto
 | `toast.line.gap` | 3 |
 | `toast.width.minimum` | 190 |
 | `toast.margin` | 0 |
+| `table.header.height` | 20 |
+| `toggle.animation` | 0 |
+| `expander.animation` | 0 |
+| `nav.animation` | 0 |
+| `scroll.smooth` | 0 |
+| `toast.fade` | 0 |
+| `progress.animation` | 0 |
 
 ## Themes from resource packs
 
@@ -427,7 +464,7 @@ The file applies to the theme `<namespace>:<path>`. This one, at `assets/minecra
 }
 ```
 
-A theme file's text entry changes only the fields it names, so `button.text` keeps its shadow. The [theming guide](../../guides/theming.md#theme-files) has the whole file format. The vanilla theme has a base, so a pack file's `parent` is ignored for it: a pack can change its keys and cannot swap the whole theme for another.
+A theme file's text entry changes only the fields it names, so `button.text` keeps its shadow. Metrics may be written as flags and durations: `"tooltip.below": true` and `"tooltip.delay": "0ms"` (or `"0.5s"`) read the same as `1` and `0`. The [theming guide](../../guides/theming.md#theme-files) has the whole file format. The vanilla theme has a base, so a pack file's `parent` is ignored for it: a pack can change its keys and cannot swap the whole theme for another.
 
 A mod can name a theme of its own, such as `ThemeRef.of(ThemeId.of("examplemod", "shop"))`, and ship `assets/examplemod/strata/themes/shop.json` with `"parent": "minecraft:vanilla"` and its own keys. Its screens then follow every pack's changes to the vanilla theme for the keys the file leaves alone. A player's pack can ship the same file too. It goes below the mod's file, as the next section explains, so it can set the keys the mod's file leaves alone and cannot change the ones it sets.
 

@@ -16,6 +16,7 @@
 package org.inspirenxe.strata.examples.swing;
 
 import org.inspirenxe.strata.api.Strata;
+import org.inspirenxe.strata.api.theme.SpriteId;
 import org.inspirenxe.strata.api.theme.Themes;
 import org.inspirenxe.strata.examples.quickstart.SettingsScreen;
 import org.inspirenxe.strata.swing.AwtFont;
@@ -59,8 +60,10 @@ public final class SwingExamples {
             Strata.screens().open(new SettingsScreen());
 
             final JFrame frame = new JFrame("Settings");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setContentPane(panel);
+            // The close button asks the screens first, and the title follows the top screen's
+            panel.manageWindow(frame);
+            // The size comes from what the top screen asks for
             frame.pack();
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
@@ -101,6 +104,43 @@ public final class SwingExamples {
         final StrataPanel panel = new StrataPanel(new SwingPlatform(metrics), Themes.flat(), 2f);
         // --8<-- [end:bitmap]
         return panel;
+    }
+
+    static float zoom(final StrataPanel panel) {
+        // --8<-- [start:zoom]
+        // The user zooms: the screens get the new size in units and the new density, and lay out again
+        panel.setScale(3f);
+        // Device pixels per UI unit: the scale times the display's own scale, 6 on a display that doubles pixels
+        final float density = panel.pixelsPerUnit();
+        // --8<-- [end:zoom]
+        return density;
+    }
+
+    static SpriteSource denseSource(final Path folder) {
+        // --8<-- [start:dense]
+        // Beside art/<namespace>/<path>.png, art/<namespace>/<path>@2x.png holds the same sprite at twice the pixels
+        return new SpriteSource() {
+            @Override
+            public Optional<BufferedImage> load(final SpriteId sprite) {
+                return read(folder.resolve(sprite.namespace()).resolve(sprite.path() + ".png"));
+            }
+
+            @Override
+            public Optional<BufferedImage> loadDense(final SpriteId sprite, final float density) {
+                // Asked at 2 where a unit covers 2 device pixels or more, and at 1.5 from there; empty uses the plain one
+                final String suffix = density == 2f ? "@2x" : "@1.5x";
+                return read(folder.resolve(sprite.namespace()).resolve(sprite.path() + suffix + ".png"));
+            }
+        };
+        // --8<-- [end:dense]
+    }
+
+    private static Optional<BufferedImage> read(final Path file) {
+        try {
+            return Files.isRegularFile(file) ? Optional.ofNullable(ImageIO.read(file.toFile())) : Optional.empty();
+        } catch (final IOException e) {
+            return Optional.empty();
+        }
     }
 
     static void source(final StrataPanel panel) {

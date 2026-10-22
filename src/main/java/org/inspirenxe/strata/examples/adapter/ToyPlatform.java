@@ -17,10 +17,12 @@ package org.inspirenxe.strata.examples.adapter;
 
 // --8<-- [start:platform]
 import org.inspirenxe.strata.api.geometry.Rect;
+import org.inspirenxe.strata.api.input.Modifier;
 import org.inspirenxe.strata.api.text.TextMetrics;
 import org.inspirenxe.strata.spi.Capabilities;
 import org.inspirenxe.strata.spi.Clipboard;
 import org.inspirenxe.strata.spi.Clock;
+import org.inspirenxe.strata.spi.Conventions;
 import org.inspirenxe.strata.spi.Platform;
 import org.inspirenxe.strata.spi.TextInputSink;
 import org.inspirenxe.strata.spi.ThemeSource;
@@ -83,6 +85,12 @@ public final class ToyPlatform implements Platform {
     @Override
     public Capabilities capabilities() {
         return CAPABILITIES;
+    }
+
+    @Override
+    public Conventions conventions() {
+        // Buttons act on release, shortcuts use Control and the engine binds nothing to Alt, so mnemonics stay on
+        return new Conventions(false, Modifier.CONTROL, true);
     }
 
     @Override

@@ -14,7 +14,7 @@ The Swing adapter draws Strata with Java2D and takes input from AWT. It is the f
 |---|---|
 | `SwingPlatform` | Text metrics, clipboard, clock and [theme source](#themes). Its text metrics also draw the text. |
 | `Theme` | The theme for every screen pushed |
-| `scale` | Pixels per UI unit, which must be positive |
+| `scale` | Pixels per UI unit, which must be positive. `setScale` changes it later; see [Scale and density](#scale-and-density). |
 
 `panel.screens()` is the [screen stack](../guides/screens.md#stacks-of-screens): push or open to show a screen, pop to close the top one. Only the top screen gets input. The stack is also the panel's `ScreenController`.
 
@@ -28,20 +28,68 @@ themes.setDefaultTheme(ThemeId.of("myapp", "dark"));
 StrataPanel panel = new StrataPanel(new SwingPlatform(SwingTextMetrics.defaults(), themes), Themes.flat(), 2f);
 ```
 
-Use the panel on the Swing event dispatch thread only, the same as any Swing component.
+The code that opens screens and works with the panel runs on the Swing event dispatch thread, as for any Swing component. The platform's [UI thread](../guides/threading.md) is the event thread: `SwingPlatform` supplies `SwingUtilities::invokeLater` as the executor and `SwingUtilities::isEventDispatchThread` as the test. Work from other threads goes through `Strata.uiThread()` or the factory's `uiThread()`, and a state set from any thread reaches its controls on the event thread. A screen opened from another thread with `Strata.screens().open` is handed to the event thread, and the call returns a handle at once. `SwingSnapshot` renders on the calling thread, since it runs no panel.
+
+## Windows
+
+`manageWindow` gives the panel a window to run:
+
+| Window | What the panel does |
+|---|---|
+| Close button | Asks the screens with `requestClose` and disposes the window only if every screen agrees, so a screen with unsaved changes can refuse and ask. A `JFrame` or `JDialog` is set to do nothing on close, since the panel decides. |
+| Title | A `Frame` or `Dialog` shows the top screen's title, translated, again whenever it changes (`Screen.title()` and `ScreenHandle.setTitle`). While no screen is open or the top one has no title, the window keeps the title it had when it was given. |
+| Size | `pack()` fits the top screen: the panel's preferred size is what the screen's content asks for, in pixels at the panel's scale plus the insets, and 960 by 600 while no screen is open. A size set with `setPreferredSize` wins. The panel revalidates when the top screen changes, so a later `pack()` sees the new size. |
+
+An application that runs its own window listener does the same by hand: it sets the window to do nothing on close, calls `screens().requestClose()` when the window is closing, and disposes the window only when that returns true.
+
+Escape that no component uses does nothing in the panel. Handle it on the root and call `handle.close()`, or `handle.requestClose()` to let the screen refuse.
 
 ## How Swing maps onto Strata
 
 - One UI unit is `scale` pixels. Drawing is scaled up and pointer positions scaled down by the same factor, and the screens are resized whenever the panel is.
-- The panel repaints about 60 times a second while it is shown, and stops when it is removed from its window.
-- Its preferred size is 960 by 600 pixels, and its own background is `0xFF1E1F22` where no screen draws.
+- The panel repaints when Strata asks for a frame, and at the next timed change, such as a caret's blink. It sets itself as the stack's frame requester, which calls `repaint()` from whatever thread changed something, and after each paint it waits for `nextFrameNanos` with a one-shot timer. An idle panel with a blinking caret paints twice a second, and one with nothing timed does not paint. A timer stops when the panel is removed from its window. See [Rendering on demand](writing-an-adapter.md#rendering-on-demand).
+- Its own background is `0xFF1E1F22` where no screen draws.
 - It takes keyboard focus when clicked, and turns off Swing's own Tab handling so Strata's tab order applies.
 - AWT reports held keys as repeated presses. The panel turns them into `REPEAT`s, and forgets held keys when it loses focus.
 - Characters come from AWT's key-typed events, with surrogate pairs joined into one code point and control characters dropped.
 - While a password box, or any field that asks for `TextInputKind.SECRET` text, has focus, the panel turns input methods off on itself, as Swing's own password field does, so no composition window shows what is typed. They come back on for the next ordinary field or when focus leaves the fields.
-- Shift plus the vertical wheel scrolls horizontally. A whole wheel rotation counts as `WHEEL`, a fractional one as `PRECISE`.
+- Shift plus the vertical wheel scrolls horizontally. A whole wheel rotation counts as `WHEEL`, a fractional one as `PRECISE`, which a spinner adds up.
+- Shortcuts use Command where the toolkit's menu shortcut key is Meta, as on macOS, and Control elsewhere. Meta is sent as `Modifier.SUPER`. In a headless JVM the operating system's name decides. Buttons act on release and mnemonics are on, so Alt with an underlined letter acts and Alt or F10 alone enters a menu bar. The context menu key is `Key.MENU`, and Shift+F10 opens a context menu too.
 - The panel consumes Alt and F10 after Strata sees them, so they do not put the window into its native menu mode, which on Windows would swallow wheel input until the key is pressed again.
-- Cursors map to AWT's predefined cursors. AWT has no "not allowed" cursor, so `NOT_ALLOWED` shows the default arrow.
+- AWT reports no touch or pen input, so every pointer is a mouse.
+
+## Scale and density
+
+One UI unit is `scale` pixels, and `setScale` changes it while the panel is open, such as when the user zooms. The screens get the panel's size in the new units and the new density, lay out again and repaint, and the panel revalidates since its preferred size changes with the scale.
+
+The density, the device pixels one unit covers, is the scale times the display's own scale, which Java2D applies on top of what the panel draws. `pixelsPerUnit()` returns it, and it is what components read from `Environment.pixelsPerUnit()` and what sprites choose their image by. The panel passes it to the screens when it is first shown, when `setScale` runs, and when it moves to a display with another scale.
+
+```java
+--8<-- "swing/SwingExamples.java:zoom"
+```
+
+Where one unit covers 2 device pixels or more, the canvas draws a sprite's denser image, and from 1.5 its 1.5 image, falling back to the plain image where a denser one is missing. The class path source finds them beside the plain file, with `@2x` or `@1.5x` before the extension:
+
+```text
+assets/examplemod/sprites/icon/star.png
+assets/examplemod/sprites/icon/star@2x.png
+```
+
+A denser image draws at the same size in UI units, so the sprite only gets sharper, and a sized nine-slice keeps the size of its border in units. A `SpriteSource` of your own supplies denser images by overriding `loadDense`, which is asked with 2 or 1.5 and answers empty where it has none. `SwingSprites.clear()` drops the loaded images, and the panel's density changes do not need it.
+
+```java
+--8<-- "swing/SwingExamples.java:dense"
+```
+
+## Drawing
+
+`SwingCanvas` draws every shape call with Java2D, so `SwingPlatform` reports `Capabilities.drawsShapes` and core never falls back to stepped rows. Lines, rounded rectangles, ovals, arcs, shapes, strokes with caps and joins, gradients at an angle, soft shadows and round clips are drawn by Java2D, anti-aliased unless a push of `smoothing(false)` turns it off. Strokes use pure stroke control, so they land where the contract puts them. A shadow is a rounded rectangle blurred three times with a box blur, and the 64 sizes and colors drawn last are cached. Round clips are hard-edged. Opacity is an `AlphaComposite`, so a fade covers fills, gradients, shapes, sprites, nine-slices, text, visuals and pixel buffers alike.
+
+A pixel buffer is drawn from an image that shares its array, so a new version needs no copy. It scales with nearest-neighbor sampling so pixel art stays sharp, and a tinted copy is made again when the version moves.
+
+## Cursors
+
+Every `CursorKind` shows. `ARROW`, `TEXT`, `HAND`, `CROSSHAIR`, the resize kinds and `WAIT` are AWT's own cursors, with the two diagonals as the north-west and north-east resize cursors. `NOT_ALLOWED`, `PROGRESS`, `GRAB`, `GRABBING`, `COPY`, `NO_DROP` and `HELP` are custom cursors the adapter draws in code and makes with `Toolkit.createCustomCursor`, once. A headless toolkit makes no custom cursors, so there those kinds report that they cannot be shown, and the host asks for their fallback.
 
 ## Fonts
 
@@ -51,7 +99,7 @@ Use the panel on the Swing event dispatch thread only, the same as any Swing com
 --8<-- "swing/SwingExamples.java:font"
 ```
 
-`SwingTextMetrics.defaults()` is the logical Dialog font at 9 units, with the logical Monospaced font at the same size for monospaced styles. Widths are the advances of a `TextLayout` with antialiasing and fractional metrics on, and the canvas draws that same layout, so text measures exactly as wide as it draws and spans side by side meet. The line height is the font's height. Underline, strikethrough and the shadow are drawn by the adapter and do not change widths.
+`SwingTextMetrics.defaults()` is the logical Dialog font at 9 units, with the logical Monospaced font at the same size for monospaced styles. Widths are the advances of a `TextLayout` with antialiasing and fractional metrics on, and the canvas draws that same layout, so text measures exactly as wide as it draws and spans side by side meet. The line height is the font's height. Underline, strikethrough and the shadow are drawn by the adapter and do not change widths. The ascent that panels line text up by is the font's real ascent, in UI units, and never more than the line height.
 
 Behind `SwingTextMetrics` are two `SwingFont`s, one for normal text and one for monospaced styles. `AwtFont` is the AWT font described above. `BitmapFont` draws glyphs cut from images, to preview an engine whose font is a bitmap:
 
@@ -60,6 +108,8 @@ Behind `SwingTextMetrics` are two `SwingFont`s, one for normal text and one for 
 ```
 
 Each sheet is split into a grid, one character per cell, row by row, with `U+0000` for an empty cell. A white glyph on a transparent ground draws in the text's color. A glyph advances by its rightmost column with any opaque pixel, plus one, scaled from the cell to the glyph's height and rounded, plus one unit of spacing; a cell with no opaque pixel advances one unit. `advance(codePoint, width)` gives a character, usually the space, a fixed advance with nothing drawn. Bold draws each glyph again one unit to the right and adds a unit to every advance, and italic slants glyphs. Characters with no glyph come from a fallback font, the logical Dialog font unless the builder is given another. The first sheet or advance that names a character wins.
+
+Swing shapes right-to-left text itself, and `SwingPlatform` reports `Capabilities.shapesRightToLeft`. `SwingFont.drawRightToLeft` draws a run that reads right to left, which the canvas calls with the run in logical order. `AwtFont` lays it out with a right-to-left run direction, so Java2D orders it, mirrors its brackets and joins Arabic letters. `BitmapFont` draws the glyphs from the right with paired brackets mirrored, and does not join letters. A `SwingFont` of your own should override `drawRightToLeft` unless its drawing runs the bidirectional algorithm itself; the default calls `draw`.
 
 Other adapters use other fonts with other widths. Layouts built on measured text adapt; layouts that assume widths will not.
 
@@ -79,7 +129,7 @@ The adapter registers an [appearance](../guides/appearances.md) for `BufferedIma
 
 ## Sprites
 
-`SwingSprites` loads images from the classpath at `assets/<namespace>/sprites/<path>.png`. Pass a `SpriteResolver` to `SwingSprites`, and that to `StrataPanel` or `SwingSnapshot.render`, to read another layout. For images that are not on the class path at all, such as files in a folder or a zip, give `SwingSprites` a `SpriteSource`, which returns the image for an id. Images are loaded once and cached, including the fact that one is missing, until `SwingSprites.clear()`. A missing or unreadable image draws as solid magenta.
+`SwingSprites` loads images from the classpath at `assets/<namespace>/sprites/<path>.png`. Pass a `SpriteResolver` to `SwingSprites`, and that to `StrataPanel` or `SwingSnapshot.render`, to read another layout. For images that are not on the class path at all, such as files in a folder or a zip, give `SwingSprites` a `SpriteSource`, which returns the image for an id. Images are loaded once and cached, including the fact that one is missing, until `SwingSprites.clear()`. Denser images sit beside the plain one as `@2x` and `@1.5x` files; see [Scale and density](#scale-and-density). A missing or unreadable image draws as solid magenta.
 
 `StrataPanel.setSprites` swaps an open panel's images. With `screens().setTheme(...)` it changes a panel's look without closing its screens:
 
@@ -105,7 +155,24 @@ Every method may be called from any thread.
 
 ## Clipboard
 
-`SwingPlatform` uses the system clipboard. Reads and writes that fail, because another program holds the clipboard or it holds no text, read as empty and are dropped. In a headless JVM there is no clipboard at all.
+`SwingPlatform` uses the system clipboard. It holds plain text, files, images and text in other MIME types, through `getTransfer` and `setTransfer`:
+
+| Format | AWT flavor |
+|---|---|
+| `DataFormat.TEXT` | `DataFlavor.stringFlavor` |
+| `DataFormat.FILES` | `DataFlavor.javaFileListFlavor` |
+| `DataFormat.IMAGE` | `DataFlavor.imageFlavor`, an ARGB image holding a copy of the pixels |
+| A `DataFormat.mime(...)` format | A text flavor of that MIME type whose value is a string |
+
+Styled text goes out as its plain text, and formats that stay inside the process never reach the system clipboard. A custom MIME format reaches other programs only under Java's own flavor names. Reads and writes that fail, because another program holds the clipboard or it holds nothing Strata understands, read as empty and are dropped. In a headless JVM there is no clipboard at all.
+
+## Drops from the desktop
+
+`StrataPanel` is a drop target. Files, text and the other formats the clipboard holds can be dragged onto it from other applications, and the component under the pointer hears `DRAG_ENTER`, `DRAG_OVER`, `DRAG_EXIT` and `DROP` as for a drag inside the panel. Data is read when a component asks for it while the drag moves, where AWT allows, and all of it at the drop. AWT reports no modifier keys during a drag, so they are read from the drop action: Control when the user asks to copy what the source would move, and Control and Shift for a link. A headless JVM has no drag and drop. Drags out of the panel to other applications are not supported.
+
+## File dialogs
+
+`SwingPlatform.fileDialogs()` offers the system's dialogs, through `java.awt.FileDialog`, owned by the active window. A folder dialog is a `JFileChooser` except on macOS, where AWT's dialog can pick folders. Each dialog is shown from a later event on the event thread, so the call returns at once; the dialog's nested loop keeps the window painting while it is open, and the future completes when it closes. Titles are read through the translator at that time. Windows ignores filename filters, so there the file name starts as the filters' patterns, such as `*.csv;*.xlsx`, unless a name was suggested or a file given as the start. Headless there are none, and `ComponentFactory.fileDialogs().isSupported()` is false. See [File dialogs](../guides/files.md).
 
 ## Rendering without a display
 
@@ -115,7 +182,7 @@ Every method may be called from any thread.
 --8<-- "swing/SwingExamples.java:snapshot"
 ```
 
-Any pixel the screen does not draw stays transparent. The screen's `closed()` runs before `render` returns, and a theme missing a required key throws `ThemeException`. Overloads take input to send before the frame is drawn, such as a click that opens a drop-down, with tooltips shown at once; a `SwingSprites`, for images from elsewhere; a `SwingPlatform`, for snapshots with other fonts; and a `ThemeRef`, resolved from that platform's [theme source](#themes). Set `-Djava.awt.headless=true` on build servers. The adapter's own tests and the gallery's `--snapshot` option use it.
+Any pixel the screen does not draw stays transparent. The screen's `closed()` runs before `render` returns, and a theme missing a required key throws `ThemeException`. Overloads take input to send before the frame is drawn, such as a click that opens a drop-down, with tooltips shown at once; a `SwingSprites`, for images from elsewhere; a `SwingPlatform`, for snapshots with other fonts; and a `ThemeRef`, resolved from that platform's [theme source](#themes). The scale is also the screen's density, so a snapshot at a scale of 2 shows the denser sprites. Set `-Djava.awt.headless=true` on build servers. The adapter's own tests and the gallery's `--snapshot` option use it.
 
 Snapshots are a good way to test layouts: render a screen and compare pixels, or check that it renders at all with each of your themes.
 
@@ -128,6 +195,12 @@ Snapshots are a good way to test layouts: render a screen and compare pixels, or
 - `SwingInput` maps AWT key events, mouse buttons and modifier masks to Strata's types, and `HeldKeys` from the SPI turns AWT's repeated presses into repeats.
 
 [Writing an adapter](writing-an-adapter.md#driving-the-host) lists what the host expects of the code that drives it.
+
+## Not supported
+
+- Touch and pen input. AWT reports none, so the panel never sends an `InputContext` other than the mouse's.
+- Closing a screen on an Escape that nothing consumed. The panel leaves Escape alone; the opt-in is not built.
+- Drags out of the panel to other applications.
 
 ## The gallery
 

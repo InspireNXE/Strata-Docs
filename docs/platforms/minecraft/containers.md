@@ -69,7 +69,7 @@ Strata sees every press first, so popups close and focus moves as on any Strata 
 
 A release or drag goes to vanilla when the press that started it did. A scroll over the panel goes to vanilla first, and to Strata when vanilla does not use it.
 
-Keys go to Strata first. A key Strata does not use goes to vanilla unless a modal dialog is open. When the pointer is over Strata content that covers a slot, vanilla gets the key with no hovered slot, so slot keys such as the hotbar keys do not act on the covered slot, while keys such as the inventory key still close the screen.
+Keys go to Strata first. A key Strata does not use goes to vanilla unless a modal dialog is open. Escape, the inventory key and any other call to `onClose()` first ask the Strata screen's `closeRequested`, and the screen stays open when it refuses; [Screens](screens.md#closing) has the details. When the pointer is over Strata content that covers a slot, vanilla gets the key with no hovered slot, so slot keys such as the hotbar keys do not act on the covered slot, while keys such as the inventory key still close the screen.
 
 A slot's tooltip is vanilla's, with tooltip images such as a bundle's contents. It shows only while pointer input would go to vanilla, so it is hidden while a modal dialog is open or while the pointer is over Strata content.
 
@@ -119,4 +119,4 @@ Players can make screens draw their slots through vanilla. The first time a cont
 
 ## Threading
 
-Use the screen and its panel on the render thread, as vanilla's screens are.
+Use the screen and its panel on the client thread, as vanilla's screens are, and hand work from other threads over with `Strata.uiThread().execute(...)`; [Screens](screens.md#threading) explains how.
