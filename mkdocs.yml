@@ -9,10 +9,6 @@ copyright: Copyright InspireNXE. Released under the Apache License, Version 2.0.
 docs_dir: docs
 strict: true
 
-# Adds the design documents and ROADMAP.md from the Strata checkout beside this one
-hooks:
-  - hooks.py
-
 theme:
   name: material
   features:
@@ -153,7 +149,4 @@ nav:
       - Status and limitations: help/status.md
   - Project:
       - project/index.md
-      - Design as built: design-implemented.md
-      - Design proposals: design-pending.md
-      - Roadmap: ROADMAP.md
       - Contributing: project/contributing.md

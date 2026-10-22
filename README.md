@@ -8,11 +8,10 @@ The source of the [documentation site](https://inspirenxe.github.io/Strata-Docs/
 |---|---|
 | `docs/` | The pages: getting started, guides, platforms, reference, help and project. |
 | `src/` | The code the pages include through `--8<--` snippet markers, compiled and tested against Strata. |
-| `hooks.py` | Pulls the design documents and roadmap in from the Strata checkout. Set `STRATA_DIR` to point elsewhere. |
 
 ## Building
 
-Building needs JDK 25, Python 3, and the Strata and Strata-Swing checkouts beside this one, at `../Strata` and `../Strata-Swing`. The site documents that source: the examples compile against it, and the Javadoc and design pages are built from it.
+Building needs JDK 25, Python 3, and the Strata and Strata-Swing checkouts beside this one, at `../Strata` and `../Strata-Swing`. The site documents that source: the examples compile against it, and the Javadoc is built from it.
 
 ```bash
 ./gradlew build

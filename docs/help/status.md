@@ -1,6 +1,6 @@
 # Status and limitations
 
-Strata is at version 0.1.0 and has not been released. This page lists what is tested, what has only been tested indirectly, known issues, and what is planned.
+Strata is at version 0.1.0 and has not been released. This page lists what is tested, what has only been tested indirectly, known issues, and what is not supported.
 
 ## What is tested
 
@@ -25,7 +25,7 @@ Snapshots are published to Maven Central's snapshot repository, and Strata-Swing
 - An engine that draws only rectangles draws lines, shapes and shadows from rectangles one device pixel high, so they look stepped, and its round clips are square. See [Platform differences](../platforms/differences.md).
 - A mnemonic can name only a key from A to Z or a digit. A letter outside that set, such as "Ö", cannot be typed as one.
 
-## Not built yet
+## Not supported
 
 - Narration and other accessibility support, and system preferences such as reduced motion.
 - Controller navigation. An adapter can send a controller's buttons as keys, but nothing moves focus with a pad.
@@ -34,16 +34,6 @@ Snapshots are published to Maven Central's snapshot repository, and Strata-Swing
 - Closable and movable tabs, a delay before submenus open, placement rules for popups, range selection in the calendar and range sliders.
 - A text area that drags its selection, and drags for trees, tables and grids.
 - A render order contract for engines that sort draws by kind. Swing draws in the order Strata asks, so overlapping siblings draw correctly there.
-- A public Maven repository.
-
-## Open design questions
-
-These are recorded in the [pending design](../design-pending.md#open-questions):
-
-- Style classes for themes, and whether a host's theme can be set per subtree. Style states and text style patches are built.
-- A tooltip kind that holds lines and a visual together.
-- Coalescing of continuous input. Causes and data binding are built.
-- Popup events that continue at the component that opened the popup, which would fix the known issue with overlay events above.
 
 ## Compatibility promise
 

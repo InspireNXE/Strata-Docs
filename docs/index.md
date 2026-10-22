@@ -46,6 +46,6 @@ Strata is a GUI library for Java that does not depend on any engine, whether you
 
 ## Project status
 
-Strata is at version 0.1.0 and has not been released. The API will still change. [Status and limitations](help/status.md) lists what works, what is untested and what is planned.
+Strata is at version 0.1.0 and has not been released. The API will still change. [Status and limitations](help/status.md) lists what works, what is untested and what is not supported.
 
 Strata is released under the Apache License, Version 2.0.

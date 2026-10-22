@@ -140,4 +140,4 @@ An event whose path has no handler for its type costs nothing extra. An event th
 
 ## Why snapshot whenever something listens?
 
-Letting each handler ask for snapshots would need a second registration method, and a handler that forgot to ask would get an exception at the worst moment. A snapshot is a small record taken only on the paths that have a listener, never while painting, so taking it for every listener keeps the API to one method at a cost that only input with handlers pays. This is recorded in the [design](../design-implemented.md#8-decisions).
+Letting each handler ask for snapshots would need a second registration method, and a handler that forgot to ask would get an exception at the worst moment. A snapshot is a small record taken only on the paths that have a listener, never while painting, so taking it for every listener keeps the API to one method at a cost that only input with handlers pays.

@@ -12,7 +12,7 @@ Not yet. Strata is at 0.1.0, unreleased, and the API will change. See [Status an
 
 ### Is it a port of MalisisCore?
 
-No. Strata takes ideas from MalisisCore (a retained component tree, anchors, cancelable events) and from Wintergreen (measure-and-arrange layout, click and drag handling, focus, typed events, the text box), but it is new code with no engine dependency. The [design document](../design-implemented.md) records where each idea comes from and what Strata does differently.
+No. Strata takes ideas from MalisisCore (a retained component tree, anchors, cancelable events) and from Wintergreen (measure-and-arrange layout, click and drag handling, focus, typed events, the text box), but it is new code with no engine dependency.
 
 ### What license?
 
