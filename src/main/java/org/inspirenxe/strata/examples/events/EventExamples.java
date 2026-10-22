@@ -16,6 +16,7 @@
 package org.inspirenxe.strata.examples.events;
 
 import org.inspirenxe.strata.api.ComponentFactory;
+import org.inspirenxe.strata.api.Strata;
 import org.inspirenxe.strata.api.component.Component;
 import org.inspirenxe.strata.api.control.attribute.text.TextInput;
 import org.inspirenxe.strata.api.control.attribute.value.Ranged;
@@ -115,10 +116,13 @@ public final class EventExamples {
 
     static void remote(final ComponentFactory factory, final TextBox price, final Object buyer, final String newPrice) {
         // --8<-- [start:remote]
-        // On the UI thread, applying an update the server sent about another person's purchase
-        try (CauseFrame _ = factory.causes().pushFrame().put(CauseKeys.ORIGIN, new Origin.Remote(buyer))) {
-            price.setText(newPrice);                    // its EDITED report says the buyer did it
-        }
+        // The update arrives on a network thread, so the change is handed to the UI thread, and the frame is
+        // opened there, around the change
+        Strata.uiThread().execute(() -> {
+            try (CauseFrame _ = factory.causes().pushFrame().put(CauseKeys.ORIGIN, new Origin.Remote(buyer))) {
+                price.setText(newPrice);                // its EDITED report says the buyer did it
+            }
+        });
         // --8<-- [end:remote]
     }
 

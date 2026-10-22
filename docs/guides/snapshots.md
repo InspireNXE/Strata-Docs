@@ -18,7 +18,7 @@ Inside the handler:
 | `event.currentSnapshot()` | The snapshot of the component whose handler is running |
 | `event.snapshotOf(component)` | Any component's snapshot, as an `Optional` |
 
-Snapshots belong to Pre events: input, and a control's requests. A Post event, such as `TextInput.EDITED`, fires after its change, so it carries the value from before the change as `previous()` instead of a snapshot:
+These methods belong to `SnapshotEvent`, the event interface that input events and a control's requests extend: `PointerEvent` and its subtypes (drags and transfers included), `KeyEvent`, `CharEvent`, `FocusEvent`, `ModifiersEvent` and `RequestEvent`. Other events have no snapshot methods at all, so a handler for one cannot ask. A Post event, such as `TextInput.EDITED`, fires after its change, so it carries the value from before the change as `previous()` instead:
 
 ```java
 --8<-- "snapshots/SnapshotExamples.java:previous"
@@ -31,7 +31,7 @@ Before an event is delivered, Strata walks its path: the target and, if the type
 - the target, always; and
 - every component on the path that has a handler for this type.
 
-Nothing else is captured. All snapshots are taken before the first handler runs, so even a handler at the top of the tree sees the target as it was before the target's own handlers and default behavior changed it. Paint and measure events never take snapshots, `PAINT` included, although it is a Pre event.
+Nothing else is captured. All snapshots are taken before the first handler runs, so even a handler at the top of the tree sees the target as it was before the target's own handlers and default behavior changed it. Paint and measure events never take snapshots, `PAINT` included, although it is a Pre event: `PaintEvent.Pre` is `Cancelable` but not a `SnapshotEvent`.
 
 ### What "when the event fired" means
 
@@ -42,7 +42,7 @@ Snapshots are taken after the host has updated its own bookkeeping for the input
 | `POINTER_PRESS` | Focus has moved to the target or its nearest focusable ancestor, and the target is pressed |
 | `POINTER_RELEASE`, `CLICK`, `DRAG_END` | The target is no longer pressed, unless another button still holds it |
 | `POINTER_ENTER`, `POINTER_EXIT` | The target is hovered, or no longer hovered |
-| `FOCUS_GAINED`, `FOCUS_LOST` | Focus has already changed |
+| `FOCUS_GAINED`, `FOCUS_LOST`, `FOCUS_ENTER`, `FOCUS_EXIT` | Focus has already changed |
 
 Everything a handler or a default behavior changes, such as text, caret, checked state or enabled state, is still in its old state.
 
@@ -128,8 +128,9 @@ Strata calls it only when the component is captured, before any handler runs. Re
 
 | Situation | `snapshot()` | `currentSnapshot()` | `snapshotOf(c)` |
 |---|---|---|---|
-| A Post event, or a paint or measure event | throws `IllegalStateException` | throws | empty |
-| Any other Pre event | works, since the target is always captured | works, since a handler is running on the current component | present for the target and every component on the path with a handler for the type |
+| A report, or a paint or measure event | does not exist: these events are not `SnapshotEvent`s | | |
+| Any `SnapshotEvent` read inside a handler | works, since the target is always captured | works, since a handler is running on the current component | present for the target and every component on the path with a handler for the type |
+| A `SnapshotEvent` read after delivery, or for a component that joined the path | throws `IllegalStateException` for the target or current component when none was taken | throws the same | empty |
 
 A component that joins the path while the event is being delivered, for example because a handler moved the target into another container, has no snapshot.
 

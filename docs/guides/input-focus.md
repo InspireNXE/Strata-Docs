@@ -39,6 +39,8 @@ The Swing adapter falls in the second group, so you see the user's system repeat
 
 `Modifier` is `SHIFT`, `CONTROL`, `ALT` or `SUPER`. The left and right keys of a kind count as the same modifier; use `Key.LEFT_SHIFT` and so on to tell them apart. `ALT` includes AltGr. `SUPER` is the Windows key, or Command on macOS.
 
+Each platform also names a shortcut modifier, the one its users press for Save and Copy: Control, or Super where the platform uses Command. `KeyEvent.shortcutModifier()` returns it, and the text fields use it for their select all, copy, cut, paste, undo and redo keys. A key with Super held passes through a text field to the host's shortcuts, so Command+S runs from inside a field.
+
 `Modifiers` is an immutable set packed into an int, so events carry it without allocating:
 
 ```java
@@ -69,6 +71,8 @@ Some engines do not report modifiers with every kind of input. An adapter for su
 --8<-- "events/EventExamples.java:shortcut"
 ```
 
+`KeyEvent.is(KeyStroke)` matches a press or repeat of a `KeyStroke`, a key with its exact modifiers. `KeyStroke.shortcut(Key.S)` holds the platform's shortcut modifier, so one stroke serves Control on most platforms and Command on macOS, and the factory's `keyText` turns it into the "Ctrl+S" a menu shows. For a shortcut that runs a command, shared by a button and a menu item, use a [command](commands.md) instead of a key handler.
+
 Put screen-wide shortcuts on the screen's content, as above. Keys bubble from the focused component, so a shortcut there fires unless something focused consumed the key first. A focused text box consumes plain typing keys, but not Control combinations it does not use, so Ctrl+S still reaches the content while the user is typing. Keys pressed inside an overlay bubble to the overlay's content and stop there, so a shortcut that should also work while a popup or dialog has focus needs a handler on that content too.
 
 `ModifierPolicy.matches(required, held)` is the test `is` uses, and it works on the modifiers of any event, such as a click that does something else with Control held:
@@ -76,6 +80,20 @@ Put screen-wide shortcuts on the screen's content, as above. Keys bubble from th
 ```java
 --8<-- "events/EventExamples.java:modifier-click"
 ```
+
+## Keys nothing consumed
+
+A key goes to the focused component first and bubbles up through its ancestors. If nothing consumes it, the host tries the following in order, and the first that acts uses the key up:
+
+1. A [command](commands.md) with a matching shortcut, for a press or repeat. Commands scoped to the key's target and its ancestors come first, then the host's, then those of the menu bars in the top dialog or the screen's content.
+2. A mnemonic: Alt with a letter or digit, where the platform uses mnemonics, acts on the control in the top layer whose caption underlines that letter, such as `_Save`.
+3. The menu bar: F10, or Alt pressed and released alone, gives the keys to the first menu bar. Left and Right move along its titles, Down or Enter opens one, and Escape lets go.
+4. The context menu: the Menu key, or Shift+F10, opens the context menu of the focused component or its nearest ancestor that has one.
+5. Enter with no modifiers presses the default button of the nearest window, or of the top layer, and Escape with no modifiers presses its cancel button.
+6. Escape closes the top overlay that is not a toast.
+7. Tab and Shift+Tab, without Control or Alt, move focus along the [tab order](#tab-order).
+
+While a drag that carries data is in progress, Escape ends the drag before anything else hears it. Adapters pass a key on to the engine only when none of these used it; see [What reaches the engine](#what-reaches-the-engine).
 
 ## Characters
 
@@ -105,6 +123,23 @@ Focus moves when:
 
 Focus is cleared when the focused component, or an ancestor, is hidden, disabled or removed. A screen that is rebuilt starts with nothing focused.
 
+Some controls keep focus on a part inside them, their focus delegate. A table and a tree keep it on their inner list, a spinner on its text field and a split pane on its divider. To code the control is still the one that has focus: `requestFocus()` focuses the part, `isFocused()` is true while the part has focus, `setTabIndex` and the other tab settings apply to the control, and `FOCUS_GAINED` and `FOCUS_LOST` fire on the control right after the part. A press on a table's header or a spinner's step buttons focuses the part. The host's `focused()` returns the part.
+
+### Focus within
+
+`isFocusWithin()` is true while a component or one of its descendants has focus, panels included. To hear it change, handle `InputEvents.FOCUS_ENTER` and `InputEvents.FOCUS_EXIT` on the container. `FOCUS_EXIT` fires when focus leaves the container's subtree and `FOCUS_ENTER` when it comes in; moving between two fields inside the container fires neither. When focus moves from A to B the events fire in this order:
+
+1. `FOCUS_LOST` on A.
+2. `FOCUS_EXIT` on each ancestor of A that is not an ancestor of B, innermost first.
+3. `FOCUS_ENTER` on each ancestor of B that is not an ancestor of A, outermost first.
+4. `FOCUS_GAINED` on B.
+
+`other()` is the component on the far side of the move, empty when focus came from or went to nothing. They fire on any component that has a handler for them, so a screen without handlers pays nothing. A form section that checks its fields when the user leaves it:
+
+```java
+--8<-- "input/FocusExamples.java:focus-exit"
+```
+
 There is no public method to clear focus from a component. Requesting focus on another component moves it.
 
 ## Tab order
@@ -112,6 +147,8 @@ There is no public method to clear focus from a component. Requesting focus on a
 Tab moves to the next component in tab order and Shift+Tab to the previous one, wrapping at both ends. With nothing focused, Tab goes to the first and Shift+Tab to the last.
 
 The order holds every component that is focusable and tabbable, with all its ancestors visible and enabled, in the top dialog or, with no dialog open, in the screen's content. Tab never moves into a popup; a [flyout](controls.md#flyout) handles Tab itself and keeps focus inside it. It is sorted by tab index, lowest first, and components with equal indexes keep tree order: depth first, children in the order of `children()`, which `insert` and `move` change. The [drawing order](components.md#drawing-order) does not count, so raising a window does not change where Tab goes. A focused component that is not in the order, for example one focused by a click with tabbing turned off, counts as "nothing focused".
+
+A [radio group](controls.md#radiobutton-and-radiogroup) is one tab stop: the selected button, or the first enabled one while nothing is selected. A button whose tab setting code changed keeps that setting.
 
 Ctrl+Tab and Alt+Tab do not move focus, so they stay free for the engine or the operating system. A component that consumes Tab keeps focus where it is. Among the built-ins, only a flyout and a text box showing suggestions do.
 
@@ -125,6 +162,17 @@ skipMe.setTabbable(false);   // still focusable by clicking
 
 Pointer positions are in UI units in host coordinates. `MouseButton` is `LEFT`, `RIGHT`, `MIDDLE`, `BACK` (button 4), `FORWARD` (button 5) or `UNKNOWN` for a button the adapter could not map. Scroll amounts are in wheel notches, and `ScrollEvent.kind()` says whether they came from a notched wheel (`ScrollKind.WHEEL`, 1 per notch) or a trackpad or smooth wheel (`ScrollKind.PRECISE`, fractions). Clicks, drags, hover and scrolling are covered in [Events](events.md#clicks).
 
+### Devices
+
+Every input event's cause names its device under `CauseKeys.DEVICE`: `MOUSE`, `KEYBOARD`, `PEN`, `TOUCH` or `CONTROLLER`. A pointer event also has `pointerId()`, 0 for the mouse, a pen and the first touch, and `pressure()`, from 0 to 1 and 1 for a device that reports none, which a drawing tool can follow. Each pointer id keeps its own presses, drags and click counts, so two fingers can press two buttons at once.
+
+- Only the mouse and the pen hover. A touch hits the component under it without marking it hovered, so it shows no hover face or tooltip, and a touch that moves fires no `POINTER_MOVE`, `POINTER_ENTER` or `POINTER_EXIT`.
+- A first touch held in place for 500 ms opens the context menu of the component under it, or of its nearest ancestor that has one. The release after that clicks nothing.
+- A second finger that starts to drag ends both presses with no click and turns the gesture into a scroll. Each move scrolls the component under the midpoint of the first two touches, a precise notch for every 10 units, in the direction the fingers drag the content. The scroll lasts until every finger is up.
+- A controller's buttons arrive as keys: the adapter sends its confirm button as Enter. A pad moves focus only inside controls that take arrow keys.
+
+What an engine reports depends on the adapter. [Platform differences](../platforms/differences.md) lists which devices each one sends, and [Writing an adapter](../platforms/writing-an-adapter.md) shows how an adapter attaches a device to an input.
+
 ## What reaches the engine
 
 Every input call into the host returns whether Strata used it, and adapters pass unused input on to the engine:
@@ -135,7 +183,7 @@ Every input call into the host returns whether Strata used it, and adapters pass
 | Button press | It hit a component, closed a popup, or a dialog was open |
 | Button release | It ended a press that started on a component |
 | Scroll | A component consumed it |
-| Key | A component consumed it, Escape closed an overlay, or Tab moved focus |
+| Key | A component consumed it, a shortcut, mnemonic, menu key, default or cancel button used it, Escape closed an overlay, or Tab moved focus |
 | Character | The focused component consumed it |
 
 A screen whose root fills the host is "a component" everywhere, so it claims every press. On an engine that shows its own widgets in the same screen as a Strata host, those widgets would never be clicked.

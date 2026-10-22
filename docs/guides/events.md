@@ -26,7 +26,7 @@ A handler is an `EventHandler`, a functional interface with one method, `handle(
 --8<-- "events/EventExamples.java:chain"
 ```
 
-Handlers run on the UI thread, as everything that touches components does.
+Handlers run on the UI thread, as everything that touches components does. Code on another thread hands its work over first; see [The UI thread](threading.md).
 
 ### Priority
 
@@ -41,7 +41,7 @@ Events come in two kinds.
 | Pre | "About to do this" | Yes, and requests with a value can be rewritten with `setValue` | Input, and the user's actions on a control | `KEY`, `CLICK`, `Button.PRESS`, `TextInput.EDIT`, `Closable.CLOSE`, `Component.PAINT` |
 | Post | "This happened" | No | Every change, whether the user or code made it | `Button.PRESSED`, `TextInput.EDITED`, `Closable.CLOSED`, `Component.PAINTED` |
 
-A control's Pre events are its requests and its Post events are its reports. To stop or change something, handle its request. To react to it, handle its report.
+A control's Pre events are its requests and its Post events are its reports. To stop or change something, handle its request. To react to it, handle its report. Not every report has a request: moving the caret (`TextEntry.CARET_MOVED`, with a `TextEntry.Caret` of anchor and caret) and a change of a field's validation (`Validatable.VALIDATED`) are reports only, because there is nothing for a handler to refuse. They fire for the user and for code alike, `CARET_MOVED` after `EDITED` and `MODIFIED` when an edit moved the caret.
 
 ```java
 --8<-- "events/EventExamples.java:veto"
@@ -86,6 +86,8 @@ The origin is one value of the event's cause. `event.cause()` gives the rest: a 
 
 Strata makes the cause only when a handler calls `cause()`, and `origin()` reads the origin without making it, so neither costs anything when nobody asks.
 
+Motion reports through the same events. Each step of an [animation](animation.md) runs in a frame with the `Animation` pushed on the chain and `Origin.CODE`, so a slider's `CHANGED` that an animation moved names the animation among its causes, and requests stay quiet.
+
 ### Applying a change for someone else
 
 Code that applies a change on another person's behalf, such as a market update the server sent, opens a frame with that person as the origin. Every event fired inside it reports them, and the controls' requests stay quiet:
@@ -94,7 +96,7 @@ Code that applies a change on another person's behalf, such as a market update t
 --8<-- "events/EventExamples.java:remote"
 ```
 
-A frame belongs to the UI thread. Work from another thread, such as a network handler, opens its frame inside the task it hands to the UI thread, where the change is applied. Close frames in a `try`-with-resources block, so they close however the block ends; closing a frame also closes any frame opened inside it that is still open. Objects you `push` go on the chain, and you can put values of your own under keys made with `CauseKey.of`.
+A frame belongs to the UI thread. Work from another thread, such as a network handler, hands the change to the UI thread with `Strata.uiThread().execute` and opens the frame inside that task, as the example above does. Tasks run with no frame open, so what a task changes reports `Origin.CODE` unless it opens one. Close frames in a `try`-with-resources block, so they close however the block ends; closing a frame also closes any frame opened inside it that is still open. Objects you `push` go on the chain, and you can put values of your own under keys made with `CauseKey.of`.
 
 On an engine with a cause stack of its own, the adapter can make Strata's stack the engine's: frames you open are then the engine's frames, objects you push are on the cause of the engine's own events fired inside them, and a Strata event's chain is the engine's current cause.
 
@@ -104,9 +106,10 @@ Each event type names the interface its handlers receive. They all extend `Event
 
 | Interface | Kind | Adds | Used by |
 |---|---|---|---|
-| `Event` | Both | `target()`, `current()`, `origin()`, `cause()`, `stopPropagation()`, `isPropagationStopped()`, and the [snapshots](snapshots.md) | Every event |
-| `Cancelable` | Pre | `cancel()`, `isCancelled()`, `consume()`, `isHandled()` | Input and requests |
-| `PointerEvent` and its subtypes, `KeyEvent`, `CharEvent`, `FocusEvent`, `ModifiersEvent` | Pre | What the user did; see [Clicks](#clicks) and below | `InputEvents`, `Focusable.FOCUS_GAINED`, `Focusable.FOCUS_LOST` |
+| `Event` | Both | `target()`, `current()`, `origin()`, `cause()`, `stopPropagation()`, `isPropagationStopped()` | Every event |
+| `Cancelable` | Pre | `cancel()`, `isCancelled()`, `consume()`, `isHandled()` | Input, requests and `Component.PAINT` |
+| `SnapshotEvent` | Pre | `snapshot()`, `currentSnapshot()` and `snapshotOf(component)`; see [Event snapshots](snapshots.md) | Input and requests. Reports, paint and measure events have none. |
+| `PointerEvent` and its subtypes, `KeyEvent`, `CharEvent`, `FocusEvent`, `ModifiersEvent` | Pre | What the user did; see [Clicks](#clicks) and below. A pointer event also has `pointerId()` and `pressure()`. | `InputEvents`, `Focusable.FOCUS_GAINED`, `Focusable.FOCUS_LOST` |
 | `RequestEvent<C>` | Pre | `control()` | Requests with no value, such as `Button.PRESS` and `Closable.CLOSE` |
 | `ValueRequestEvent<C, V>` | Pre | `control()`, `value()`, `setValue(value)` | Requests with a value, such as `TextInput.EDIT` and `Toggle.TOGGLE` |
 | `ControlEvent<C>` | Post | `control()` | Reports with no value, such as `Button.PRESSED` and `Closable.CLOSED` |
@@ -114,6 +117,7 @@ Each event type names the interface its handlers receive. They all extend `Event
 | `PaintEvent` | Post | `painter()`, `bounds()` | `Component.PAINTED` |
 | `PaintEvent.Pre` | Pre | The same, and it can be canceled | `Component.PAINT` |
 | `MeasureEvent` | Post | `context()`, `availableWidth()`, `availableHeight()`, `width()`, `height()`, `setWidth`, `setHeight` | `Component.MEASURED` |
+| `LifecycleEvent` | Post | Nothing beyond `Event` | `Component.ATTACHED`, `Component.DETACHED` |
 
 In a control's events, `C` is the type that declares the event. For a control's own event it is the control, as in `RequestEvent<Button>`. For an attribute's event it is the attribute, as in `ValueEvent<Toggle<?>, Boolean>`, because the same type serves check boxes, radio buttons and switches. `control()` returns the control that fired the event, typed as `C`. To reach the concrete control, test `target()` with `instanceof`.
 
@@ -249,9 +253,23 @@ Drag events go to the component the press started on, even when the pointer leav
 
 If the pointer leaves the host during a drag, the press stays tracked, and the drag continues when the pointer comes back.
 
+### Drags that carry data
+
+A `DRAG_START` handler can attach data to the drag with `startTransfer`. The components under the pointer then hear five more events, which carry a `TransferEvent`:
+
+| Event | Bubbles | When |
+|---|---|---|
+| `DRAG_ENTER` | no | A drag with data moved onto the component |
+| `DRAG_OVER` | yes | The drag moved over the component. A handler calls `accept` or `reject`. |
+| `DRAG_EXIT` | no | The drag left the component, or ended |
+| `DROP` | yes | The button came up over the component that accepted last |
+| `TRANSFER_DONE` | no | The drag ended, on the component that started it. Its effect says what the target took. |
+
+[Drag and drop](drag-and-drop.md) covers the data, the effects, the drag image and a complete example.
+
 ## Hover
 
-Only the deepest component under the pointer is hovered. Hit testing respects clipping, visibility and enabled state: the pointer cannot hit a hidden or disabled component, or the part of a child cut off by a clipping parent.
+Only the deepest component under the pointer is hovered, for the mouse and a pen; a touch hovers nothing and fires none of these events (see [Devices](input-focus.md#devices)). Hit testing respects clipping, visibility and enabled state: the pointer cannot hit a hidden or disabled component, or the part of a child cut off by a clipping parent.
 
 | Event | Bubbles | When |
 |---|---|---|
@@ -275,7 +293,7 @@ Amounts are in wheel notches. A component that scrolls by whole steps, such as a
 
 ## Keys and characters
 
-`KEY` carries a physical key (`key()`), an action (`PRESS`, `REPEAT` or `RELEASE`) and the held modifiers. It fires at the focused component and bubbles. When nothing has focus, it fires at the content of the top dialog, or at the screen's content when no dialog is open. If nothing consumes it, the host acts on two keys: an Escape press closes the top overlay that is not a toast, and a Tab press or repeat without Control or Alt moves focus to the next tabbable component, or the previous one with Shift.
+`KEY` carries a physical key (`key()`), an action (`PRESS`, `REPEAT` or `RELEASE`) and the held modifiers. It fires at the focused component and bubbles. When nothing has focus, it fires at the content of the top dialog, or at the screen's content when no dialog is open. If nothing consumes it, the host goes on: it runs the first enabled [command](commands.md) whose shortcut matches, acts on a mnemonic, opens a context menu for the Menu key, presses a default or cancel button for Enter or Escape, closes the top overlay that is not a toast for Escape, and moves focus for Tab. [Input and focus](input-focus.md#keys-nothing-consumed) gives the order.
 
 `CHAR` carries a typed character as a code point, after the keyboard layout and any input method. It fires only at the focused component and is dropped when nothing has focus. It bubbles.
 
@@ -290,6 +308,33 @@ A key handler on the screen's content sees every key that nothing focused consum
 ## Focus events
 
 `Focusable.FOCUS_LOST` and `Focusable.FOCUS_GAINED` are direct, and fire only at components that are `Focusable`. When focus moves from one component to another, the old one gets `FOCUS_LOST` first, then the new one gets `FOCUS_GAINED`, and both fire after the focus has already changed. `other()` is the component on the other side of the move, or empty when focus came from or went to nothing. Canceling a focus event cannot keep focus where it was; it only skips the component's default behavior, such as a text box moving its caret to the end.
+
+`InputEvents.FOCUS_EXIT` and `InputEvents.FOCUS_ENTER` are the same news for the containers around: they fire on any component, panels included, when focus leaves or enters its subtree, and `other()` is again the component on the other side. Moving from a section's first field to its second fires neither on the section, since focus stays inside it. A control that keeps focus on a part inside it, such as a table on its list, gets `FOCUS_GAINED` and `FOCUS_LOST` itself as well. [Input and focus](input-focus.md#focus-within) gives the order of all four and an example.
+
+## Attaching and detaching
+
+`Component.ATTACHED` and `Component.DETACHED` fire when a component joins and leaves a tree that a host is showing. Their `LifecycleEvent` adds nothing to `Event`. They are direct: a handler on a panel does not hear its children, because every component of the subtree that joins or leaves hears its own.
+
+```java
+--8<-- "events/LifecycleExamples.java:order"
+```
+
+For a panel that holds a label, adding the panel to an attached container logs `attached panel` and then `attached label`, and removing it logs `detached label` and then `detached panel`.
+
+- On attach, parents hear it before their children, and only after the subtree's [bindings](binding.md) have set their properties, so a handler sees the bound values.
+- On detach, children hear it before their parent, while the subtree is still attached and its bindings still follow their states. Then the tree is cleared of hover, focus and press state and detached.
+- Each attach a component hears is followed by exactly one detach. A component that is kept and added again, such as the page a navigation view shows again, hears both again.
+- They fire only for a component with a handler for them, build a new event each time and take no snapshots.
+
+Every way a tree changes goes through the same two steps: adding to or removing from an attached container or composite, an expander showing and hiding its content, a navigation view swapping pages, an overlay opening and closing, and a screen opening, closing or being rebuilt (the screen's `closed()` runs before its tree detaches). A handler that throws does not stop the walk. Strata finishes it, keeps the tree consistent, and throws the first failure at the end with the later ones suppressed.
+
+`whileAttached` starts something when the component attaches and stops it when it detaches, however often that happens. The supplier returns a `Subscription`, and it is called at once if the component is already attached. A label that follows a feed only while it shows:
+
+```java
+--8<-- "events/LifecycleExamples.java:while-attached"
+```
+
+The feed here calls the listener on its own thread, so the label changes inside a task handed to the UI thread. A supplier that returns null throws `NullPointerException`. A component you write can override `onAttached()` and `onDetached()` instead; see [Extending Strata](extending.md#the-hooks).
 
 ## Drawing and sizing
 
@@ -333,7 +378,12 @@ A control you write declares its events the way the built-ins do, as constants m
 | `SCROLL` | `ScrollEvent` | yes | The component under the pointer |
 | `KEY` | `KeyEvent` | yes | The focused component, or else the top dialog's content, or else the screen's content |
 | `CHAR` | `CharEvent` | yes | The focused component only |
+| `DRAG_ENTER`, `DRAG_EXIT` | `TransferEvent` | no | The component a drag with data moved onto or off |
+| `DRAG_OVER` | `TransferEvent` | yes | The component under a drag with data, until a handler accepts or rejects |
+| `DROP` | `TransferEvent` | yes | The component that accepted the drag last |
+| `TRANSFER_DONE` | `TransferEvent` | no | The component the drag started on |
 | `FOCUS_GAINED`, `FOCUS_LOST` | `FocusEvent` | no | The component gaining or losing focus |
+| `FOCUS_ENTER`, `FOCUS_EXIT` | `FocusEvent` | no | A component whose subtree focus entered or left, panels included |
 | `MODIFIERS_CHANGED` | `ModifiersEvent` | no | The screen's content and each open overlay's content |
 
 The [event type reference](../reference/event-types.md) adds each type's default behavior in the built-in controls, and lists every control event type with its value. Each control's events are also described with the control in [Controls](controls.md).

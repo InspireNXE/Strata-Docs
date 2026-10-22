@@ -29,11 +29,13 @@ The key names the property. Keys are constants beside the events of the attribut
 | Key | Value | Two way through |
 |---|---|---|
 | `Component.ENABLED`, `Component.VISIBLE` | `Boolean` | |
+| `Component.OPACITY` | `Float`, from 0 to 1 | |
 | `HasTooltip.TOOLTIP` | `Tooltip`, null for none | |
 | `HasText.TEXT` | `Text` | |
 | `TextEntry.READ_ONLY` | `Boolean` | |
 | `TextInput.TEXT` | `String` | `TextInput.EDITED` |
 | `Titled.TITLE` | `Text` | |
+| `Validatable.VALIDATION` | `Validation` | `Validatable.VALIDATED` |
 | `Toggle.SELECTED` | `Boolean` | `Toggle.TOGGLED` |
 | `Ranged.VALUE` | `Double` | `Ranged.CHANGED` |
 | `HasDate.DATE` | `LocalDate`, null for none | `HasDate.DATE_PICKED` |
@@ -126,6 +128,8 @@ A state change does not reach its controls during `set`. It marks the bindings t
 --8<-- "binding/BindingExamples.java:threads"
 ```
 
+Setting a state is the one change to a screen's data that needs no hand-over to the UI thread. Changing a component directly from another thread throws; [The UI thread](threading.md) shows how to hand the work over.
+
 A binding that sets a control can change more states, through that control's handlers, and those bindings run in the same step. If bindings are still changing after 100 rounds, the host takes it for a cycle, such as two handlers that keep setting each other's states. It logs an error naming the bindings, through `System.Logger`, and drops their updates until one of their states changes again.
 
 Input calls such as `pointerButton` and `key` do not flush, so a state set in a handler reaches the other controls bound to it at the next frame.
@@ -137,6 +141,91 @@ In tests, call `host.flush()` to bring bindings up to date without laying out or
 A binding follows its sources only while its component is attached. When the component joins a shown tree, the binding reads its source and sets the property at once, so a screen opens with its bound values. Binding a component that is already attached sets the property during the `bind` call. When the component leaves the tree, the binding lets go of every state it read. Nothing needs to be unsubscribed, and a state that outlives a screen holds nothing of it.
 
 A component holds one binding per key name. Binding the same key again replaces the earlier binding, which lets go of its states at once.
+
+## Unbinding
+
+`unbind(key)` takes a binding off and returns the component. The binding lets go of every state it read at once, and the property keeps the value it has. Calling it for a key that is not bound does nothing. It matches by the key's name, as `bind` does when it replaces a binding, so a converted key removes a binding made with the plain key, and the other way round.
+
+```java
+--8<-- "binding/ConverterExamples.java:unbind"
+```
+
+Like `bind`, it must run on the UI thread when the component is attached.
+
+## Watching a state
+
+Sometimes code has to act on a change instead of showing it: save a setting, send a volume to a server. There are two ways, and they differ in thread and lifetime.
+
+```java
+--8<-- "binding/ConverterExamples.java:watch"
+```
+
+| | `ComponentFactory.watch(source, listener)` | `State.subscribe(listener)` |
+|---|---|---|
+| Source | A state or a computed `Source`, tracked as a binding is | One state |
+| Called | On the UI thread, before the next frame is laid out, with the bindings | At once, on the thread that called `set` |
+| Several changes in one frame | One call, with the last value, if it differs from the last one called | One call each |
+| The first value | Read once when the watch is made, and not delivered | Not delivered |
+| Stops | When the screen closes or is built again, or when you close the subscription | Only when you close the subscription |
+
+Use `watch` in screen code: it needs no cleanup, a listener may change components, and a computed source that comes out the same calls nothing. Use `subscribe` in a model or service that outlives screens, such as one that writes settings to disk. The state holds a subscribed listener until it is closed, so a listener that points at a screen keeps the screen alive. A listener of `subscribe` runs on whatever thread set the state, so it must not touch components; hand that work to the UI thread. Setting an equal value calls neither.
+
+`watch` throws `IllegalStateException` for a factory with no host. A watch made while no screen is open stops when the next screen closes, and one whose source throws on its first read is dropped.
+
+## Converters
+
+A text box holds a `String` and a quantity is an `int`. A key made with `convert` joins the two, so a field's text can follow a `State<Integer>`:
+
+```java
+--8<-- "binding/ConverterExamples.java:quantity"
+```
+
+`TextInput.TEXT.convert(Converters.integer(1, 64))` is a new key with the same name and reports as `TextInput.TEXT`, so it replaces and removes bindings as that key does. The binding then does the following:
+
+- It writes a state's value to the control as text, with `toView`, unless the text already converts to that value. A field bound to 5 that holds "05" is left as typed.
+- When the user changes the text, it converts it with `toModel` and sets the state only if the text is valid. The state keeps its last valid value while the text is wrong.
+- A control that is `Validatable`, which Strata's text fields are, shows the failed conversion at once: its validation becomes an error with the converter's message, which draws the invalid look and shows in the tooltip. The error clears as soon as the text converts, when the state changes, or when the key is unbound or bound again. It wins over a validator and over `setValidation` while it lasts.
+- A converted key can be converted again, to stack one converter on another.
+
+`Converters` makes the converters for numbers and one for anything else:
+
+| Converter | Model | Accepts | Writes |
+|---|---|---|---|
+| `Converters.integer()` | `Integer` | Whole numbers that fit an `int` | The digits, with no grouping |
+| `Converters.integer(min, max)` | `Integer` | Whole numbers in the range | The same |
+| `Converters.decimal(decimals)` | `Double` | Any finite number | `decimals` digits after the separator, from 0 to 15 |
+| `Converters.decimal(min, max, decimals)` | `Double` | Numbers in the range, checked after rounding | The same |
+| `Converters.of(toView, toModel)` | Any | Whatever `toModel` returns, never invalid | Whatever `toView` returns |
+
+The number converters read the translator's locale each time they run, so a German screen shows 2,5 and accepts it. They write the language's digits and signs without grouping, and read a number with or without grouping and with spaces around it. An integer converter takes "2.0" as 2 and rejects "2.5". A decimal converter rounds half up to its digits, and turns -0 into 0. A null model value is empty text, and empty text is invalid. A range with its minimum above its maximum, or decimals outside 0 to 15, throws `IllegalArgumentException`. The messages are the translation keys `strata.validation.integer`, `.integer_range`, `.decimal` and `.decimal_range`, with core's English, such as "Enter a whole number from 1 to 64". See the [translation keys](../reference/translation-keys.md).
+
+To write your own, implement `Converter<M, V>`: `toView` turns the model's value into the control's, and `toModel` turns the control's back into a `Conversion`, which is `Conversion.valid(value)` or `Conversion.invalid(message)`:
+
+```java
+--8<-- "binding/ConverterExamples.java:converter"
+```
+
+A converter is not tied to text. `Converters.of` fits a combo box whose items are objects while the model keeps an id.
+
+## Validation
+
+`Validatable.VALIDATION` binds a control's validation to a `State<Validation>`, two way through `Validatable.VALIDATED`. Giving each field of a form a state of its own brings their results together where a computed source can read them. The model of the quantity form has one:
+
+```java
+--8<-- "binding/ConverterExamples.java:model"
+```
+
+The quantity form above binds `Validatable.VALIDATION` to `order.quantityCheck` beside the converted text. Its hint label shows the validation's message, which is the converter's message while the text is wrong and empty text when valid, and Save is enabled while the validation is valid. A second field's state can join in:
+
+```java
+--8<-- "binding/ConverterExamples.java:all-valid"
+```
+
+A `Validation` is a severity and a message: `Validation.VALID`, `Validation.warning(text)` or `Validation.error(text)`. Only an error makes `isValid()` false. [Controls](controls.md#validation) covers what a control does with its validation, including validators, the look and the tooltip.
+
+## Animated properties
+
+A binding on a property that an [animation](animation.md) moves does not write the state on every step. The binding waits and writes the value where the property comes to rest, when the animation ends or when it is closed. The state hears one change, and other controls bound to it do not follow the intermediate values. `Component.OPACITY` is the property a fade animates.
 
 ## Binding your own control
 

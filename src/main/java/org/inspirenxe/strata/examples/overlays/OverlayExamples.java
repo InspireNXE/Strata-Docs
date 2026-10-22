@@ -47,7 +47,7 @@ public final class OverlayExamples {
         // --8<-- [start:message-box]
         factory.overlays().dialog(factory.messageBox("Delete", "Delete this exchange?", MessageBox.Buttons.YES_NO)
                 .onEvent(MessageBox.ANSWERED, event -> {
-                    if (event.value() == MessageBox.Result.YES) {
+                    if (event.value().equals(MessageBox.Result.YES)) {
                         delete.run();
                     }
                 }));
