@@ -62,6 +62,11 @@ tasks.register('siteJavadoc', Sync) {
             into(name)
         }
     }
+    // The test kit, published in core's test fixtures
+    dependsOn(gradle.includedBuild('Strata').task(':core:testFixturesJavadoc'))
+    from(file('../Strata/core/build/docs/testFixturesJavadoc')) {
+        into('testing')
+    }
     // The Swing adapter's Javadoc comes from the Strata-Swing checkout
     dependsOn(gradle.includedBuild('Strata-Swing').task(':javadoc'))
     from(file('../Strata-Swing/build/docs/javadoc')) {

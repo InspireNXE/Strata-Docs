@@ -2,7 +2,7 @@
 
 An application can test its screens without an engine or a display. A test opens a screen, types 3 into the quantity box, clicks Buy and checks that the total reads 29.97. The test kit does what a person would do: input goes through the same path as the engine's input, requests fire, bindings run and layout happens, so a test fails when a person could not have done the thing.
 
-The kit is `ScreenTester`, with `TesterOptions` and `Matching`, in the package `org.inspirenxe.strata.testing`. It ships in the test fixtures of `strata-core`.
+The kit is `ScreenTester`, with `TesterOptions` and `Matching`, in the package `org.inspirenxe.strata.testing`. It ships in the test fixtures of `strata-core`, and its [Javadoc](../javadoc/testing/index.html) is on this site.
 
 ## Add the kit
 

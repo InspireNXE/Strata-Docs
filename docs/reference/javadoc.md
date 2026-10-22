@@ -40,6 +40,7 @@ Entries that a control holds, such as menu items, radio menu items, tabs and tab
 | `api` | Everyone writing screens and components | [Open](../javadoc/api/index.html) |
 | `spi` | Adapter authors | [Open](../javadoc/spi/index.html) |
 | `swing` | Swing applications | [Open](../javadoc/swing/index.html) |
+| `testing` | Tests of your own screens, through the test kit in `strata-core`'s test fixtures | [Open](../javadoc/testing/index.html) |
 | `core` | Contributors. Not part of the API. | [Open](../javadoc/core/index.html) |
 
 Good starting points in the API Javadoc:
