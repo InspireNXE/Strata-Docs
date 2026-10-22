@@ -1,6 +1,6 @@
 # Data binding
 
-A screen usually shows data that lives somewhere else: settings, a player's balance, a list of offers. You can keep the two in step by hand, with a setter call wherever the data changes and a handler on every control that changes it. Binding does the same with one call per control. The data lives in states, and each control says which state, or which value computed from states, one of its properties follows.
+A screen usually shows data that lives somewhere else: settings, an account's balance, a list of offers. You can keep the two in step by hand, with a setter call wherever the data changes and a handler on every control that changes it. Binding does the same with one call per control. The data lives in states, and each control says which state, or which value computed from states, one of its properties follows.
 
 Binding is optional. Setters and [events](events.md) work as they always have, and a screen can mix both.
 

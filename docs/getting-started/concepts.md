@@ -47,7 +47,7 @@ They come from Strata's core, which lists a `Strata.Provider` in its `META-INF/s
 All positions and sizes are floats in UI units, with the origin at the top left of the host, x growing right and y growing down. The adapter decides how big a unit is:
 
 - In Swing, one unit is `scale` pixels, a number you pass to `StrataPanel`.
-- Other adapters usually tie a unit to the engine's pixels and the player's scale setting.
+- Other adapters usually tie a unit to the engine's pixels and the user's scale setting.
 
 Layout happens in floats. An adapter for an engine that draws whole pixels rounds when it draws.
 

@@ -74,7 +74,7 @@ Return the same objects every time; hosts may keep what they get. Hosts may also
 | `defaultTheme()` | The theme screens open in when none is given, `strata:flat` by default |
 | `version()` | A number that changes whenever any of the above may return something new |
 
-This source gives the engine's look an id, reads theme files from the player's packs, and makes the engine's look the default:
+This source gives the engine's look an id, reads theme files from the user's packs, and makes the engine's look the default:
 
 ```java
 --8<-- "adapter/ToyThemeSource.java:themes"

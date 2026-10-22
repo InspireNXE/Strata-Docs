@@ -163,7 +163,7 @@ There is no per-component theme or per-subtree theme. To give one button a diffe
 
 ## Themes by id
 
-A `Theme` built in code is fixed. To let players restyle your screens with packs, name the theme by id instead and hand the host a `ThemeRef`:
+A `Theme` built in code is fixed. To let users restyle your screens with packs, name the theme by id instead and hand the host a `ThemeRef`:
 
 ```java
 ThemeRef theme = ThemeRef.of(ThemeId.of("mymod", "shop"))
@@ -195,7 +195,7 @@ A theme comes together from layers, lowest first. Each layer sets keys over the 
 | Overrides from code | Keys set with `Strata.themes().override`, in the order they were added | `code` |
 | The ref's overrides | Keys set with `ThemeRef.override` | `ref` |
 
-A parent resolves in full, its own files and overrides included, before the child's layers go on top. When an id has a base, its files' `parent` is ignored, so a pack can change keys of an engine theme but cannot swap it for another theme. The adapter decides the order of the theme files, so it decides where the player's packs and each mod's files fall. [Platform differences](../platforms/differences.md#at-a-glance) lists what Swing does.
+A parent resolves in full, its own files and overrides included, before the child's layers go on top. When an id has a base, its files' `parent` is ignored, so a pack can change keys of an engine theme but cannot swap it for another theme. The adapter decides the order of the theme files, so it decides where the user's packs and each mod's files fall. [Platform differences](../platforms/differences.md#at-a-glance) lists what Swing does.
 
 A resolved theme remembers which layer set each key. `theme.layer(key)` returns the layer's name, which shows where a color or a sprite came from. A theme built with `Theme.builder` reports none, and neither does a variant made with `toBuilder()`. To look at a resolved theme outside a screen, resolve the ref yourself; on Swing, `SwingThemeSource.resolve` does it the way a host would:
 

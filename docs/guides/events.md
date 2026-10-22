@@ -96,7 +96,7 @@ Code that applies a change on another person's behalf, such as a market update t
 
 A frame belongs to the UI thread. Work from another thread, such as a network handler, opens its frame inside the task it hands to the UI thread, where the change is applied. Close frames in a `try`-with-resources block, so they close however the block ends; closing a frame also closes any frame opened inside it that is still open. Objects you `push` go on the chain, and you can put values of your own under keys made with `CauseKey.of`.
 
-On an engine with a cause stack of its own, such as Sponge, the adapter can make Strata's stack the engine's: frames you open are then the engine's frames, objects you push are on the cause of the engine's own events fired inside them, and a Strata event's chain is the engine's current cause.
+On an engine with a cause stack of its own, the adapter can make Strata's stack the engine's: frames you open are then the engine's frames, objects you push are on the cause of the engine's own events fired inside them, and a Strata event's chain is the engine's current cause.
 
 ## Event interfaces
 

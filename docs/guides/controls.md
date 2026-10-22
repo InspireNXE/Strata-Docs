@@ -162,7 +162,7 @@ Who someone or something is, in a small square: their picture, or else their ini
 The square shows the first of these it has:
 
 1. A sprite or visual set with `setSprite` or `setVisual`, stretched over the square.
-2. The icon of the value's [appearance](appearances.md). An adapter that registers an appearance for its player or account type makes `factory.avatar(account)` show that face with no more code.
+2. The icon of the value's [appearance](appearances.md). An adapter that registers an appearance for its user or account type makes `factory.avatar(account)` show that face with no more code.
 3. Initials: those set with `setInitials`, else worked out from the name set with `setName`, else from the value's name. They are the first letter of the first word and the first letter of the last word, uppercased for the language, so Ana Lima shows `AL`, Cleo shows `C`, and a name with no letters shows none.
 4. The theme's `avatar.placeholder`, or `avatar.placeholder.group` for a group, when it has one. Otherwise only the background shows.
 
