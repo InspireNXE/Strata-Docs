@@ -99,7 +99,7 @@ A component can take focus when it is attached, focusable, visible and enabled, 
 
 Focus moves when:
 
-- a mouse button goes down: focus moves to the pressed component or its nearest focusable ancestor, or is cleared if there is none. This happens just before `POINTER_PRESS` fires, so a click on empty space clears focus;
+- a mouse button goes down: focus moves to the pressed component or its nearest focusable ancestor, or is cleared if there is none. This happens just before `POINTER_PRESS` fires, so a click on empty space clears focus. A press on a disabled component leaves focus where it is;
 - Tab or Shift+Tab is pressed or repeats, without Control or Alt, and nothing consumed it;
 - code calls `requestFocus()`, which returns false and changes nothing if the component cannot take focus.
 

@@ -51,6 +51,8 @@ Keys go to the focused component first. When nothing has focus they go to the to
 | Up, Left | Select and focus the previous usable button of the group, wrapping (repeats; not with Control or Alt) |
 | Down, Right | Select and focus the next one |
 
+A radio group is one stop for Tab and Shift+Tab: the selected button, or the first button while none is selected.
+
 ## CycleButton, while focused
 
 | Keys | Action |

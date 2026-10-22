@@ -35,13 +35,15 @@ While a dialog is open:
 - Nothing below it gets the pointer, focus or Tab. Keys go to it when nothing in it has focus.
 - The screen below stays visible, under the theme's `overlay.backdrop` paint if it has one.
 - Focus moves to the first tabbable component in it when it opens, and back to where it was when it closes.
-- An Escape press that nothing consumed closes it. A window in a dialog handles Escape itself, as a close by the user, so a `Closable.CLOSE` handler can keep it open.
+- An Escape press that nothing consumed closes it. A window in a dialog handles Escape itself, as a close by the user, so a `Closable.CLOSE` handler can keep it open. A window made unclosable with `setClosable(false)` consumes the Escape without closing, so the dialog stays open.
 
 A [`MessageBox`](controls.md#messagebox) is a ready-made dialog for confirmations:
 
 ```java
 --8<-- "overlays/OverlayExamples.java:message-box"
 ```
+
+Closing the overlay that shows a message box from code answers it with its dismiss result, reported through `MessageBox.ANSWERED` without asking `ANSWER` first.
 
 ## Toasts
 
