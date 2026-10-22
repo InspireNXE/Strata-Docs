@@ -119,7 +119,7 @@ Along the orientation, each child gets exactly the space it asks for, so alignme
 
 ### Weights
 
-`add(child, weight)`, or `setWeight(child, weight)` for a child already added, gives a child a share of the room the other children and the gaps leave. Weight 2 gets twice the space of weight 1, and 0 takes the weight away again. A weighted child is placed in its share by its own alignment, so give it `STRETCH` along the orientation to fill it. Its share never goes below zero, and its own desired size does not count once the panel has a size, so a weighted child shrinks first when space runs out. Measured without a limit along its orientation, inside a scroll panel for example, the panel asks for enough room to give each weighted child its desired size while keeping the proportions. `weight(child)` reads a weight back, and removing a child forgets its weight.
+`add(child, weight)`, or `setWeight(child, weight)` for a child already added, gives a child a share of the room the other children and the gaps leave. Weight 2 gets twice the space of weight 1, and 0 takes the weight away again. A weighted child is placed in its share by its own alignment, so give it `STRETCH` along the orientation to fill it. Its share stays within the child's minimum and maximum size plus its margin: a child that would go past a limit is held at it, and the other weighted children share what is left. Its own desired size does not count once the panel has a size, so a weighted child shrinks first when space runs out, down to its minimum. When the minimums do not fit, the children run past the end of the panel. Measured without a limit along its orientation, inside a scroll panel for example, the panel asks for enough room to give each weighted child its desired size while keeping the proportions. `weight(child)` reads a weight back, and removing a child forgets its weight.
 
 This covers a frame with a header and a footer at their own height and a body that takes the rest:
 
@@ -149,7 +149,7 @@ Children sit in the cells of rows and columns. Each row and column has a `GridLe
 | `GridLength.fixed(size)` | Exactly `size` units, whatever its children need |
 | `GridLength.weighted(weight)` | A share of the space left after the fixed and auto tracks. Weight 2 gets twice the space of weight 1. |
 
-Fixed and auto tracks are sized first. Whatever width or height remains is shared among weighted tracks in proportion to their weights. When the grid itself is measured without a size limit, weighted tracks take the smallest size that fits their children while keeping their proportions.
+Fixed and auto tracks are sized first. Whatever width or height remains is shared among weighted tracks in proportion to their weights. A weighted track stays within the largest minimum and the largest maximum of the children that sit only in it, and children in weighted rows are measured with their row's share, so wrapping text in them sees its height. When the grid itself is measured without a size limit, weighted tracks take the smallest size that fits their children while keeping their proportions.
 
 ```java
 --8<-- "layout/LayoutExamples.java:grid"
@@ -162,7 +162,7 @@ Fixed and auto tracks are sized first. Whatever width or height remains is share
 - Several children may share a cell. They overlap, like in an anchor panel.
 - A child aligns itself within its cell. `STRETCH` fills the cell.
 - Children spanning several auto tracks grow those tracks if they would not fit otherwise.
-- A grid with no rows or columns defined acts as one auto cell.
+- A grid with no rows or columns defined has one cell that fills its content box.
 - A cell outside the defined rows or columns is moved to the last row or column, and spans are cut to fit. A negative row or column, or a span below 1, throws `IllegalArgumentException`.
 - `setSpacing(columnGap, rowGap)` puts gaps between tracks, never around the edge. Use padding for that.
 - `columns(...)` and `rows(...)` replace the definitions; `addColumn` and `addRow` append one, and `columnDefinitions()` and `rowDefinitions()` read them back.
@@ -225,7 +225,7 @@ The default is vertical `AUTO`, horizontal `NEVER`. The panel asks for its conte
 | Up, Down, Page Up, Page Down, Home, End | Vertically, by the rate, by the viewport less one rate, or to the ends, when no focused descendant used them. Held keys repeat. Not with Control or Alt, nor while the vertical policy is `NEVER`, and consumed only when the offset changed. |
 | Focus | A descendant that gains focus is scrolled into view |
 
-`setScroll(x, y)`, `scrollBy` and `scrollToVisible(component)` work from code, `scrollX()`, `scrollY()`, `maxScrollX()` and `maxScrollY()` read the offsets, and `ScrollPanel.SCROLLED` reports every change of offset with a `ScrollPanel.State`. The offset is clamped to its range on every change and after every layout, and children move by it rounded to whole units, so engines that draw whole pixels do not shimmer. A scroll panel is `Focusable` but starts unfocusable; call `setFocusable(true)` to let it take focus and its keys by itself. Scrolling moves the children's real bounds without measuring them again, so pointer positions and `bounds()` stay in host coordinates inside a scroll panel. Children are clipped to the viewport, the bounds less the padding and the bar's gutter. For long lists of similar rows, use a [`ListView`](controls.md#listview), which builds only the rows in view.
+`setScroll(x, y)`, `scrollBy` and `scrollToVisible(component)` work from code, `scrollX()`, `scrollY()`, `maxScrollX()` and `maxScrollY()` read the offsets, and `ScrollPanel.SCROLLED` reports every change of offset with a `ScrollPanel.State`. The offset is clamped to its range on every change and after every layout (before the first layout it is only kept from going below 0), and children move by it rounded to whole units, so engines that draw whole pixels do not shimmer. A scroll panel is `Focusable` but starts unfocusable; call `setFocusable(true)` to let it take focus and its keys by itself. Scrolling moves the children's real bounds without measuring them again, so pointer positions and `bounds()` stay in host coordinates inside a scroll panel. Children are clipped to the viewport, the bounds less the padding and the bar's gutter. For long lists of similar rows, use a [`ListView`](controls.md#listview), which builds only the rows in view.
 
 ## Clipping
 
