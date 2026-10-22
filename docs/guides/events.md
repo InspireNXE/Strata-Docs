@@ -317,7 +317,7 @@ None of the three bubble, and none take snapshots. They reach only the component
 
 ## Your own events
 
-A control you write declares its events the way the built-ins do, as constants made with `EventType.request`, `EventType.valueRequest`, `EventType.report` and `EventType.valueReport`, and fires them with `CustomComponent`'s `request` and `report` methods. [Extending Strata](extending.md#events-for-your-own-control) shows a complete example.
+A control you write declares its events the way the built-ins do, as constants made with `EventType.request`, `EventType.valueRequest`, `EventType.report` and `EventType.valueReport`, and fires them with `CustomComponent`'s `request` and `report` methods. An event type compares by identity: each call to a factory makes a type equal only to itself, even when another has the same name and event class, so two libraries that both declare `EventType.valueReport("changed")` get two types and a handler for one never hears the other. The name is only for debugging. Keep each type in a constant, and register handlers and fire events with that constant. [Extending Strata](extending.md#events-for-your-own-control) shows a complete example.
 
 ## Input event types
 

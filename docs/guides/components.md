@@ -103,12 +103,14 @@ A [window](controls.md#window) raises itself in its parent when it is pressed, s
 | Flag | Default | Effect |
 |---|---|---|
 | `setVisible(false)` | visible | Not drawn, cannot be hovered or focused, takes no space in layout, and its bounds become empty |
-| `setEnabled(false)` | enabled | Still drawn (built-in controls draw a disabled look) and still takes space, but gets no pointer or keyboard input and cannot be focused |
+| `setEnabled(false)` | enabled | Still drawn (built-in controls draw a disabled look) and still takes space, but acts on no pointer or keyboard input and cannot be focused |
 
 Hiding or disabling a component also hides or disables everything inside it, and clears focus if the focused component is inside.
 
-!!! note "Disabled components pass the pointer to their ancestors"
-    The pointer cannot hit a disabled or hidden component or anything inside it. A click on a disabled button therefore lands on the nearest enabled ancestor under the pointer, usually the panel behind it. If that ancestor has a click handler, it runs.
+!!! note "Disabled components take the pointer and do nothing with it"
+    The pointer cannot hit a hidden component or anything inside it, but it does hit a disabled one, or one inside a disabled container, so nothing behind it acts. A press on a disabled button does not select the list row under it or start a window drag. It closes any light-dismiss popup above, as a press elsewhere would, and then fires no events, runs no default behavior, leaves focus where it is and uses up its release, so no click follows. The component is not hovered and hears no pointer enter, exit or move, but its tooltip shows, so a control can say why it is disabled. Its cursor is the nearest enabled ancestor's, and a scroll over it goes to that ancestor.
+
+    `isEnabled()` and `isVisible()` say whether the component itself is on. `isEffectivelyEnabled()` and `isEffectivelyVisible()` also check every container and composite above it, which is what decides whether it can take input.
 
 ## What only some components have
 
