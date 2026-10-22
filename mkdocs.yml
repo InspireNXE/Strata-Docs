@@ -112,10 +112,18 @@ nav:
       - Data binding: guides/binding.md
       - Event snapshots: guides/snapshots.md
       - Input and focus: guides/input-focus.md
+      - Commands and shortcuts: guides/commands.md
       - Screens: guides/screens.md
+      - Threads: guides/threading.md
       - Themes: guides/theming.md
       - Text: guides/text.md
+      - Internationalization: guides/internationalization.md
+      - Animation: guides/animation.md
+      - Drag and drop: guides/drag-and-drop.md
+      - Clipboard: guides/clipboard.md
+      - File dialogs: guides/files.md
       - Appearances: guides/appearances.md
+      - Testing: guides/testing.md
       - Extending Strata: guides/extending.md
   - Platforms:
       - platforms/index.md
