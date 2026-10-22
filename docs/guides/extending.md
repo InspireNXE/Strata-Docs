@@ -136,6 +136,7 @@ Every hook is a `protected` method you override, and Strata calls each one at th
 | Hook | Called | Default |
 |---|---|---|
 | `measure(context, availableWidth, availableHeight)` | During layout, when the component or something inside it changed, or it is offered a different size. Return the content's natural size. Required. | |
+| `measureMinimum(context)` | During layout, the first time a parent that shares space asks after the component changed. Return the smallest size the content can work in, such as the longest word of wrapping text. A stack's weighted children and a grid's weighted tracks get no less. | `Size.ZERO` |
 | `arrange(context, bounds)` | On a `CustomComposite` or `CustomContainer`, after `measure`, with the component's final bounds. Give every child its slot. Required there. | |
 | `paint(painter, bounds)` | Every frame, after the background and border and before a composite's children | Draws nothing |
 | `paintOverChildren(painter, bounds)` | On a composite, every frame after its children, outside their clip | Draws nothing |
@@ -153,6 +154,8 @@ Every hook is a `protected` method you override, and Strata calls each one at th
 
 `measure` receives the space its parent offered with the margin already taken off. Where the component has a fixed width or height, that size is offered in place of the parent's, and the maximum size caps both. A component that did not change and is offered the same space as last time keeps its last size without `measure` running, so do not count frames or poll for changes in `measure`.
 
+`measureMinimum` takes no space: return what the content needs wherever it is, and read children's minimums with `context.minimumSize(child)` rather than measuring them. Strata raises the result to the minimum size, caps it by the maximum size, puts a fixed size in its place, and keeps it until the next `invalidateLayout()`. It does not make the component itself larger: `measure` can still be offered less, inside a fixed size for example. A negative or non-finite result counts as zero.
+
 ### When hooks run
 
 A host does its work for a frame in this order, and only the steps something asked for do anything:
@@ -168,7 +171,7 @@ Input arrives between frames. A pointer event runs the layout first if something
 - Pass the factory of the host that will show the component. A component cannot move between hosts.
 - `measure` must be pure layout. Compute and return a size, and cache what `paint` needs. Strata applies the minimum and any fixed size to what you return. The available size may be infinite, and a negative result counts as zero. Do not change other components or call `invalidateLayout()` from it. A composite may add and remove its own children during layout, as a list adds the rows that scroll into view; that schedules one more layout.
 - `paint` draws inside the bounds it is given and must not change layout state. It runs every frame, so avoid allocating there. The painter is valid only during the call.
-- Call `invalidateLayout()` whenever something `measure` reads changes. Changes that only affect drawing need nothing: the next frame draws them.
+- Call `invalidateLayout()` whenever something `measure` or `measureMinimum` reads changes. Changes that only affect drawing need nothing: the next frame draws them.
 - Read time, the clipboard and text sizes through `environment()`, never from `System.currentTimeMillis()` or AWT, so the component works on every engine and in tests.
 - Event hooks run only while the component is attached, and a hidden or disabled component gets no new pointer or keyboard input.
 - Consume the events you act on, so ancestors and the engine do not act on them too.
@@ -255,8 +258,10 @@ Everything required of a custom component applies, plus:
 |---|---|---|
 | `MeasureContext` | `text()` | The engine's text metrics, for measuring text in your own content |
 | `MeasureContext` | `measure(child, width, height)` | Measures a child in the space offered, margin included. Either size may be infinite. Returns the child's desired size plus its margin, or zero for a hidden child. |
+| `MeasureContext` | `minimumSize(child)` | The child's smallest size, margin included: its `measureMinimum` raised to its minimum size and capped by its maximum, or its fixed size, or zero for a hidden child. It may be read before or after the child is measured. |
 | `ArrangeContext` | `text()` | The engine's text metrics |
 | `ArrangeContext` | `outerSize(child)` | What the child asked for in the last measure, margin included, or zero for a hidden child |
+| `ArrangeContext` | `minimumSize(child)` | The same as on `MeasureContext` |
 | `ArrangeContext` | `arrange(child, slot)` | Gives the child its slot in host coordinates, margin included. A slot smaller than the child is allowed; the child overflows it unless it stretches. |
 | `ArrangeContext` | `measure(child, width, height)` | Measures a child added during `arrange`, such as a row that scrolled into view, before you give it a slot |
 
