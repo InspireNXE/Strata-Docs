@@ -52,11 +52,12 @@ A key may have a paint, a text style, [insets](#insets), a [metric](#metrics), o
 
 ## Paints
 
-A `Paint` fills a rectangle. There are five kinds:
+A `Paint` fills a rectangle. There are six kinds:
 
 | Factory | Record | Draws |
 |---|---|---|
 | `Paint.solid(argb)` | `Paint.Solid` | One color |
+| `Paint.rounded(argb, radius)` | `Paint.Rounded` | One color, with rounded corners |
 | `Paint.gradient(top, bottom)` | `Paint.Gradient` | A vertical gradient |
 | `Paint.sprite(id)` | `Paint.Sprite` | An image stretched over the rectangle |
 | `Paint.tiled(id, size)` | `Paint.Tiled` | An image repeated from the top left corner, one copy per `size` |
@@ -64,13 +65,23 @@ A `Paint` fills a rectangle. There are five kinds:
 
 `Paint.NONE` draws nothing; it is the default background. The sprite factories make untinted paints. To tint, use the record constructor with an ARGB tint, which is multiplied with the image's pixels: `new Paint.NineSlice(id, border, 0xFFC0C0C0)` darkens it slightly. Opaque white leaves an image unchanged.
 
-`paint.paint(painter, rect)` draws any paint, so custom components need not care which kind they hold. `Paint` is a sealed interface of the five records, so code that does need the kind, such as a component that draws a solid paint's color a shade darker, can switch over them.
+`paint.paint(painter, rect)` draws any paint, so custom components need not care which kind they hold. `Paint` is a sealed interface of the six records, so code that does need the kind, such as a component that draws a solid paint's color a shade darker, can switch over them.
 
 ### Colors
 
 Colors are ARGB ints, `0xAARRGGBB`. The alpha byte comes first: `0xFF000000` is opaque black, and `0x80FFFFFF` is half-transparent white.
 
 A color with alpha 0 draws nothing, so be careful with `0xRRGGBB` literals: `0xFF0000` has alpha 0 and is invisible. Write `0xFFFF0000` for opaque red.
+
+### Rounded corners
+
+`Paint.rounded(argb, radius)` fills the rectangle with rounded corners. A radius of 0 is a solid color, and one larger than half the shorter side counts as half of it. In a theme file it is a color object with a radius: `{ "color": "#FF202024", "radius": 4 }`. A color object without a radius is a solid color, and a radius that is not a plain, non-negative number makes the file invalid.
+
+```java
+--8<-- "theming/ThemeAdditionsExamples.java:rounded"
+```
+
+The corners are drawn with the painter's shape calls, so on an engine that draws only rectangles they look stepped. See [Lines, shapes and pixels](extending.md#lines-shapes-and-pixels) and [Platform differences](../platforms/differences.md).
 
 ### Sprites
 
@@ -106,6 +117,22 @@ When a rectangle is smaller than the borders, they shrink in proportion. The bor
 
 A `TextStyle` sets color, bold, italic, underline, strikethrough, a shadow and the monospaced font. Themes map text keys to styles; labels can also take one directly. See [Text](text.md).
 
+### Changing part of a text style
+
+A `TextStyle` in an override or a theme replaces the whole style for its key. To change one property and keep the rest of what the engine's theme gives that key, override with a `TextStylePatch` instead. A patch names only the properties it changes: `TextStylePatch.of()` changes nothing, and `color`, `bold`, `italic`, `underline`, `strikethrough`, `shadow` and `monospace` return a copy that also sets one property.
+
+```java
+--8<-- "theming/ThemeAdditionsExamples.java:patch"
+```
+
+`ThemeRef.override(key, patch)` and `ThemeOverrides.with(key, patch)` take them, as `override(key, style)` does for whole styles. A layer applies its whole styles first and then its patches, over the style the layers below give the key, or over `TextStyle.DEFAULT` when they give none. Two patches of one key in the same overrides combine, the later one winning where both set a property, so a recolor and a bold do not drop one another:
+
+```java
+--8<-- "theming/ThemeAdditionsExamples.java:combine"
+```
+
+A theme file's `text` entry already works this way: it changes only the fields it names. `TextStylePatch.then(after)` combines two patches in code, and `apply(base)` returns the patched style. A panel can patch the text inside it with `Container.setTextStyle`; see [Inherited text styles](layout.md#inherited-text-styles).
+
 ## Insets
 
 Paints and text styles say what a control looks like. Insets, the third kind of theme value, say where it puts its content, in UI units. A tab bar reads `tab.padding` for the space around an unselected tab's text and `tab.padding.selected` for the selected tab's, so a theme whose unselected tab image is drawn shorter than the tab can move that tab's text down to match:
@@ -125,13 +152,13 @@ Theme theme = Themes.flat().toBuilder()
         .build();
 ```
 
-Padding set in code wins over the theme: `setTextPadding` on a button, a drop-down button, a text box, a password box or a text area, `setPadding` on a window, and `setMargin` on a cell label. Pass `null` to `setTextPadding` or `setPadding` to follow the theme again.
+Padding set in code wins over the theme: `setTextPadding` on a button, a drop-down button, a text box, a password box or a text area, `setPadding` on a window, and `setMargin` on a cell label. To follow the theme again, call `clearTextPadding()` or `clearPadding()`. The setters take no null; `clearPadding()` is on every container, and `clearTextPadding()` on those controls.
 
 `theme.insets(key)` and `insetsOr(key, fallback)` look them up, and `ThemeRef.override(key, insets)` overrides them like paints. A control that reads insets for several states sizes itself for the largest, so selecting a tab never moves its neighbors. [Theme keys](../reference/theme-keys.md) lists the insets keys with their defaults.
 
 ## Metrics
 
-Some things a theme tunes are a single number, such as how long the pointer rests before a tooltip shows or how many rows a wheel notch scrolls. Metrics, the fourth kind of theme value, hold one number per key. Each key's Javadoc states its unit, which is UI units, milliseconds, rows, or a flag that is on for any value but 0.
+Some things a theme tunes are a single number, such as how long the pointer rests before a tooltip shows or how many rows a wheel notch scrolls. Metrics, the fourth kind of theme value, hold one number per key. Each key's Javadoc states its unit, which is UI units, milliseconds, rows, or a flag that is on for any value but 0. [Theme keys](../reference/theme-keys.md) has a column for the unit.
 
 ```java
 Theme theme = Themes.flat().toBuilder()
@@ -148,6 +175,20 @@ ThemeRef theme = ThemeRef.platform()
 ```
 
 [Theme keys](../reference/theme-keys.md) lists every metric key with its default.
+
+### Flags and durations
+
+A flag and a duration are metrics that say what they are. In a theme file, a flag is `true` or `false`, stored as 1 and 0, and a duration is a string of digits with an optional fraction and the unit `ms` or `s`, such as `"500ms"` or `"0.5s"`, stored in milliseconds. Anything else, including a number that does not fit a float, makes the file invalid. In code, `ThemeOverrides.with(key, boolean)` and `ThemeRef.override(key, boolean)` set a flag. Read them back with `Theme.flagOr(key, fallback)`, true when the metric is not 0, and `Theme.millisOr(key, fallback)`, the metric rounded to whole milliseconds:
+
+```java
+--8<-- "theming/ThemeAdditionsExamples.java:flags"
+```
+
+```java
+--8<-- "theming/ThemeAdditionsExamples.java:read"
+```
+
+A plain number still works for both, so a file written before these forms keeps its meaning.
 
 ## Per-component overrides
 
@@ -213,7 +254,7 @@ A resolved theme remembers which layer set each key. `theme.layer(key)` returns 
 
 `ThemeOverrides` holds paints, text styles, insets and metrics by style key, with no id, so the same overrides can go to `override`, to `define` or to one ref. Overrides from code apply above every theme file, so your code has the last word over packs and over other projects' theme files, and only a ref's own overrides come after them. Overrides for one id apply in the order they were added.
 
-Nothing is written to a theme or a file. The keys apply each time the theme resolves, and closing the subscription brings back whatever lies beneath them. A text style from code replaces the whole style for its key, where a theme file's text entry changes only the fields it names.
+Nothing is written to a theme or a file. The keys apply each time the theme resolves, and closing the subscription brings back whatever lies beneath them. A text style from code replaces the whole style for its key, where a theme file's text entry and a [text style patch](#changing-part-of-a-text-style) change only the fields they name.
 
 `define` gives an id a base that starts from its parent, as a theme file with `parent` does, and packs can restyle a defined theme like any other. Defining an id that is already defined, until that definition's subscription is closed, throws `ThemeException`, and so does defining `strata:flat` or `strata:platform`. An id that the adapter already gives a base cannot be defined either; that shows when the theme resolves, which then throws `ThemeException`.
 
@@ -247,6 +288,7 @@ A theme file sets only the keys it changes. Where the files live depends on the 
 | Value | Written as |
 |---|---|
 | Color | `"#RRGGBB"` (opaque) or `"#AARRGGBB"` |
+| Rounded color | `{ "color": "#AARRGGBB", "radius": 4 }` |
 | No paint | `"none"` |
 | Sprite | `{ "sprite": "ns:path" }`, with an optional `"tint"` color |
 | Nine-slice | `{ "nine_slice": "ns:path", "border": ... }`, with an optional `"tint"`, `"size": [width, height]` and `"tiled": true`, which needs a size. The border is one number, `[horizontal, vertical]` or `[left, top, right, bottom]` |
@@ -254,7 +296,7 @@ A theme file sets only the keys it changes. Where the files live depends on the 
 | Gradient | `{ "gradient": [top, bottom] }` |
 | Text style | Any of `color`, `bold`, `italic`, `underline`, `strikethrough`, `shadow` and `monospace`. Fields you leave out keep the style a lower layer gave the key, or `TextStyle.DEFAULT` where none did |
 | Insets | One number, `[horizontal, vertical]` or `[left, top, right, bottom]`, in UI units |
-| Metric | A number, in the unit its key states |
+| Metric | A number, in the unit its key states. A flag may be `true` or `false`, and a duration a string such as `"500ms"` or `"0.5s"`. |
 
 A misspelled member, a bad color or broken JSON makes the whole file invalid. The engine logs it and skips that file, and the other packs still apply. Adapters find the files through the SPI's `ThemeSource`, which [Writing an adapter](../platforms/writing-an-adapter.md#themes) describes.
 

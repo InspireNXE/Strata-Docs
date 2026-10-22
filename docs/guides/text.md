@@ -31,7 +31,30 @@ Text is immutable, and two texts built the same way are equal. Read the characte
 
 Where the translation comes from depends on the platform. A game's adapter usually reads the game's own language files, so keys go wherever the game keeps its translations. On Swing, set a `ResourceBundle` with `SwingTranslations.use`; see [Swing](../platforms/swing.md#translations). A key with no translation shows the key itself, which makes missing ones easy to spot, and the log gets one warning per missing key. Strata's own controls use keys too, listed in [Translation keys](../reference/translation-keys.md), with English built in.
 
-Plural rules are not handled. Pick the key for the count yourself, such as `shop.item` for one and `shop.items` for more.
+### Plurals
+
+"1 offer" and "3 offers" need their own translations, and some languages have more than two forms. `Text.plural(key, count, args...)` picks the translation by the language's rules for the count:
+
+```java
+--8<-- "text/TextAdditionsExamples.java:plural"
+```
+
+The translator names the count's `PluralCategory`, one of `ZERO`, `ONE`, `TWO`, `FEW`, `MANY` and `OTHER`, and the text reads the translation of `key.<category>`, such as `shop.offers.one`. If the language has no entry for that category it reads `key.other`, and if that is missing too the text shows `key.other` itself, with one warning in the log. The translation is a pattern like any other, so `%s` stands for the first argument, here the count. The English entries are:
+
+```text
+shop.offers.one=%s offer
+shop.offers.other=%s offers
+```
+
+A Russian file adds `shop.offers.few` and `shop.offers.many`, and an Arabic one all six. Like `translatable`, the text resolves on every layout, so it follows a language change, and two plural texts are equal when their key, count and arguments are.
+
+Core carries the cardinal rules of the Unicode CLDR for whole numbers, so counts need no code of yours: the languages with a single form, the languages that use one form for 0 and 1, and the ones with two, three, four or six forms, such as the Slavic languages, Arabic, Hebrew, Irish, Welsh and Maltese. A language without rules of its own uses English's. `PluralCategory.of(locale, count)` gives the category directly, for code that needs it, and a negative count takes the category of its absolute value:
+
+```java
+--8<-- "text/TextAdditionsExamples.java:category"
+```
+
+An adapter whose engine has its own plural handling overrides `Translator.plural(long)`; a translator that throws or returns null counts as `OTHER`.
 
 ### Operations
 
@@ -133,14 +156,17 @@ As far as engines are concerned, a span is one line. Break text into lines befor
 |---|---|
 | `width(span)` | How wide the span is drawn, in UI units. 0 for empty text. |
 | `lineHeight(style)` | The distance from one line's top to the next line's top |
+| `ascent(style)` | The distance from a line's top to its baseline, positive and no more than the line height. The default is four fifths of the line height; adapters report their font's own. |
 
 Components get it from `MeasureContext.text()` during measure and from `environment().text()` anywhere else. The widths match drawing, so a text box can place its caret between characters. These metrics also measure pictures in text: a span that holds one is as wide as the picture. `lineHeight` describes a style, so it leaves pictures out; a line with a picture taller than its text needs room for the picture's height too.
 
 | Engine | Widths | Line height |
 |---|---|---|
-| Swing | Fractional advance widths of the AWT font | The font's height: ascent, descent and leading |
+| Swing | Fractional advance widths of the AWT font | The font's height: ascent, descent and leading. The ascent is the font's own. |
 
 Engines with pixel fonts often report whole-pixel widths, and some make bold text wider.
+
+The ascent is what lets a layout put the text of different controls on one line. A component that draws a line of text with its top at `y` has its baseline at `y` plus the ascent of the line's style; see [Lining up text](layout.md#lining-up-text).
 
 ## Drawing text in a custom component
 
@@ -172,6 +198,10 @@ protected void paint(Painter painter, Rect bounds) {
 
 `Label` wraps greedily by word when wrapping is on: it fills each line with as many words as fit the available width, and breaks a single word wider than a whole line between characters. It always breaks at `\n`. See [Wrapping text](layout.md#wrapping-text) for giving it a width.
 
+Labels, tooltips, toasts, info bars and text areas all break by one rule. A row takes as much of its line as fits and breaks after the last whitespace that fits, where whitespace is any character `Character.isWhitespace` accepts, tabs included. A no-break space never breaks. The whitespace where a row breaks stays at the end of that row: it is not drawn and does not count toward the row's width, and a text area can put the caret in it. Whitespace anywhere else, at the start of a line included, is kept as written, so indentation survives wrapping. A word wider than a whole row breaks between grapheme clusters, never inside one, and a row always takes at least one cluster.
+
+A grapheme cluster is what a reader sees as one character: a letter with its accent marks, an emoji with its modifiers, a flag. Wrapping, the `...` of `TextOverflow.ELLIPSIS`, a field's length limit, the caret and selections all keep clusters whole. `maxLength` counts code points, and a cut to it leaves out a cluster that would cross the limit. A password box steps by code points.
+
 Wrapping belongs to the controls and is not a public utility. A custom component that needs wrapped text can measure and break the text itself, or contain a wrapping label.
 
 ## Mixed styles
@@ -201,7 +231,18 @@ An engine adapter can turn the engine's own text, such as a translated engine me
 
 Strata has no font API, so each adapter picks its fonts. Swing draws with the fonts given to `SwingTextMetrics`, AWT fonts or a `BitmapFont` cut from images. `SwingTextMetrics.defaults()` is the logical Dialog font at 9 units. See [Swing](../platforms/swing.md#fonts). Other adapters usually draw with the engine's own font.
 
+## Right to left text
+
+Hebrew and Arabic read from the right, and a line that mixes them with English reads in both directions. Core orders each line you draw by the Unicode bidirectional algorithm, so captions, menu items, combo boxes, placeholders and the lines of a label all draw in reading order, with no code of your own. The text you hand over stays in logical order: `plain()`, `Text.append` and searches see the characters as typed.
+
+- The paragraph direction of a control comes from its [flow direction](layout.md#right-to-left). A caption such as "שלום Ana" has the Hebrew first and at the right in a right to left panel, and the English name after it.
+- `LEFT` text alignment means the start of the line, so a label's text starts at the right in a right to left panel.
+- Wrapping and ellipsis work on the logical text, as the algorithm requires, and each wrapped line is then put in reading order.
+- An engine that shapes right to left text itself, as Swing does, draws each run joined and in order. An engine with a simple font gets the run with its characters in reverse order and its brackets mirrored. That reads correctly for Hebrew, but Arabic letters draw unjoined there. [Platform differences](../platforms/differences.md) says which adapters do what.
+
+[Internationalization](internationalization.md) collects the rest: mirrored controls, numbers in the language's digits, and plurals.
+
 ## Not supported yet
 
 - Markup such as BBCode. Avoid an engine's own formatting codes in text too: Strata does not interpret them, and the engine's text drawing may, so the same text would look different on each engine.
-- Right-to-left text and complex shaping beyond what the engine's own text drawing does.
+- Joined Arabic and other complex scripts on an engine whose text drawing cannot shape them. Core orders such text but cannot join its letters.

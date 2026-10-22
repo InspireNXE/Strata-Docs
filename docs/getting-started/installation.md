@@ -29,7 +29,7 @@ repositories {
 |---|---|---|
 | `strata-api` | The API | Compiling screens and components |
 | `strata-spi` | The SPI, with the adapter contract tests as test fixtures | Writing an engine adapter |
-| `strata-core` | The implementation | Run time only, through an adapter |
+| `strata-core` | The implementation, with the test kit as test fixtures | Run time only, through an adapter, and `testFixtures` for the [test kit](../guides/testing.md) |
 | `strata-swing` | The Swing adapter, built in Strata-Swing | Swing applications and tests |
 
 Every artifact comes with a sources jar and a javadoc jar. A Java 17 build of `strata-api`, `strata-spi` and `strata-core` has `-java17` in its version, such as `0.1.0-java17-SNAPSHOT`.

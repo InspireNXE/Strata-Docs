@@ -31,7 +31,19 @@ A `Strata` method such as `Strata.screens()` or `Strata.texts()` could not find 
 
 ### `IllegalStateException: No snapshot was taken for this event`
 
-A handler called `event.snapshot()` or `currentSnapshot()` on an event that has no snapshot of that component: a Post, paint or measure event, or a component that joined the path during delivery. On a Post event, read `previous()` instead. See [Event snapshots](../guides/snapshots.md#when-there-is-no-snapshot).
+A handler called `event.snapshot()` or `currentSnapshot()` on a request or input event that has no snapshot of that component, because the component joined the path during delivery. Post, paint and measure events have no snapshot methods at all; on a Post event, read `previous()` instead. See [Event snapshots](../guides/snapshots.md#when-there-is-no-snapshot).
+
+### `IllegalStateException: Called on ..., but components shown by a host must be used on its UI thread`
+
+A setter, `add` or another change reached a component from a thread that is not the host's UI thread. Hand the work to the UI thread with `Strata.uiThread().execute(...)` or the factory's `uiThread()`, or set a `State` the component is bound to. A component not yet in a host can be built on any thread. See [The UI thread](../guides/threading.md).
+
+### `NullPointerException` from `setTooltip(null)`, `setPadding(null)` or `setPlaceholder(null)`
+
+Setters that have overloads no longer take null. Call `clearTooltip()`, `clearPadding()` or `clearTextPadding()`, and pass empty text for no placeholder. See [Javadoc](../reference/javadoc.md).
+
+### `IllegalStateException` calling `startTransfer`, `accept` or `reject`
+
+`DragEvent.startTransfer` works only in a `DRAG_START` handler or `onDragStart`, once per drag, and `accept` and `reject` only in `DRAG_OVER` and `DROP`. See [Drag and drop](../guides/drag-and-drop.md).
 
 ### `IllegalArgumentException: Sprite id needs a namespace`
 
@@ -51,7 +63,7 @@ Strata does not catch exceptions from handlers or hooks. They propagate out of t
 | Is a clipping ancestor too small? | Children are clipped to their container's bounds by default. |
 | Are your colors opaque? | `0xFF0000` has alpha 0 and draws nothing. Write `0xFFFF0000`. |
 | On Swing, was the screen opened? | `Strata.screens().open(screen)` after `panel.setDefault()`, or `panel.screens().push(screen)`. |
-| Did you show it on the UI thread? | Hosts are single-threaded. Hand work from other threads to the engine's UI thread first. |
+| Did you show it on the UI thread? | Hosts are single-threaded. Hand work from other threads over with [`Strata.uiThread().execute`](../guides/threading.md). |
 
 ## Layout looks wrong
 
@@ -64,6 +76,10 @@ Strata does not catch exceptions from handlers or hooks. They propagate out of t
 | Things are a pixel off on another engine | The adapter may round fractional positions to whole pixels. Use whole numbers. |
 | A `GridPanel` child lands in the wrong cell | Cells past the defined rows and columns move to the last ones. Define enough tracks. |
 | A custom container's children have stale positions | It must measure and arrange every child, hidden ones included. See [Write a new layout](../guides/extending.md#write-a-new-layout). |
+| A custom component looks stale until the mouse moves | A change that only `paint` reads needs `repaint()`, and one the clock brings needs `repaintAfter(millis)`. Adapters that draw only when asked show it. See [Asking for frames](../guides/extending.md#asking-for-frames). |
+| Labels, a text box and a button in a row show their text at different heights | Give them `VerticalAlignment.BASELINE` in a horizontal stack panel, a wrap panel or a grid row. See [Lining up text](../guides/layout.md#lining-up-text). |
+| A `WrapPanel` stays in one long line | It was offered unlimited width. Give it a fixed or maximum width. |
+| A right to left screen is not mirrored | The translator's language reads left to right and nothing set a direction. Call `setFlowDirection(FlowDirection.RIGHT_TO_LEFT)` on the root, or set a language that reads right to left. See [Right to left](../guides/layout.md#right-to-left). |
 
 ## Input problems
 
@@ -77,7 +93,9 @@ Strata does not catch exceptions from handlers or hooks. They propagate out of t
 | Tab skips a component | It is not focusable and tabbable, or it or an ancestor is hidden or disabled. Check its tab index too. |
 | A shortcut on the root never fires | A focused component consumed the key first. A text box consumes printable keys without Control or Alt. |
 | Modifier checks never pass on another engine | Some engines send no modifiers with moves, scrolls or characters. See [Modifier keys](../platforms/differences.md#modifier-keys). |
-| Escape closes the screen | The engine closes screens on an unconsumed Escape. Consume Escape in a root handler. |
+| Escape closes the screen | The engine closes screens on an unconsumed Escape, and Strata asks the screen first through `closeRequested`. Return false from it to refuse, or consume Escape in a root handler. See [Closing](../guides/screens.md#closing). |
+| A dragged item is never dropped | A target must call `event.accept(effect)` in `DRAG_OVER`, or have a default that does. A drag with a format the target does not take finds no target. See [Drag and drop](../guides/drag-and-drop.md). |
+| A command's shortcut does nothing | The command is disabled, a focused component consumed the key first, or a modal dialog is open, which blocks the host's shortcuts. See [Commands and shortcuts](../guides/commands.md). |
 
 ## Sprites
 

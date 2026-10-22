@@ -96,7 +96,7 @@ public final class ExtendingExamples {
             event.cancel();
             factory.overlays().dialog(factory.messageBox("Notes", "Discard your changes?", MessageBox.Buttons.YES_NO)
                     .onEvent(MessageBox.ANSWERED, answer -> {
-                        if (answer.value() == MessageBox.Result.YES) {
+                        if (MessageBox.Result.YES.equals(answer.value())) {
                             window.close();
                         }
                     }));

@@ -82,7 +82,7 @@ The control events of parts added with `addChild`, such as the buttons' `Button.
 --8<-- "extending/ExtendingExamples.java:composite-use"
 ```
 
-A part that shows the caller's content, such as a cell a caller's cell factory made, goes in with `addContent` instead. It is still private, but control events from it and from anything inside it pass the composite, so a button in a cell is heard around the composite. `CustomComposite` also has `removeChild`, `clearChildren`, `childList()` and the ordering methods below, and `setChildClipping(false)` lets parts draw outside its bounds. `CustomContainer` is a composite whose children are public: callers add and remove them through the `Container` methods.
+A part that shows the caller's content, such as a cell a caller's cell factory made, goes in with `addContent` instead. It is still private, but control events from it and from anything inside it pass the composite, so a button in a cell is heard around the composite. `CustomComposite` also has `removeChild`, `clearChildren`, `childList()` and the ordering methods below, and `setChildClipping(false)` lets parts draw outside its bounds. There is no `clipsChildren()` to override: the setting is yours to make, and a `CustomContainer` reports it through its public `clipsChildren()`. `CustomContainer` is a composite whose children are public: callers add and remove them through the `Container` methods.
 
 ## Write a new component
 
@@ -143,10 +143,14 @@ Every hook is a `protected` method you override, and Strata calls each one at th
 | `childClip()` | On a composite, while painting and hit testing, if it clips its children. Return a rectangle worked out during layout. | The bounds |
 | `requiredStyleKeys()` | When the component joins a host, and when the theme changes | None |
 | `onApplyTheme(theme)` | On attach and whenever the theme changes, before the next layout | Nothing |
+| `onAttached()` | Every time the component joins a tree a host is showing, after `onApplyTheme` and the bindings, before its `Component.ATTACHED` handlers. See [Attach and detach](#attach-and-detach). | Nothing |
+| `onDetached()` | Every time it leaves such a tree, after its `Component.DETACHED` handlers and while its bindings still run | Nothing |
+| `baseline()` | During the parent's layout, after `measure`, if the parent lines up text. Return the distance from the top of the bounds to the first line's baseline. See [Lining up text](#lining-up-text). | NaN, for none |
 | `acceptsTextInput()` | When it gains focus | false |
 | `textInputKind()` | When it gains focus, if it accepts text input. Return `SECRET` for a secret, so the engine can turn off input methods and suggestions. | `TEXT` |
 | `snapshotState()` | When an event with [snapshots](snapshots.md#your-own-components) captures it | null |
 | `onPointerEnter`, `onPointerExit`, `onPointerMove`, `onPointerPress`, `onPointerRelease`, `onClick`, `onDragStart`, `onDrag`, `onDragEnd`, `onScroll`, `onKey`, `onChar` | The default-behavior step of the matching `InputEvents` type, after the component's handlers, unless one canceled it | Nothing |
+| `onDragEnter`, `onDragOver`, `onDragExit`, `onDrop`, `onTransferDone` | The same, for the five events of a drag that carries data. See [Dragging data](#dragging-data). | Nothing |
 | `onFocusGained`, `onFocusLost` | The default-behavior step of `Focusable.FOCUS_GAINED` and `FOCUS_LOST` | Nothing |
 | `onOtherEvent(type, event)` | The default-behavior step of an input event type with no hook of its own, such as `InputEvents.MODIFIERS_CHANGED` on the screen's root. Control events, the requests and reports, have no default-behavior step. | Nothing |
 | `onChildRemoved(child)` | On a composite, after a child is removed. Drop what you kept about it. | Nothing |
@@ -166,16 +170,37 @@ A host does its work for a frame in this order, and only the steps something ask
 
 Input arrives between frames. A pointer event runs the layout first if something changed, so hit testing never sees stale bounds. Then the event fires: on each component of its path, the handlers run and then the component's `on...` hook, unless a handler canceled it. `onApplyTheme` runs when a component is attached and when the theme changes, before the next layout.
 
+### Attach and detach
+
+A component is attached when it is in a tree a host shows, and detached when it leaves one. Adding it to an attached container attaches it, removing it detaches it, and so do an expander showing or hiding its content, a navigation view swapping pages, an overlay opening or closing, and a screen opening, closing or being rebuilt. The same two steps run in every case:
+
+1. On attach, the host applies the theme (`onApplyTheme`), sets the properties of the bindings that joined, and then calls `onAttached()` and fires `Component.ATTACHED` on each component, parents before their children. The component's hook runs before its handlers.
+2. On detach, the host first fires `Component.DETACHED` and calls `onDetached()` on each component, children before their parents, while the tree is still attached and its bindings still run. The handlers run before the component's hook. Then focus, hover and the tooltip are cleared and the tree is detached.
+
+Each attach a component hears is followed by exactly one detach. A throwing handler or hook does not stop the walk; the first exception is thrown at the end. The events are made only when a component has a handler for them, and they do not bubble. [Events](events.md#attaching-and-detaching) covers them from the handler's side.
+
+Start what a component needs only while it is shown in `onAttached()` and stop it in `onDetached()`. This chart listens to a feed of prices only while it is on a screen:
+
+```java
+--8<-- "extending/HookExamples.java:lifecycle"
+```
+
+Code outside a component does the same with `whileAttached(start)`, which calls the supplier at once if the component is attached, again on every attach, and closes the returned `Subscription` on every detach:
+
+```java
+--8<-- "extending/HookExamples.java:while-attached"
+```
+
 ### Rules
 
 - Pass the factory of the host that will show the component. A component cannot move between hosts.
 - `measure` must be pure layout. Compute and return a size, and cache what `paint` needs. Strata applies the minimum and any fixed size to what you return. The available size may be infinite, and a negative result counts as zero. Do not change other components or call `invalidateLayout()` from it. A composite may add and remove its own children during layout, as a list adds the rows that scroll into view; that schedules one more layout.
 - `paint` draws inside the bounds it is given and must not change layout state. It runs every frame, so avoid allocating there. The painter is valid only during the call.
-- Call `invalidateLayout()` whenever something `measure` or `measureMinimum` reads changes. Changes that only affect drawing need nothing: the next frame draws them.
+- Call `invalidateLayout()` whenever something `measure`, `measureMinimum` or `baseline` reads changes. A change that only `paint` reads needs `repaint()` instead, and a change the clock brings needs `repaintAfter(millis)`; see [Asking for frames](#asking-for-frames).
 - Read time, the clipboard and text sizes through `environment()`, never from `System.currentTimeMillis()` or AWT, so the component works on every engine and in tests.
 - Event hooks run only while the component is attached, and a hidden or disabled component gets no new pointer or keyboard input.
 - Consume the events you act on, so ancestors and the engine do not act on them too.
-- Everything runs on the UI thread. Exceptions thrown from hooks propagate to the engine's call into Strata.
+- Everything runs on the UI thread, and a component that a host shows may be changed only there; see [The UI thread](threading.md). `repaint()` is the exception. Exceptions thrown from hooks propagate to the engine's call into Strata.
 
 Every `Component` method is `final` on `CustomComponent` and delegates to Strata's half of the component, its peer, so your component takes part in layout, focus, hit testing and events like any other. Return `this.self()` from your own setters to keep chaining typed.
 
@@ -189,7 +214,9 @@ These `protected` methods are for the subclass's own drawing, layout and input c
 |---|---|
 | `self()` | Returns `this` as `T`, for returning from your own setters |
 | `environment()` | The engine's text metrics, clock, clipboard and held modifiers; see [The environment](#the-environment) |
-| `theme()` | The host's theme, or `null` before the first attach, for reading styles outside `onApplyTheme` |
+| `theme()` | The host's theme as an `Optional`, empty before the first attach, for reading styles outside `onApplyTheme`. It has the [text style patches](layout.md#inherited-text-styles) of the containers around the component applied. |
+| `setStyleState(state, on)`, `stylePaint(key, fallback)`, `styleText(key, fallback)` | Name your own style states and look up the theme's paints and text styles for them; see [Style states](#style-states) |
+| `repaint()`, `repaintAfter(millis)` | Ask the host for a frame; see [Asking for frames](#asking-for-frames) |
 | `isHovered()` | Whether the pointer is over this component itself, and not over a child |
 | `isHoverWithin()` | Whether the pointer is over this component or anything inside it |
 | `isPressed()` | Whether a button went down on this component and is still held, even if the pointer moved away |
@@ -199,6 +226,8 @@ These `protected` methods are for the subclass's own drawing, layout and input c
 | `invalidateArrangement()` | On a composite, schedules an arrange in the last bounds with no measure, for children that move without changing size, as in scrolling |
 | `request(...)`, `report(...)`, `isHandled(type)` | Fire your own [events](#events-for-your-own-control) |
 
+The public methods follow the same rules as the built-in controls'. A getter whose value can be absent returns an `Optional`: `parent()`, `cursor()`, `tooltip()`, `contextMenu()` and `theme()`. `setCursor` and `setContextMenu` take null to clear; `setTooltip` never takes null, and `clearTooltip()` removes the tooltip. Every `CustomComponent` has `clearTooltip()` whether or not its interface extends `HasTooltip`, and like the other tooltip methods it has an effect only when it does.
+
 ### Painting
 
 The `Painter` a component draws with:
@@ -207,6 +236,7 @@ The `Painter` a component draws with:
 |---|---|
 | `fill(rect, argb)` | A solid rectangle |
 | `fillGradient(rect, top, bottom)` | A vertical gradient |
+| `fillGradient(rect, gradient)` | A gradient at any angle, with any number of stops |
 | `sprite(id, rect, tint)` | An image stretched over the rectangle |
 | `nineSlice(id, rect, border, tint)` | A nine-slice image |
 | `nineSlice(id, rect, size, border, tiled, tint)` | A nine-slice whose image stands for `size` units, with its edges and center repeated when `tiled` |
@@ -216,8 +246,100 @@ The `Painter` a component draws with:
 | `clipped(rect, draw)` | Runs `draw` with drawing limited to the rectangle, intersected with any clip in place |
 | `translated(dx, dy, draw)` | Runs `draw` with every coordinate shifted |
 | `scaled(scale, draw)` | Runs `draw` with every coordinate and size multiplied by `scale` |
+| `pixelsPerUnit()` | How many device pixels one unit covers where the painter draws now |
+
+The lines, shapes, shadows and pixels the painter also draws are in [Lines, shapes and pixels](#lines-shapes-and-pixels).
 
 Coordinates are host coordinates in UI units. Later calls draw over earlier ones. Clipping, translation and scaling take a callback, so the engine's state is always restored, even if the callback throws. Any `Paint` from a theme draws itself with `paint.paint(painter, rect)`.
+
+### Lines, shapes and pixels
+
+A dashboard needs a line chart, a gauge, cards with rounded corners and soft shadows, and connectors between boxes. The painter draws all of them on every engine, with the engine's own shape drawing where it has one and from rectangles where it has not.
+
+| Method | Draws |
+|---|---|
+| `line(x1, y1, x2, y2, stroke, argb)` | A straight line, centered on the segment |
+| `polyline(points, count, stroke, argb)` | Connected lines through `count` points, given as x and y pairs in one array |
+| `fillRoundRect(rect, radius, argb)` | A rectangle with rounded corners |
+| `strokeRect(rect, radius, stroke, argb)` | The outline of a rectangle, inside it |
+| `fillEllipse(oval, argb)`, `strokeEllipse(oval, stroke, argb)` | An ellipse, and its outline inside the rectangle it fits |
+| `strokeArc(oval, startRadians, sweepRadians, stroke, argb)` | Part of an ellipse's outline, inside the rectangle, with the stroke's caps |
+| `fillShape(shape, argb)`, `strokeShape(shape, stroke, argb)` | A `Shape` made of lines, curves and arcs, and its outline centered on the path |
+| `shadow(rect, radius, blur, argb)` | The soft shadow of a rounded rectangle |
+| `clippedRound(rect, radius, draw)` | Runs `draw` limited to a rectangle with rounded corners |
+| `smoothed(smooth, draw)` | Runs `draw` with anti-aliasing on or off |
+| `pixels(buffer, rect, tint)` | A `PixelBuffer` stretched over the rectangle |
+
+Colors are ARGB, and a color with alpha 0 draws nothing. The values these calls take are plain objects you make once and keep in fields, so a frame allocates nothing for them:
+
+- `Stroke` has a width, a `Cap` (`BUTT`, `ROUND`, `SQUARE`) and a `Join` (`MITER`, `ROUND`, `BEVEL`). `Stroke.of(width)` has butt caps and miter joins, and a width of 0 draws nothing.
+- `Gradient` has an angle in radians and at least two stops with offsets from 0 to 1 that do not go down. Angle 0 runs left to right and a quarter turn runs top to bottom. The stops span the whole rectangle at any angle, and the colors before the first stop and after the last hold.
+- `Shape` is built once with `Shape.builder()`: `moveTo`, `lineTo`, `quadTo`, `cubicTo`, `arc` and `close`. It never changes after `build()`. A fill uses the nonzero rule, so an inner subpath that runs the other way is a hole.
+- `PixelBuffer` holds ARGB pixels in the array `array()` returns. Write the pixels on the UI thread and call `changed()`; an engine copies the buffer again only when its `version()` moved.
+
+A chart draws its grid and a line through its values. The grid lines are one device pixel thick at any density, and the line comes from one array that every frame refills:
+
+```java
+--8<-- "extending/DrawingExamples.java:chart"
+```
+
+A gauge is two arcs. An angle is in radians and turns clockwise on the screen from 3 o'clock, so this ring starts at the lower left and sweeps three quarters of a turn:
+
+```java
+--8<-- "extending/DrawingExamples.java:gauge"
+```
+
+A card draws its shadow first, then its face, then a gradient at an angle that `clippedRound` keeps inside the rounded corners, and last its outline:
+
+```java
+--8<-- "extending/DrawingExamples.java:card"
+```
+
+A `Shape` kept in a static field draws at any size when the painter is moved and scaled; the second shape here has a hole:
+
+```java
+--8<-- "extending/DrawingExamples.java:shape"
+```
+
+Pixels you compute go into a buffer. Hard edges keep pixel art sharp:
+
+```java
+--8<-- "extending/DrawingExamples.java:pixels"
+```
+
+The rules for all of them:
+
+- Lines, polylines and shape outlines are centered on their path. Outlines of rectangles, ellipses and arcs lie inside their rectangle or oval, with the stroke's outer edge on it, so a border drawn over a component's bounds stays inside them. Their caps and joins do not apply, except an arc's caps. A stroke wider than half the rectangle fills it.
+- A radius below 0 counts as 0, and one larger than half the shorter side counts as half of it.
+- Angles are radians. Angle 0 is at the right of an oval and angles turn clockwise. A sweep of a full turn or more draws the whole outline.
+- A shadow is the color over the rectangle, fading to nothing over `blur` units outside its edges. A blur of 0 or less gives a hard edge. Draw it before what casts it, at an offset if the light comes from a side.
+- `smoothed(false, ...)` asks for hard edges. Shapes are anti-aliased where the engine can.
+- A round clip limits drawing only. The component's hit area stays its rectangle.
+- A `polyline` array is read during the call and not kept. A count below 0 or larger than the array throws `IllegalArgumentException`, and fewer than two points draw nothing.
+- An engine that draws only rectangles still draws everything here, built from fills one device pixel high. Its shapes look stepped, its round clips are square, and its shadows are a few rings of falling alpha. An engine that cannot draw pixels shows a placeholder for a `PixelBuffer`. [Platform differences](../platforms/differences.md) lists which adapters draw shapes themselves.
+
+### Display density
+
+A display at 150 or 200 percent has more device pixels than units. `painter.pixelsPerUnit()` says how many device pixels one unit covers where the painter draws now: the host's density times every `scaled` call in progress. A line `1 / painter.pixelsPerUnit()` units thick is one device pixel thick, which the chart above uses for its grid. `environment().pixelsPerUnit()` is the host's density, for work outside `paint`. It is 1 until the adapter says otherwise, and a change lays everything out again.
+
+An adapter may have denser images for a sprite, and draws the densest one the device pixels can show at the same size in units. A component can also choose between two sprites itself:
+
+```java
+--8<-- "extending/DrawingExamples.java:density"
+```
+
+### Asking for frames
+
+Some adapters draw only when a host says it needs a frame, which saves power in an application that sits idle. The built-in controls and layout invalidation already ask. Two calls are for a component whose look changes in a way Strata cannot see:
+
+- `repaint()` says the look changed and the layout did not, as when a setter changes only what `paint` reads. The gauge and the chart above call it from their setters. Any thread may call it.
+- `repaintAfter(millis)` says the look changes by itself after a time, such as a blinking cursor or a clock's next second. Call it from `paint` for the next change only, and again on the next paint. The same deadline registered twice counts once. The delay is by the clock `environment().millis()` reads, and the call must be on the UI thread.
+
+```java
+--8<-- "extending/HookExamples.java:clock"
+```
+
+Both do nothing while the component is detached. On an engine that draws every frame they cost nothing, so a component that forgets them looks right there and stale elsewhere, until the next input.
 
 ### The environment
 
@@ -230,12 +352,55 @@ Coordinates are host coordinates in UI units. Later calls draw over earlier ones
 | `clipboardText()` | The clipboard text, or empty |
 | `setClipboardText(text)` | Puts text on the clipboard. Engines without one ignore it. |
 | `modifiers()` | The modifier keys held as of the latest input, or `NONE` before any |
+| `pixelsPerUnit()` | The host's device pixels per UI unit, 1 until the adapter sets it; see [Display density](#display-density) |
+| `clipboard()`, `setClipboard(transfer)` | The clipboard with every format; see [Clipboard](clipboard.md) |
 
 It works before the component is attached.
 
+### Style states
+
+A built-in control looks up a theme key for each of its states, such as `button.hovered`. A component of yours can do the same, with states of its own. Name a state with `setStyleState(state, on)`, and read the theme with `stylePaint(key, fallback)` and `styleText(key, fallback)`:
+
+```java
+--8<-- "extending/HookExamples.java:states"
+```
+
+Strata sets `disabled`, `pressed`, `hovered` and `focused` itself, from the component's own state, so those four names, and an empty one, throw `IllegalArgumentException` when you set them. A component can have up to 60 states of its own. A lookup tries the keys in this order, and the first one the theme has wins:
+
+1. `key.disabled`, when the component or an ancestor is disabled.
+2. `key.<state>` for each of the component's own states that is on, in the order each was first set.
+3. `key.pressed`, `key.hovered` and `key.focused`, for those that are on.
+4. `key`.
+
+So with `warning` on, `examplemod.card.warning` wins over `examplemod.card`, and a disabled card shows `examplemod.card.disabled`. The fallback is returned when the theme has none of the keys, and when the component was never attached. The result for each combination of states is kept until the theme changes, so a lookup in `paint` allocates nothing after the first one with the same states.
+
+Changing a state marks nothing for layout. Call `invalidateLayout()` when a state's style changes the size, and `repaint()` when only the look changes. List the plain key in `requiredStyleKeys()` if the component cannot draw without it, and leave the state keys optional.
+
+### Dragging data
+
+A drag that carries data, set up with `startTransfer` from a `DRAG_START` handler or `onDragStart`, sends five events to the components it passes over. A component handles them with handlers, or with the matching hooks: `onDragEnter` and `onDragExit` when the drag arrives at and leaves the component, `onDragOver` on every move, `onDrop` when it is released on the component that accepted last, and `onTransferDone` on the source when the drag ends. In `onDragOver`, call `event.accept(effect)` to take the drop or `event.reject()` to refuse it. [Drag and drop](drag-and-drop.md) covers the events, effects and formats.
+
+A tile starts a drag that carries its name as text, and a bin takes text:
+
+```java
+--8<-- "extending/HookExamples.java:drag"
+```
+
+### Lining up text
+
+A parent that lines up its children's text asks each child where its baseline is. Override `baseline()` to return the distance from the top of your bounds to the baseline of your first line of text. The ascent the text metrics report is the distance from the top of a line to its baseline, so a component that draws one line of text at a top of `y` has its baseline at `y` plus the ascent, as the tag below does. The hook runs after `measure`, for the component at its desired height, so read the ascent in `measure` and keep it. The default returns NaN, for no baseline, and a parent then lines up the component's bottom edge instead.
+
+A container of yours reads children's baselines with `context.baseline(child)` on the `MeasureContext` and the `ArrangeContext`. It returns the baseline from the top of the child's margin, or NaN for a hidden child or one with none. This row puts the baselines of its children on one line:
+
+```java
+--8<-- "extending/HookExamples.java:baseline"
+```
+
+Strata's horizontal stack panel, the rows of a wrap panel and single-row grid cells do the same for children aligned `VerticalAlignment.BASELINE`; see [Layout](layout.md#lining-up-text).
+
 ## Write a new layout
 
-Subclass `CustomContainer<T>`. It is a `CustomComponent` that also measures and places children. This flow layout wraps its children into rows like words in a paragraph:
+Subclass `CustomContainer<T>`. It is a `CustomComponent` that also measures and places children. This flow layout wraps its children into rows like words in a paragraph. Strata has a [`WrapPanel`](layout.md#wrappanel) of its own with spacing, line alignment and baselines, so write one like this only to learn how a layout works or to place children differently:
 
 ```java
 --8<-- "extending/WrapPanel.java:wrap"
@@ -258,10 +423,12 @@ Everything required of a custom component applies, plus:
 |---|---|---|
 | `MeasureContext` | `text()` | The engine's text metrics, for measuring text in your own content |
 | `MeasureContext` | `measure(child, width, height)` | Measures a child in the space offered, margin included. Either size may be infinite. Returns the child's desired size plus its margin, or zero for a hidden child. |
+| `MeasureContext` | `baseline(child)` | The child's baseline from the top of its margin, or NaN if it is hidden or has none. See [Lining up text](#lining-up-text). |
 | `MeasureContext` | `minimumSize(child)` | The child's smallest size, margin included: its `measureMinimum` raised to its minimum size and capped by its maximum, or its fixed size, or zero for a hidden child. It may be read before or after the child is measured. |
 | `ArrangeContext` | `text()` | The engine's text metrics |
 | `ArrangeContext` | `outerSize(child)` | What the child asked for in the last measure, margin included, or zero for a hidden child |
 | `ArrangeContext` | `minimumSize(child)` | The same as on `MeasureContext` |
+| `ArrangeContext` | `baseline(child)` | The same as on `MeasureContext` |
 | `ArrangeContext` | `arrange(child, slot)` | Gives the child its slot in host coordinates, margin included. A slot smaller than the child is allowed; the child overflows it unless it stretches. |
 | `ArrangeContext` | `measure(child, width, height)` | Measures a child added during `arrange`, such as a row that scrolled into view, before you give it a slot |
 
@@ -330,5 +497,5 @@ All of this is in `api.extension.peer` and is plumbing. You never call these met
 
 - Implement `Component`, `Container` or a control interface directly. Strata rejects such classes.
 - Subclass the built-in controls. Their implementations are hidden in `core`. Handle their events, compose them, or write your own.
-- Draw arbitrary geometry, such as lines or textured triangles. The painter offers rectangles, gradients, sprites and text only, because every engine can draw those. See [Status and limitations](../help/status.md).
+- Draw textured triangles, radial gradients or dashed strokes. The painter draws rectangles, lines, shapes, linear gradients, shadows, sprites, pixels and text. See [Status and limitations](../help/status.md).
 - Use `ComponentFactory.createPeer`, `createContainerPeer`, `CustomComponent.peer()` or anything in `api.extension.peer`, such as `ComponentHooks`, `ComponentPeer` and `ContainerPeer`. They are plumbing between the base classes and core; see [How the base classes work](#how-the-base-classes-work).

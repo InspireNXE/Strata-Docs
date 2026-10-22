@@ -42,7 +42,11 @@ No, their implementations are hidden. Change them through their events, compose 
 
 ### Do I need to call layout or repaint?
 
-Never. Setters that affect size schedule a layout, and the host draws every frame.
+Not for anything Strata's own controls do. Setters that affect size schedule a layout, and the host draws the next frame. A component you write calls `repaint()` when a change only its `paint` reads, such as a gauge's needle, and `repaintAfter(millis)` for a change the clock brings. Forgetting them shows only on adapters that draw when asked, not on every frame. See [Asking for frames](../guides/extending.md#asking-for-frames).
+
+### Why does `parent()` return an `Optional`?
+
+A component has no parent before it is added to one, and a screen's root and an overlay's content have none. Getters of values that can be absent return `Optional`: `parent()`, `tooltip()`, `cursor()`, the sprite of an image, the content of an expander. A setter with a single form takes null to clear. A setter with overloads never takes null and has a `clearX()` beside it, such as `clearTooltip()` and `clearPadding()`. See [Javadoc](../reference/javadoc.md).
 
 ### Why is `bounds()` zero or out of date?
 
@@ -80,6 +84,26 @@ Yes. [`ScrollPanel`](../guides/layout.md#scrollpanel) scrolls anything larger th
 
 Nothing prevents it. The API is plain Java interfaces and records. The examples are all Java.
 
+### Can I change the screen from another thread?
+
+Not through components: a component that a host shows belongs to the host's UI thread, and calling a setter from another thread throws `IllegalStateException`. Hand the work over with `Strata.uiThread().execute(...)`, or set a `State` that the screen is bound to, which works from any thread. Opening a screen from another thread is also handed over for you. See [The UI thread](../guides/threading.md).
+
+### How do I animate something?
+
+Animate a property with the factory's `animator()`, or turn on the theme's motion metrics for the built-in controls, such as `toggle.animation`. See [Animation](../guides/animation.md).
+
+### How do I test a screen?
+
+Core's test kit opens a screen without a window, finds components, clicks and types, and advances the clock. See [Testing your screens](../guides/testing.md).
+
+### How do I support Arabic or Hebrew?
+
+Set the translator's language. Screens mirror by themselves, text mixing both directions is ordered, and plurals and numbers follow the language. See [Internationalization](../guides/internationalization.md).
+
+### Can users drag things around?
+
+Yes. A drag that carries data starts with `startTransfer`, targets accept it, and a list with a drag transfer lets its rows be reordered or dropped elsewhere. Files dragged from the desktop arrive as a drop where the adapter supports it. See [Drag and drop](../guides/drag-and-drop.md).
+
 ## Events
 
 ### What is the difference between `target()` and `current()`?
@@ -108,11 +132,11 @@ Read `clicks()` on the `CLICK` event. Strata delivers every click immediately wi
 
 ### How do I make a keyboard shortcut?
 
-Register a `KEY` handler on the screen's root and use `event.is(key, modifiers, policy)`. See [Shortcuts](../guides/input-focus.md#shortcuts).
+For an action that a button, a menu item or a toolbar also offers, make a `Command` with a shortcut and share it; the shortcut works everywhere the screen does, and the menu shows it. See [Commands and shortcuts](../guides/commands.md). For a one-off key, register a `KEY` handler on the screen's root and use `event.is(key, modifiers, policy)`. See [Shortcuts](../guides/input-focus.md#shortcuts).
 
 ### Why does `event.snapshot()` throw?
 
-Only Pre events have snapshots. A Post event such as `TextInput.EDITED` fires after its change, so `snapshot()` throws `IllegalStateException` there; read `previous()` instead. Paint and measure events have none either. See [When there is no snapshot](../guides/snapshots.md#when-there-is-no-snapshot).
+Only input events and a control's requests have snapshots, since they are the `SnapshotEvent`s. A Post event such as `TextInput.EDITED` fires after its change and has no `snapshot()` method at all; read `previous()` instead. Paint and measure events have none either. See [When there is no snapshot](../guides/snapshots.md#when-there-is-no-snapshot).
 
 ### Does a snapshot include a panel's children?
 
@@ -130,7 +154,7 @@ No. A closed screen's tree is dropped, along with its handlers. Remove handlers 
 
 ### What does the scale argument of `StrataPanel` mean?
 
-Pixels per UI unit. At 2, a 100-unit button is 200 pixels wide.
+Pixels per UI unit. At 2, a 100-unit button is 200 pixels wide. On a high density display Strata also knows the device's pixels, so charts can draw one-pixel lines and sprites with `@2x` files are chosen; see [Swing](../platforms/swing.md).
 
 ### Why does text look different from other adapters?
 
