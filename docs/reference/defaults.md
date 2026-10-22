@@ -7,7 +7,7 @@ Every number Strata picks for you. Where a theme [metric](../guides/theming.md#m
 | Setting | Default |
 |---|---|
 | Visible, enabled | yes |
-| Focusable, tabbable | no, except the controls that are `Focusable`: buttons, drop-down buttons, cycle buttons, checkboxes, radio buttons, toggle switches, sliders, text boxes, password boxes, text areas, lists (also inside tables and trees), combo boxes, tab bars, expanders, navigation views, calendar views and the date and time pickers. Scroll bars and scroll panels are `Focusable` but start with focus off. Menus and flyouts are focusable but not tabbable. A color picker and a spinner are neither, but their fields are. |
+| Focusable, tabbable | no, except the controls that are `Focusable`: buttons, drop-down buttons, cycle buttons, checkboxes, radio buttons (one Tab stop for a whole group), toggle switches, sliders, text boxes, password boxes, text areas, lists (also inside tables and trees), combo boxes, tab bars, expanders, navigation views, calendar views and the date and time pickers. Scroll bars and scroll panels are `Focusable` but start with focus off. Menus and flyouts are focusable but not tabbable. A color picker and a spinner are neither, but their fields are. |
 | Margin | `Insets.NONE` |
 | Minimum size | 0 by 0 |
 | Maximum size | `Float.POSITIVE_INFINITY` both ways |
@@ -134,7 +134,7 @@ Every number Strata picks for you. Where a theme [metric](../guides/theming.md#m
 | | Padding, minimum size, caption too wide, acts on, cursor | as `Button` |
 | | Desired size | label plus widest value, with 8 and 5 of padding |
 | `ComboBox` | Rows shown before scrolling | 8 |
-| | Selection | the first option once there are options |
+| | Selection | the first option once there are options, but only for a box that never had a selection and that code has not cleared |
 | | Label function, key function | the option's appearance name (`String.valueOf` for an option with no appearance), the option itself |
 | | Padding | the theme's `combobox.padding`, else 4 at the sides and 3 at the top and bottom |
 | | Desired size | the widest option plus the padding, a 4-unit gap and a 7-wide arrow; one line plus the padding tall |
@@ -162,6 +162,7 @@ Every number Strata picks for you. Where a theme [metric](../guides/theming.md#m
 | `RadioButton` | Box, gap and cursor | as `CheckBox` |
 | | Mark inset | three tenths of the box size on each side |
 | `RadioGroup` | Buttons, selection | none, none |
+| | Tab stop | the selected button, else the first |
 | `ToggleSwitch` | Track | a box one caption line tall and two wide, grown by the theme's `toggle.track.padding`, else 4 at the sides and 2 at the top and bottom |
 | | Knob | a square in from the track's edges by the theme's `toggle.knob.padding`, else 2 |
 | | Gap between track and caption | 4 |
