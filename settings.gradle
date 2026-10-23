@@ -28,3 +28,10 @@ includeBuild('../Strata-Swing') {
     }
 }
 
+
+// The Vulkan adapter, from the Strata-Vulkan checkout beside this one
+includeBuild('../Strata-Vulkan') {
+    dependencySubstitution {
+        substitute(module('org.inspirenxe:strata-vulkan')).using(project(':'))
+    }
+}

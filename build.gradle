@@ -22,9 +22,12 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 dependencies {
-    // What a mod or game compiles against, taken from the Strata and Strata-Swing checkouts this build includes
+    // What a mod or game compiles against, taken from the Strata and adapter checkouts this build includes
     implementation("org.inspirenxe:strata-api:${strata_version}")
     implementation("org.inspirenxe:strata-swing:${strata_version}")
+    implementation("org.inspirenxe:strata-vulkan:${strata_version}")
+    // The Vulkan page's examples connect to a GLFW window, as an application using the bridge does
+    implementation('org.lwjgl:lwjgl-glfw')
     // The adapter guide's example engine creates hosts and runs the SPI contract tests
     implementation("org.inspirenxe:strata-spi:${strata_version}")
     implementation("org.inspirenxe:strata-core:${strata_version}")
@@ -71,6 +74,11 @@ tasks.register('siteJavadoc', Sync) {
     dependsOn(gradle.includedBuild('Strata-Swing').task(':javadoc'))
     from(file('../Strata-Swing/build/docs/javadoc')) {
         into('swing')
+    }
+    // The Vulkan adapter's Javadoc comes from the Strata-Vulkan checkout
+    dependsOn(gradle.includedBuild('Strata-Vulkan').task(':javadoc'))
+    from(file('../Strata-Vulkan/build/docs/javadoc')) {
+        into('vulkan')
     }
     into(layout.projectDirectory.dir('docs/javadoc'))
 }

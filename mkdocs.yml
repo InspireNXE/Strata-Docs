@@ -1,5 +1,5 @@
 site_name: Strata
-site_description: An engine-agnostic GUI library for Java, with adapters for Swing and Minecraft.
+site_description: An engine-agnostic GUI library for Java, with adapters for Swing, Vulkan and Minecraft.
 site_url: https://inspirenxe.github.io/Strata-Docs/
 repo_url: https://github.com/InspireNXE/Strata-Docs
 repo_name: InspireNXE/Strata-Docs
@@ -124,6 +124,7 @@ nav:
   - Platforms:
       - platforms/index.md
       - Swing: platforms/swing.md
+      - Vulkan: platforms/vulkan.md
       - Minecraft:
           - platforms/minecraft/index.md
           - Screens: platforms/minecraft/screens.md

@@ -7,14 +7,15 @@ Strata is at version 0.1.0 and has not been released. This page lists what is te
 | Area | How |
 |---|---|
 | Layout, sibling order, input, focus, events, snapshots, binding, converters and validation, commands and shortcuts, text editing and undo, drag and drop, animation, frame scheduling, right to left layout and text, plurals, extension, the controls, scrolling, lists, overlays, tooltips, screens and `Strata.screens()`, and theme resolution | Unit tests in `core` against a test platform with a manual clock |
-| The SPI contracts | Contract tests run on the test platform, on the Swing adapter, and on the example adapter in these docs |
+| The SPI contracts | Contract tests run on the test platform, on the Swing and Vulkan adapters, and on the example adapter in these docs |
 | The Swing adapter | Every contract, sprite, tint, nine-slice, shape and pixel drawing on generated images, key and button mapping, a panel driven with synthetic AWT events, clipboard round trips, end-to-end snapshots |
+| The Vulkan adapter | Every contract, shapes and pixel buffers included, drawn on a real device and read back; sprites, nine-slices and denser images; a render pass target; screens rendered over more frames than are in flight; the GLFW bridge on a hidden window; the path rasterizer on the host. Its workflow runs them on Mesa's software rasterizer with the Khronos validation layer. |
 | The test kit | Core's own tests drive screens through it, as [Testing your screens](../guides/testing.md) describes |
 | These docs | Every Java example compiles, and the example adapter and snapshot timing are tested |
 
 ## What is not tested
 
-Snapshots are published to Maven Central's snapshot repository, and Strata-Swing and Strata-Minecraft build against them in their own workflows. No release has gone to Maven Central yet. Adapters in other repositories list their own status.
+Snapshots are published to Maven Central's snapshot repository, and Strata-Swing, Strata-Vulkan and Strata-Minecraft build against them in their own workflows. No release has gone to Maven Central yet. Adapters in other repositories list their own status.
 
 ## Known issues
 

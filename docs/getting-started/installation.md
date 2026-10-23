@@ -7,7 +7,7 @@
 | Java | 25 or newer, for building and at run time |
 | Gradle | 9.7.1, through the wrapper in the repository |
 
-Strata itself has no other dependencies. The Swing adapter uses only the JDK. The Minecraft adapter needs the game and a loader; [Minecraft](../platforms/minecraft/index.md#versions-and-loaders) lists the versions.
+Strata itself has no other dependencies. The Swing adapter uses only the JDK. The Vulkan adapter brings LWJGL's Vulkan, VMA, FreeType and stb bindings with their natives. The Minecraft adapter needs the game and a loader; [Minecraft](../platforms/minecraft/index.md#versions-and-loaders) lists the versions.
 
 ## Get the artifacts
 
@@ -31,6 +31,7 @@ repositories {
 | `strata-spi` | The SPI, with the adapter contract tests as test fixtures | Writing an engine adapter |
 | `strata-core` | The implementation, with the test kit as test fixtures | Run time only, through an adapter, and `testFixtures` for the [test kit](../guides/testing.md) |
 | `strata-swing` | The Swing adapter, built in Strata-Swing | Swing applications and tests |
+| `strata-vulkan` | The Vulkan adapter, built in Strata-Vulkan | Applications and games that render with Vulkan through LWJGL |
 
 Every artifact comes with a sources jar and a javadoc jar. A Java 17 build of `strata-api`, `strata-spi` and `strata-core` has `-java17` in its version, such as `0.1.0-java17-SNAPSHOT`.
 
@@ -45,6 +46,19 @@ dependencies {
 ```
 
 Then continue with [Your first screen](first-screen.md), or read the [Swing platform page](../platforms/swing.md).
+
+## Vulkan applications
+
+Depend on the Vulkan adapter. Like the Swing adapter, it brings `strata-api` and `strata-spi` and keeps `strata-core` on the runtime classpath only. It also brings LWJGL's Vulkan bindings, which your renderer uses already. To connect it to a GLFW window, add LWJGL's GLFW bindings if your application does not have them.
+
+```groovy
+dependencies {
+    implementation 'org.inspirenxe:strata-vulkan:0.1.0-SNAPSHOT'
+    implementation 'org.lwjgl:lwjgl-glfw:3.4.3'
+}
+```
+
+Then read the [Vulkan platform page](../platforms/vulkan.md), which shows where `render` goes in a frame.
 
 ## Minecraft mods
 

@@ -4,7 +4,7 @@
 
 ### What engines does Strata support?
 
-The Swing (Java2D) adapter, in the Strata-Swing repository, runs on any desktop JVM. [Platforms](../platforms/index.md) lists the adapters. Other engines need an adapter, which is a small amount of code; see [Writing an adapter](../platforms/writing-an-adapter.md).
+The Swing (Java2D) adapter, in the Strata-Swing repository, runs on any desktop JVM. The Vulkan adapter, in Strata-Vulkan, draws into the Vulkan frames of any application on LWJGL. [Platforms](../platforms/index.md) lists the adapters. Other engines need an adapter, which is a small amount of code; see [Writing an adapter](../platforms/writing-an-adapter.md).
 
 ### Is it ready for production?
 

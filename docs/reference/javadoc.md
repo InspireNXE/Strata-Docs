@@ -40,6 +40,7 @@ Entries that a control holds, such as menu items, radio menu items, tabs and tab
 | `api` | Everyone writing screens and components | [Open](../javadoc/api/index.html) |
 | `spi` | Adapter authors | [Open](../javadoc/spi/index.html) |
 | `swing` | Swing applications | [Open](../javadoc/swing/index.html) |
+| `vulkan` | Applications that render with Vulkan | [Open](../javadoc/vulkan/index.html) |
 | `testing` | Tests of your own screens, through the test kit in `strata-core`'s test fixtures | [Open](../javadoc/testing/index.html) |
 | `core` | Contributors. Not part of the API. | [Open](../javadoc/core/index.html) |
 
@@ -53,4 +54,4 @@ Good starting points in the API Javadoc:
 - `org.inspirenxe.strata.api.theme.ThemeRef` and `ThemeRegistry`: themes by id, their layers and overrides from code.
 - `org.inspirenxe.strata.spi` (the package page): the steps for writing an adapter, with each interface's requirements for implementors on its own page.
 
-To build the Javadoc locally, run `./gradlew javadoc` in Strata or Strata-Swing. Each module's output is in its `build/docs/javadoc` directory.
+To build the Javadoc locally, run `./gradlew javadoc` in Strata, Strata-Swing or Strata-Vulkan. Each module's output is in its `build/docs/javadoc` directory.

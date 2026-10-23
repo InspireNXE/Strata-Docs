@@ -5,6 +5,7 @@ Strata runs wherever an adapter exists. Each adapter lives in a repository of it
 | | Adapter | Artifact | Show a screen with | One UI unit is |
 |---|---|---|---|---|
 | ![Swing](../assets/brand/platform-swing.svg){ .strata-icon } | [Swing](swing.md), in [Strata-Swing](https://github.com/InspireNXE/Strata-Swing) | `strata-swing` | `Strata.screens()` on a `StrataPanel`, a `JPanel`, marked with `setDefault()` | `scale` pixels |
+| ![Vulkan](../assets/brand/platform-vulkan.svg){ .strata-icon } | [Vulkan](vulkan.md), in [Strata-Vulkan](https://github.com/InspireNXE/Strata-Vulkan) | `strata-vulkan` | `Strata.screens()` on a `StrataVulkan` view, marked with `setDefault()` and recorded into the application's pass | `scale` framebuffer pixels |
 | ![Minecraft](../assets/brand/platform-minecraft.svg){ .strata-icon } | [Minecraft](minecraft/index.md), in [Strata-Minecraft](https://github.com/InspireNXE/Strata-Minecraft) | `strata-minecraft-neoforge`, `-forge`, `-fabric` or `-spongevanilla` | `Strata.screens()`, shown in a vanilla `Screen` | One GUI pixel, screen pixels divided by the GUI scale |
 | ![Your engine](../assets/brand/platform-engine.svg){ .strata-icon } | [Your engine](writing-an-adapter.md) | | | |
 
