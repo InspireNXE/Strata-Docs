@@ -19,6 +19,7 @@ import org.inspirenxe.strata.api.event.cause.Device;
 import org.inspirenxe.strata.api.input.Modifiers;
 import org.inspirenxe.strata.api.input.MouseButton;
 import org.inspirenxe.strata.api.transfer.Transfer;
+import org.inspirenxe.strata.spi.Canvas;
 import org.inspirenxe.strata.spi.InputContext;
 import org.inspirenxe.strata.spi.ScreenStack;
 
@@ -32,6 +33,8 @@ import java.util.List;
 public final class ToyWindowAdapter {
     private final ScreenStack screens;
     private final float scale;
+    // Long ago, so the first frame is due at once
+    private long lastFrame = Long.MIN_VALUE / 2;
 
     /**
      * Creates the adapter.
@@ -88,9 +91,19 @@ public final class ToyWindowAdapter {
         this.screens.setFrameRequester(scheduleRedraw);
     }
 
-    /** Whether the engine should draw now: something changed, or a timed change such as a caret blink is due. */
+    /**
+     * Whether the engine should draw now: something changed, or a timed change such as a caret blink is due, and one
+     * interval of the frame rate has passed since the last frame began.
+     */
     public boolean frameDue(final long nowNanos) {
-        return this.screens.needsFrame() || nowNanos >= this.screens.nextFrameNanos();
+        final boolean wanted = this.screens.needsFrame() || nowNanos >= this.screens.nextFrameNanos();
+        return wanted && nowNanos >= this.lastFrame + this.screens.frameIntervalNanos();
+    }
+
+    /** Draws a frame, noting when it began. */
+    public void drawFrame(final Canvas canvas, final long nowNanos) {
+        this.lastFrame = nowNanos;
+        this.screens.render(canvas);
     }
     // --8<-- [end:frames]
 }

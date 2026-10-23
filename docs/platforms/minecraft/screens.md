@@ -165,4 +165,4 @@ Tasks go on the game's own task queue, which the client runs between frames, in 
 
 `Strata.screens().open` may be called from any thread and moves to the client thread itself, as the [Screens](../../guides/screens.md) guide describes. The handle it returns works from the moment the screen shows. Vanilla's `setScreen`, which opens a `StrataScreen` subclass, must run on the client thread.
 
-The game draws every frame, so the adapter renders Strata screens every frame and ignores Strata's frame scheduling (`needsFrame`, `nextFrameNanos` and the frame requester), which adapters that draw on demand use.
+The game draws every frame, so the adapter renders Strata screens every frame and ignores Strata's frame scheduling (`needsFrame`, `nextFrameNanos`, the frame requester and the frame rate), which adapters that draw on demand use. Motion still reads the clock, so it moves every frame the game draws.

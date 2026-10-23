@@ -171,6 +171,10 @@ class AdapterExtrasTest {
         stack.render(new RecordingCanvas());
         assertFalse(adapter.frameDue(0L), "a fresh frame leaves nothing to draw");
         assertTrue(requests.get() > 0, "the requester ran when the stack went dirty");
+        adapter.drawFrame(new RecordingCanvas(), 0L);
+        stack.resize(300, 200);
+        assertFalse(adapter.frameDue(10_000_000L), "a needed frame waits for the frame rate's interval");
+        assertTrue(adapter.frameDue(stack.frameIntervalNanos()), "and draws once it has passed");
         assertEquals("", adapter.windowTitle());
         assertTrue(adapter.onCloseButton(), "a screen that does not object closes");
         assertTrue(stack.isEmpty());

@@ -138,7 +138,7 @@ A password box neither lends nor takes text.
 
 A drag that carries a transfer scrolls the panel or list it is held near. Within 16 units of an edge of a viewport (`ScrollPanel.DRAG_SCROLL_ZONE`), and inside it, a scroll panel scrolls toward that edge by its scroll rate times how deep into the zone the pointer is, at least an eighth of that and at most all of it. A list scrolls by its row step the same way. The innermost control that can still scroll that way does it, so an inner panel at its end lets the outer one scroll.
 
-Scrolling goes on every 16 ms while the pointer stays still, and the drag is moved again over the content that is now under it. It happens at once, without a glide, since a glide each frame would trail the pointer.
+Scrolling goes on each frame the host's frame rate allows while the pointer stays still, and the drag is moved again over the content that is now under it. It happens at once, without a glide, since a glide each frame would trail the pointer.
 
 Plain drags, such as a slider's, a scroll bar's or a text selection's, do not scroll anything. `ScrollPanel.setDragScroll(false)` and `setDragScroll(false)` on a list, table or tree turn the behavior off.
 
@@ -184,7 +184,7 @@ Optional<DropEffect> taken = tester.drop(target, Transfer.text("hello"));   // a
 | Drag threshold | 4 units on either axis |
 | Drag image offset | 8 units right of and below the pointer |
 | List drop line | 2 units high, `list.drop` paint, `#FF8FB4F0` in the flat theme |
-| Edge scrolling zone | 16 units, every 16 ms |
+| Edge scrolling zone | 16 units, one step a frame |
 | Lists and text boxes | allow `MOVE` and `COPY`; a read-only text box allows `COPY` only |
 | List dragging | off until `setDragTransfer` |
 | Edge scrolling | on |

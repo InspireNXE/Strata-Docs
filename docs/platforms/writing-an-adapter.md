@@ -281,7 +281,7 @@ The example adapter's close button and title bar, which an engine with a window 
 
 ### Rendering on demand
 
-An engine that draws every frame, as a game does, calls `render` every frame and can ignore this section. A toolkit that draws only when asked, such as Swing, can render on demand with three calls:
+An engine that draws every frame, as a game does, calls `render` every frame and can ignore this section. A toolkit that draws only when asked, such as Swing, can render on demand with these calls:
 
 ```java
 --8<-- "adapter/ToyWindowAdapter.java:frames"
@@ -290,8 +290,9 @@ An engine that draws every frame, as a game does, calls `render` every frame and
 - `needsFrame()` is true when something changed since the last `render`: input the host dispatched, a layout invalidation, a binding queued, a task handed to the UI thread, an overlay opening or closing, a change of look, or a screen opening or closing. A new host needs a frame. Any thread may call it.
 - `nextFrameNanos()` is when the next timed change is due, as a reading of the platform's clock: a caret's next blink, a tooltip's delay running out, a toast's expiry, the next synthesized key repeat, a caption or progress bar that moves with the clock, or an animation's next step. It is `Long.MAX_VALUE` when nothing timed is waiting. Call it on the UI thread after a render. An adapter that renders on demand renders when the clock reaches it, even when `needsFrame()` is false, and uses the platform's clock, the one core reads.
 - `setFrameRequester(requester)` sets what runs when `needsFrame()` turns from false to true, and runs it at once if a frame is already needed. It runs once per change from clean to dirty, not again before the next `render`, and it can run on any thread, such as the thread that set a state. It must only schedule a frame, for example by asking the engine to repaint, and must not call into the host.
+- `setFrameRate(framesPerSecond)` sets how many frames a second the host asks for at most, from 1 to 1000, and `frameIntervalNanos()` is one second divided by it. It is 30 until set. A stack passes its rate to every screen it holds and to those pushed later. Any thread may set it.
 
-An adapter renders when `needsFrame()` is true or the clock has reached `nextFrameNanos()`. The first frame after a host is made is always due. Core asks for the next frame 16 ms after each step of a sliding caption or an animation, so something that moves continuously draws at about 60 frames a second.
+An adapter renders when `needsFrame()` is true or the clock has reached `nextFrameNanos()`, and never sooner than `frameIntervalNanos()` after its last render began. The first frame after a host is made is always due. `nextFrameNanos()` itself is never sooner than one interval after the last render began, so a timed change due sooner waits for that frame, and something that moves with the clock, such as a sliding caption, an indeterminate progress bar or an animation, draws at the frame rate. Motion reads the clock when it draws, so a lower rate shows the same motion in fewer steps. A tool window is fine at 20 frames a second; set a higher rate for a screen that plays something smooth. An engine that draws every frame anyway is not held to the rate.
 
 ### Devices
 

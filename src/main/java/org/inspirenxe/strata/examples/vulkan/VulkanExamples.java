@@ -28,6 +28,7 @@ import org.inspirenxe.strata.vulkan.BitmapFont;
 import org.inspirenxe.strata.vulkan.FreeTypeFont;
 import org.inspirenxe.strata.vulkan.VulkanSnapshot;
 import org.inspirenxe.strata.vulkan.VulkanVisuals;
+import org.inspirenxe.strata.vulkan.VulkanFrame;
 import org.inspirenxe.strata.vulkan.VulkanImage;
 import org.inspirenxe.strata.vulkan.VulkanPlatform;
 import org.inspirenxe.strata.vulkan.VulkanRenderer;
@@ -86,6 +87,24 @@ public final class VulkanExamples {
         strata.render(commands);
         // Strata leaves its pipeline, viewport and scissor bound; set your own again before drawing more
         // --8<-- [end:frame]
+    }
+
+    static boolean kept(final StrataVulkan strata, final VkCommandBuffer commands) {
+        // --8<-- [start:kept]
+        // At most 20 frames a second, plenty for a tool window
+        strata.screens().setFrameRate(20);
+        // Before the pass: draw the screens and find what changed since the last frame
+        final VulkanFrame frame = strata.prepare();
+        if (frame.isEmpty()) {
+            // Nothing changed: record, submit and present nothing
+            return false;
+        }
+        // Begin rendering into the kept image with VK_ATTACHMENT_LOAD_OP_LOAD and frame.bounds() as the render
+        // area, and clear frame.damage() to your background with vkCmdClearAttachments. Then:
+        frame.record(commands);
+        // End rendering, copy the kept image to the swapchain image, and present it naming frame.damage()
+        // --8<-- [end:kept]
+        return true;
     }
 
     static void shutdown(final VkDevice device, final StrataVulkan strata, final VulkanRenderer renderer) {

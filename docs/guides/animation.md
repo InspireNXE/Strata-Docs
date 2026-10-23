@@ -71,7 +71,7 @@ Finished actions run in the order added. An action added after the animation rea
 
 - Animations step once a frame, by the platform's clock, on the UI thread. The step comes after the tasks handed over with `UiThread.execute` and before data bindings are brought up to date, so a binding sees where an animation is. See [Threads](threading.md).
 - An animation's time starts when it is made. Its first step comes on the next frame and its last step is exactly 1 whatever the easing returns near the end. A duration of 0 takes that one step, 1, on the next frame. A negative duration throws `IllegalArgumentException`.
-- Starting an animation asks the host for a frame. While any animation runs, the host asks for another 16 ms after each step, which matters to adapters that render on demand. See [Writing an adapter](../platforms/writing-an-adapter.md).
+- Starting an animation asks the host for a frame. While any animation runs, the host asks for the next frame its frame rate allows after each step: one interval later, a thirtieth of a second unless the adapter sets another rate. This matters to adapters that render on demand. Each step reads the clock, so at a lower rate an animation takes the same time in fewer steps. See [Writing an adapter](../platforms/writing-an-adapter.md#rendering-on-demand).
 - Every animator call must come from the UI thread and throws `IllegalStateException` elsewhere.
 - A step that throws stops its own animation. The others still step, and the exception goes on to the host's caller.
 
@@ -120,5 +120,5 @@ The test kit's tester has a clock that stands still until the test moves it. `ad
 |---|---|
 | Built-in motion durations | 0 (no motion) |
 | Component opacity | 1 |
-| Frame request while animating | 16 ms after each step |
+| Frame request while animating | one interval of the host's frame rate after each step |
 | Built-in easing | `EASE_OUT`; a toast's fade out `EASE_IN` |

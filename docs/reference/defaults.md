@@ -343,7 +343,7 @@ Every number Strata picks for you. Where a theme [metric](../guides/theming.md#m
 | Long press | 500 ms of a first touch held within the drag threshold opens the context menu |
 | Two-finger scroll | one `PRECISE` notch for each 10 units the midpoint of the two touches moves |
 | Drag image | 8 units right of and below the pointer |
-| Edge scrolling during a drag | within 16 units of a viewport's edge, by a line times how deep into the zone the pointer is (a scroll panel's scroll rate, a list's row step), from an eighth of a line to a whole one, every 16 ms |
+| Edge scrolling during a drag | within 16 units of a viewport's edge, by a line times how deep into the zone the pointer is (a scroll panel's scroll rate, a list's row step), from an eighth of a line to a whole one, each frame |
 | Transfers a drag allows | `MOVE` and `COPY` from lists and text boxes, `COPY` only from a read-only box |
 | Keys the host repeats itself | Left, Right, Up, Down, Backspace, Delete, Home, End, Page Up, Page Down |
 | Tooltip delay | the adapter's, else the theme's `tooltip.delay`, else 500 ms (`Tooltip.DEFAULT_DELAY_MILLIS`); none when moving from one tooltip to another |
@@ -369,7 +369,9 @@ The host synthesizes repeats only for engines whose platform reports `sendsKeyRe
 | Opening a screen from another thread | a handle at once; its calls wait for the screen, and `factory()` throws until it has opened |
 | A host needs a frame | after input, a layout or binding change, a task handed over, a report, an overlay opening or closing, a theme, size or density change, `repaint()` and every running animation |
 | Frame requester | called when a host turns from clean to dirty, possibly on any thread, and not again before the next render |
-| Sliding caption, animation, anything else that moves continuously | asks for its next frame 16 ms later (`FrameRequests.CONTINUOUS_MILLIS`) |
+| Frame rate | 30 frames a second (`ScreenHost.DEFAULT_FRAME_RATE`), from 1 to 1000 with `setFrameRate` |
+| Earliest next frame | one interval of the frame rate after the last render began |
+| Sliding caption, animation, anything else that moves continuously | asks for the next frame the rate allows, one interval later |
 | Caret, busy indicator, indeterminate progress bar | ask for their next change as they paint |
 | Calendar's today | read again a minute after the last reading |
 
@@ -383,7 +385,7 @@ The host synthesizes repeats only for engines whose platform reports `sendsKeyRe
 | `Easing.EASE_OUT` | cubic Bezier with control points (0, 0) and (0.58, 1) |
 | `Easing.EASE_IN_OUT` | cubic Bezier with control points (0.42, 0) and (0.58, 1) |
 | Easing of built-in motion | `EASE_OUT`; a toast's fade out uses `EASE_IN` |
-| Next step of an animation | 16 ms after each step |
+| Next step of an animation | one interval of the host's frame rate after each step |
 | An animation of 0 milliseconds | one step on the next frame |
 | Cause of a step | the `Animation`, with `Origin.CODE`, so requests do not fire |
 | Component opacity | 1 |

@@ -56,8 +56,27 @@ Then, every frame, inside the pass:
 
 - The view fills a rectangle of the framebuffer, set with `setBounds(x, y, width, height)` in framebuffer pixels. One UI unit is `scale` framebuffer pixels, which is also the screens' density, so components and sprites see the display's real pixels.
 - Input goes to `strata.screens()`, which takes positions in UI units. `strata.unitX` and `unitY` convert framebuffer pixels. Input Strata does not use comes back as `false`, so the application can pass it on to its own controls or camera.
-- A game renders every frame. An application that renders only when something changes renders when `screens().needsFrame()` is true or the platform's clock reaches `screens().nextFrameNanos()`; see [Rendering on demand](writing-an-adapter.md#rendering-on-demand).
+- A game renders every frame. An application that renders only when something changes renders when `screens().needsFrame()` is true or the platform's clock reaches `screens().nextFrameNanos()`, and no sooner than `screens().frameIntervalNanos()` after its last render began, so the screens draw at most `screens().frameRate()` times a second, 30 unless set; see [Rendering on demand](writing-an-adapter.md#rendering-on-demand). Such an application can also redraw only what changed, below.
 - The platform's UI thread is the thread that renders. Without an executor set on the platform's builder, tasks handed to `Strata.uiThread()` run at the start of the next frame.
+
+## Redrawing only what changed
+
+An application that keeps its image between frames, such as a tool or an editor, need not redraw the whole view when one control changes. `prepare()` draws the screens and compares the frame with the view's last one. The `VulkanFrame` it returns holds the damage, at most four rectangles of framebuffer pixels that do not overlap, and records only the draws that touch them:
+
+```java
+--8<-- "vulkan/VulkanExamples.java:kept"
+```
+
+- Call `prepare()` before the pass begins, since the damage decides the render area. When nothing changed, the damage is empty and the frame takes nothing from the device: record, submit and present nothing.
+- Otherwise draw over the kept image, loaded rather than cleared, with the damage's bounds as the render area. If you draw a background under Strata, clear the damage rectangles to it first with `vkCmdClearAttachments`. Then `record` the frame and submit it to the renderer's queue, as with `render`.
+- Vulkan does not promise that a swapchain image keeps its pixels from one present to the next, so copy the kept image to the swapchain image before presenting. Where the device has `VK_KHR_incremental_present`, name the damage rectangles in `VkPresentRegionsKHR`, so the compositor updates only those.
+- A primitive changes when anything Strata draws it with changes: its place, color, texture or clip, or the pixels of its texture, such as a pixel buffer's. An image of the application's own, made with `renderer.image`, can change at any time, so its area is damaged every frame.
+- The first frame, the frame after the bounds or the scale change, and the frame after a `render` damage the whole view. Call `invalidate()` when the kept image is lost, such as after making the swapchain again.
+- Record a frame once, before the view prepares or renders another.
+
+An application that clears its image every frame, as most games do, gains nothing from this and calls `render`.
+
+The gallery draws this way: on its progress bar page at 1750 by 1125 pixels, a frame redraws the moving bars and leaves the rest of the window alone.
 
 ## GLFW
 

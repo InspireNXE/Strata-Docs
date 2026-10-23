@@ -196,7 +196,7 @@ Code outside a component does the same with `whileAttached(start)`, which calls 
 - Pass the factory of the host that will show the component. A component cannot move between hosts.
 - `measure` must be pure layout. Compute and return a size, and cache what `paint` needs. Strata applies the minimum and any fixed size to what you return. The available size may be infinite, and a negative result counts as zero. Do not change other components or call `invalidateLayout()` from it. A composite may add and remove its own children during layout, as a list adds the rows that scroll into view; that schedules one more layout.
 - `paint` draws inside the bounds it is given and must not change layout state. It runs every frame, so avoid allocating there. The painter is valid only during the call.
-- Call `invalidateLayout()` whenever something `measure`, `measureMinimum` or `baseline` reads changes. A change that only `paint` reads needs `repaint()` instead, and a change the clock brings needs `repaintAfter(millis)`; see [Asking for frames](#asking-for-frames).
+- Call `invalidateLayout()` whenever something `measure`, `measureMinimum` or `baseline` reads changes. A change that only `paint` reads needs `repaint()` instead, and a change the clock brings needs `repaintAfter(millis)` or `repaintNextFrame()`; see [Asking for frames](#asking-for-frames).
 - Read time, the clipboard and text sizes through `environment()`, never from `System.currentTimeMillis()` or AWT, so the component works on every engine and in tests.
 - Event hooks run only while the component is attached, and a hidden or disabled component gets no new pointer or keyboard input.
 - Consume the events you act on, so ancestors and the engine do not act on them too.
@@ -216,7 +216,7 @@ These `protected` methods are for the subclass's own drawing, layout and input c
 | `environment()` | The engine's text metrics, clock, clipboard and held modifiers; see [The environment](#the-environment) |
 | `theme()` | The host's theme as an `Optional`, empty before the first attach, for reading styles outside `onApplyTheme`. It has the [text style patches](layout.md#inherited-text-styles) of the containers around the component applied. |
 | `setStyleState(state, on)`, `stylePaint(key, fallback)`, `styleText(key, fallback)` | Name your own style states and look up the theme's paints and text styles for them; see [Style states](#style-states) |
-| `repaint()`, `repaintAfter(millis)` | Ask the host for a frame; see [Asking for frames](#asking-for-frames) |
+| `repaint()`, `repaintAfter(millis)`, `repaintNextFrame()` | Ask the host for a frame; see [Asking for frames](#asking-for-frames) |
 | `isHovered()` | Whether the pointer is over this component itself, and not over a child |
 | `isHoverWithin()` | Whether the pointer is over this component or anything inside it |
 | `isPressed()` | Whether a button went down on this component and is still held, even if the pointer moved away |
@@ -330,16 +330,17 @@ An adapter may have denser images for a sprite, and draws the densest one the de
 
 ### Asking for frames
 
-Some adapters draw only when a host says it needs a frame, which saves power in an application that sits idle. The built-in controls and layout invalidation already ask. Two calls are for a component whose look changes in a way Strata cannot see:
+Some adapters draw only when a host says it needs a frame, which saves power in an application that sits idle. The built-in controls and layout invalidation already ask. Three calls are for a component whose look changes in a way Strata cannot see:
 
 - `repaint()` says the look changed and the layout did not, as when a setter changes only what `paint` reads. The gauge and the chart above call it from their setters. Any thread may call it.
 - `repaintAfter(millis)` says the look changes by itself after a time, such as a blinking cursor or a clock's next second. Call it from `paint` for the next change only, and again on the next paint. The same deadline registered twice counts once. The delay is by the clock `environment().millis()` reads, and the call must be on the UI thread.
+- `repaintNextFrame()` says the look keeps moving with the clock, such as a needle easing toward its value or a pattern that scrolls. Call it from `paint` while the motion lasts. It asks for the next frame the host's frame rate allows, 30 a second unless the adapter sets another, so paint from the clock rather than counting frames: a lower rate then shows the same motion in fewer steps. Any thread may call it.
 
 ```java
 --8<-- "extending/HookExamples.java:clock"
 ```
 
-Both do nothing while the component is detached. On an engine that draws every frame they cost nothing, so a component that forgets them looks right there and stale elsewhere, until the next input.
+All three do nothing while the component is detached. On an engine that draws every frame they cost nothing, so a component that forgets them looks right there and stale elsewhere, until the next input.
 
 ### The environment
 
