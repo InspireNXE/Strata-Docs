@@ -33,6 +33,12 @@ jobs:
           repository: InspireNXE/Strata-Swing
           path: Strata-Swing
 
+      # The Vulkan adapter, whose page's examples compile against it
+      - uses: actions/checkout@v4
+        with:
+          repository: InspireNXE/Strata-Vulkan
+          path: Strata-Vulkan
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
