@@ -23,7 +23,11 @@ import org.inspirenxe.strata.api.screen.Screen;
 import org.inspirenxe.strata.api.theme.Themes;
 import org.inspirenxe.strata.examples.quickstart.SettingsScreen;
 import org.inspirenxe.strata.vulkan.StrataVulkan;
-import org.inspirenxe.strata.vulkan.VulkanFont;
+import org.inspirenxe.strata.api.visual.PixelBuffer;
+import org.inspirenxe.strata.vulkan.BitmapFont;
+import org.inspirenxe.strata.vulkan.FreeTypeFont;
+import org.inspirenxe.strata.vulkan.VulkanSnapshot;
+import org.inspirenxe.strata.vulkan.VulkanVisuals;
 import org.inspirenxe.strata.vulkan.VulkanImage;
 import org.inspirenxe.strata.vulkan.VulkanPlatform;
 import org.inspirenxe.strata.vulkan.VulkanRenderer;
@@ -37,6 +41,7 @@ import org.lwjgl.vulkan.VkQueue;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_F11;
 import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
@@ -104,16 +109,62 @@ public final class VulkanExamples {
 
     static VulkanTextMetrics fonts() throws IOException {
         // --8<-- [start:fonts]
-        final VulkanFont text = VulkanFont.builder(9f)
+        final FreeTypeFont text = FreeTypeFont.builder(9f)
                 .regular(Path.of("fonts/Inter-Regular.ttf"))
                 .bold(Path.of("fonts/Inter-Bold.ttf"))
                 // Characters Inter lacks come from here; italic is made by slanting the regular face
                 .fallback(Path.of("fonts/NotoSansSymbols2-Regular.ttf"), 0)
                 .build();
-        final VulkanFont code = VulkanFont.load(Path.of("fonts/JetBrainsMono-Regular.ttf"), 9f);
+        final FreeTypeFont code = FreeTypeFont.load(Path.of("fonts/JetBrainsMono-Regular.ttf"), 9f);
         final VulkanTextMetrics metrics = new VulkanTextMetrics(text, code);
         // --8<-- [end:fonts]
         return metrics;
+    }
+
+    static VulkanTextMetrics bitmap(final byte[] sheetPng, final FreeTypeFont text) {
+        // --8<-- [start:bitmap]
+        // Lines 9 units tall with the baseline 7 below the top; one sheet of 16 by 16 cells
+        final BitmapFont pixels = BitmapFont.builder(9f, 7f)
+                .sheet(sheetPng, 8f, 7f, List.of(
+                        "\u0000!\"#$%&'()*+,-./",
+                        "0123456789:;<=>?",
+                        "@ABCDEFGHIJKLMNO",
+                        "PQRSTUVWXYZ[\\]^_",
+                        "`abcdefghijklmno",
+                        "pqrstuvwxyz{|}~\u0000"))
+                // The space draws nothing and advances 4 units
+                .advance(' ', 4f)
+                // Characters the sheet lacks
+                .fallback(text)
+                .build();
+        final VulkanTextMetrics metrics = new VulkanTextMetrics(pixels);
+        // --8<-- [end:bitmap]
+        return metrics;
+    }
+
+    static PixelBuffer snapshot() {
+        // --8<-- [start:snapshot]
+        // 640 by 400 pixels at 2 pixels per unit: the screen is laid out in 320 by 200 units
+        final PixelBuffer pixels = VulkanSnapshot.render(new SettingsScreen(), Themes.flat(), 640, 400, 2f);
+        // pixels.get(x, y) is ARGB, alpha not premultiplied
+        // --8<-- [end:snapshot]
+        return pixels;
+    }
+
+    static Screen icons() {
+        // --8<-- [start:visuals]
+        final PixelBuffer dot = PixelBuffer.of(16, 16);
+        for (int y = 0; y < 16; y++) {
+            for (int x = 0; x < 16; x++) {
+                if ((x - 8) * (x - 8) + (y - 8) * (y - 8) <= 42) {
+                    dot.set(x, y, 0xFF4C86E0);
+                }
+            }
+        }
+        // A live visual: change the pixels, call dot.changed(), and the next frame shows them
+        final Screen screen = factory -> factory.button("Refresh").setIcon(VulkanVisuals.image(dot.changed()));
+        // --8<-- [end:visuals]
+        return screen;
     }
 
     static void forward(final long window, final StrataVulkan strata) {

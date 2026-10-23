@@ -79,10 +79,11 @@ Strata is a plain Java library. To show screens on another engine, depend on its
 
 ## Trying it without a project
 
-Strata-Gallery opens every control in a window. Clone it and run it; it takes Strata from Maven Central unless Strata is checked out beside it:
+Strata-Gallery opens every control in a window, drawn with Java2D or with Vulkan. Clone it and run it; it takes Strata from Maven Central unless Strata is checked out beside it:
 
 ```bash
-./gradlew run
+./gradlew runJava2d
+./gradlew runVulkan
 ```
 
 On a machine without a display, render every page to PNGs instead:

@@ -101,7 +101,9 @@ A pixel buffer becomes a texture, copied again when its version moves and droppe
 
 ## Fonts
 
-Text is drawn with FreeType. `VulkanTextMetrics.defaults()` looks for the operating system's fonts at 9 units: Segoe UI and Consolas on Windows, Arial and Menlo on macOS, and DejaVu, Noto or Liberation on Linux, with the system's symbol and CJK fonts as fallbacks where it finds them. It throws `IllegalStateException` when none is installed. Any TrueType or OpenType file works through `VulkanFont`:
+`VulkanTextMetrics` measures and draws with two `VulkanFont`s, one for ordinary text and one for monospaced text. A font is a `FreeTypeFont`, read from font files with FreeType, or a `BitmapFont`, cut from images.
+
+`VulkanTextMetrics.defaults()` looks for the operating system's fonts at 9 units: Segoe UI and Consolas on Windows, Arial and Menlo on macOS, and DejaVu, Noto or Liberation on Linux, with the system's symbol and CJK fonts as fallbacks where it finds them. It throws `IllegalStateException` when none is installed. Any TrueType or OpenType file works through `FreeTypeFont`:
 
 ```java
 --8<-- "vulkan/VulkanExamples.java:fonts"
@@ -110,6 +112,14 @@ Text is drawn with FreeType. `VulkanTextMetrics.defaults()` looks for the operat
 A family has a regular face and optional bold, italic and bold italic faces; `collection(path)` takes them from a `.ttc` by their style flags. A missing style is made by thickening or slanting the nearest face, and a character no face has comes from the fallbacks in order, else draws as the regular face's missing glyph box. The size is the em square's height in UI units.
 
 Widths are the fonts' unhinted advances plus the kerning between neighbors from the font's `kern` table, so text measures the same at every scale. Glyphs are drawn with light hinting at the size they land on screen, from a glyph atlas the renderer keeps. A synthetic bold glyph is a 24th of the em wider. Underline, strikethrough and the shadow, the text again one unit down and to the right at a quarter of its brightness, are drawn by the adapter and do not change widths.
+
+`BitmapFont` measures and draws as the Swing adapter's bitmap font does, so a look built on a pixel font lays out the same on both adapters. A sheet is an image split into a grid, one character per cell, given as an image file's bytes or a `PixelBuffer`:
+
+```java
+--8<-- "vulkan/VulkanExamples.java:bitmap"
+```
+
+A glyph advances by its rightmost column with any opaque pixel, plus one, scaled from the cell to the glyph's height and rounded, plus one unit of spacing; a cell with no opaque pixel advances one unit. `advance(codePoint, width)` gives a character a fixed advance with nothing drawn. When several sheets or advances name a character, the first one added wins, so add a font's parts in the order its own files list them. Glyphs draw in the text's color through their pixels' alpha, scaled without smoothing to the size they land on screen, with each cell's top snapped to the pixel grid. Bold draws each glyph again one unit to the right and adds a unit to every advance, and italic slants glyphs. Characters with no glyph come from the fallback, the system's sans-serif font at the line height unless the builder is given another.
 
 The adapter does not shape text. Each character draws its own glyph, so there are no ligatures, and `VulkanPlatform` does not report `Capabilities.shapesRightToLeft`: core reverses right-to-left runs, which reads correctly for Hebrew and draws Arabic unjoined.
 
@@ -126,6 +136,22 @@ Sprites are sampled nearest and tints multiply each channel. A nine-slice's bord
 ```
 
 The visual is live: each frame samples what the image holds when the frame executes. Keep the image in `VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL` whenever a frame that draws it runs. A second form takes a sampler of your own; the default samples linearly. The canvas draws a visual another renderer made as magenta.
+
+`VulkanVisuals.image(pixels)` makes a visual of a `PixelBuffer`, at one unit per pixel or at a size of its own, as `SwingVisuals.image` does for a `BufferedImage`. Any renderer draws it, as a pixel buffer:
+
+```java
+--8<-- "vulkan/VulkanExamples.java:visuals"
+```
+
+## Rendering without a window
+
+`VulkanSnapshot.render` opens a screen on a fresh stack, draws one frame on a Vulkan device of the adapter's own with no window, and closes it again, as `SwingSnapshot` does with Java2D:
+
+```java
+--8<-- "vulkan/VulkanExamples.java:snapshot"
+```
+
+It returns the frame as a `PixelBuffer`. Any pixel the screen does not draw stays transparent, and the screen's `closed()` runs before `render` returns. Overloads take input to send before the frame is drawn, with tooltips shown at once; a `VulkanPlatform` and `VulkanSprites`, for other fonts and images; and a `ThemeRef`, resolved from the platform's theme source. The first snapshot finds a device with graphics and dynamic rendering, a discrete one where there is one, and keeps it for the life of the process. `VulkanSnapshot.isSupported()` says whether the machine has one; Mesa's software rasterizer counts, so build servers can take snapshots too.
 
 ## Themes and translations
 
@@ -150,6 +176,10 @@ The visual is live: each frame samples what the image holds when the frame execu
 ## Testing
 
 The adapter's tests draw on a real device into an image and read it back, and pass Strata's canvas, platform and text metrics contracts with the shape and pixel buffer checks on. On a machine without a GPU, Mesa's software rasterizer runs them.
+
+## The gallery
+
+Strata-Gallery runs on this adapter as well as on Java2D. `./gradlew runVulkan` opens it in a GLFW window drawn with Vulkan, the whole host an application writes around Strata: an instance, a surface, a device, a swapchain and a loop that renders when the screens need a frame. `--renderer vulkan --snapshot <directory>` renders every page through `VulkanSnapshot`.
 
 ## Not supported
 

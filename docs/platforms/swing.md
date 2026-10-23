@@ -204,9 +204,11 @@ Snapshots are a good way to test layouts: render a screen and compare pixels, or
 
 ## The gallery
 
-The Strata-Gallery repository runs on this adapter. It gives every control a page, written against the API only, with a log of the events the control fires:
+The Strata-Gallery repository runs on this adapter, and on the [Vulkan](vulkan.md) one. It gives every control a page, written against the API only, with a log of the events the control fires:
 
 ```bash
-./gradlew run
+./gradlew runJava2d
 ./gradlew run --args="--snapshot gallery"
 ```
+
+`runVulkan`, or `--renderer vulkan`, shows the same pages with the Vulkan adapter.
