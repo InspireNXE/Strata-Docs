@@ -2,6 +2,8 @@
 
 A progress bar that eases to its new value, a card that fades out, a color that blends to red: each is a value that moves over a few hundred milliseconds instead of jumping. `ComponentFactory.animator()` returns the host's `Animator`, which moves a property, or any number you like, over time. Strata's own controls use the same animator for their built-in motion, which a theme turns on.
 
+For work that repeats, such as refreshing a label every second, use a screen's [repeating tasks](screens.md#repeating-tasks), which the platform runs on its own beat.
+
 ## Moving a property
 
 `animate` takes a target, a `PropertyKey` that names one of its properties, the value to end on, a duration in milliseconds and an `Easing`:

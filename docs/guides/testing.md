@@ -54,7 +54,7 @@ A size that is not positive and finite throws `IllegalArgumentException`. The wa
 --8<-- "testing/ShopScreenTest.java:options"
 ```
 
-The kit's platform measures text the way Strata's own tests do, so layout is the same on every machine: 6 units wide for each code point, 7 in a monospaced style, and 9 high for a line. Its clock stands still until the test calls `advance`. Its clipboard is held in memory. It has no engine text input, and it reports that the engine sends key repeats, so holding a key repeats nothing.
+The kit's platform measures text the way Strata's own tests do, so layout is the same on every machine: 6 units wide for each code point, 7 in a monospaced style, and 9 high for a line, at its default size of 9. Text of another size measures in proportion, and every font measures alike. Its clock stands still until the test calls `advance`, which also runs a screen's [repeating tasks](screens.md#repeating-tasks) once for each interval it passes, on the test's thread. Its clipboard is held in memory. It has no engine text input, and it reports that the engine sends key repeats, so holding a key repeats nothing.
 
 ## Finding components
 

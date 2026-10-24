@@ -31,7 +31,9 @@ dependencies {
 `TextMetrics` measures text the way your engine draws it. Its requirements, from the Javadoc:
 
 - A span drawn at x must end at x plus its measured width, give or take a unit of rounding. Text boxes place the caret from these numbers.
-- The same span always gives the same result, with no side effects.
+- The same span always gives the same result while `version()` stays the same, with no side effects.
+- A style's `font` and `size` measure as they are drawn. A family the engine does not know measures as the default font, and a size of 0 as the default size. Scale the font for other sizes, and draw it at that size so the glyphs stay sharp.
+- `version()` changes whenever the same text could measure differently, such as when the application registers a font or the user changes font options. Hosts compare it at the start of each layout and lay every screen out again when it changed. The default is 0, for metrics that never change.
 - Width is 0 for an empty span and never negative.
 - Appending a code point never makes a span narrower.
 - Line height is positive.
@@ -53,6 +55,7 @@ dependencies {
 | Method | Requirements |
 |---|---|
 | `textMetrics()` | Must match what the canvas's `text` draws |
+| `scheduler()` | Runs the [repeating tasks](../guides/screens.md#repeating-tasks) screens ask for, on the UI thread, first about one interval after `every` is called and then about one interval apart. It must never run a task after its subscription closed, even one already queued, must refuse an interval of 0 or less with `IllegalArgumentException`, and may round intervals to the engine's beat and drop runs it missed while busy. Every platform gives one. Wrap the engine's own scheduler where it has one; otherwise run due tasks from the engine's frame or tick, as `ToyScheduler` below does. |
 | `clipboard()` | Never throws. A busy or missing clipboard reads as empty and ignores writes. Use `Clipboard.NONE` if the engine has none. Text written reads back unchanged until something else changes it. An engine that holds more than text also overrides `getTransfer()` and `setTransfer(Transfer)`; see [The clipboard](#the-clipboard). |
 | `clock()` | Monotonic, never backward, advancing in real time. `Clock.SYSTEM` is `System.nanoTime`. Click counting, caret blinking and synthesized key repeat stall on a clock that stops. `wall()` returns the `java.time.Clock` that today is read from, such as the day a calendar marks; the default is the system clock in the default zone. Return the engine's clock or zone if it has one, or a fixed clock in tests. Core reads it at most about once a minute per control and never accepts null. |
 | `textInput()` | Told when a text field gains and loses focus. Core calls `start(area, kind)`, whose default forwards to `start(area)`; for `TextInputKind.SECRET`, turn off input method composition, prediction and on-screen keyboard suggestions where the engine allows, and never log what is typed. `start` and `stop` may arrive repeatedly; a second `start` moves the input area and may change the kind. After `start`, the adapter must forward typed characters. Use `TextInputSink.NONE` if the engine always sends characters. |
@@ -66,6 +69,16 @@ dependencies {
 | `user()` | Optional. The engine's object for the person at the screen, such as a user profile, which hosts put in every `Origin.User` so handlers can tell who acted. Empty by default, and the identity is then null. Return the same object every time. |
 
 Return the same objects every time; hosts may keep what they get. Hosts may also share one platform: a screen stack hands its own to the host of every screen in it.
+
+### The scheduler
+
+An engine with a main loop and no scheduler of its own can run screens' tasks from its frame:
+
+```java
+--8<-- "adapter/ToyScheduler.java:scheduler"
+```
+
+Core keeps the subscriptions and closes them when a screen closes, and checks before each run that the screen is still open, so a task never outlives its screen. The contract tests check the rest. Override `passTime` in your `PlatformContract` when the scheduler runs only when the engine drives it, to run the frame there.
 
 ### Themes
 

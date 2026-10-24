@@ -56,7 +56,7 @@ Then, every frame, inside the pass:
 
 - The view fills a rectangle of the framebuffer, set with `setBounds(x, y, width, height)` in framebuffer pixels. One UI unit is `scale` framebuffer pixels, which is also the screens' density, so components and sprites see the display's real pixels.
 - Input goes to `strata.screens()`, which takes positions in UI units. `strata.unitX` and `unitY` convert framebuffer pixels. Input Strata does not use comes back as `false`, so the application can pass it on to its own controls or camera.
-- A game renders every frame. An application that renders only when something changes renders when `screens().needsFrame()` is true or the platform's clock reaches `screens().nextFrameNanos()`, and no sooner than `screens().frameIntervalNanos()` after its last render began, so the screens draw at most `screens().frameRate()` times a second, 30 unless set; see [Rendering on demand](writing-an-adapter.md#rendering-on-demand). Such an application can also redraw only what changed, below.
+- A game renders every frame. An application that renders only when something changes renders when `screens().needsFrame()` is true or the platform's clock reaches `strata.nextFrameNanos()`, which also counts the next [repeating task](#repeating-tasks), and no sooner than `screens().frameIntervalNanos()` after its last render began, so the screens draw at most `screens().frameRate()` times a second, 30 unless set; see [Rendering on demand](writing-an-adapter.md#rendering-on-demand). Such an application can also redraw only what changed, below.
 - The platform's UI thread is the thread that renders. Without an executor set on the platform's builder, tasks handed to `Strata.uiThread()` run at the start of the next frame.
 
 ## Redrawing only what changed
@@ -120,13 +120,27 @@ A pixel buffer becomes a texture, copied again when its version moves and droppe
 
 ## Fonts
 
-`VulkanTextMetrics` measures and draws with two `VulkanFont`s, one for ordinary text and one for monospaced text. A font is a `FreeTypeFont`, read from font files with FreeType, or a `BitmapFont`, cut from images.
+`VulkanTextMetrics` measures and draws with a `VulkanFont` for ordinary text, one for monospaced text, and any the application registers under a `FontId`. A font is a `FreeTypeFont`, read from font files with FreeType, or a `BitmapFont`, cut from images.
 
 `VulkanTextMetrics.defaults()` looks for the operating system's fonts at 9 units: Segoe UI and Consolas on Windows, Arial and Menlo on macOS, and DejaVu, Noto or Liberation on Linux, with the system's symbol and CJK fonts as fallbacks where it finds them. It throws `IllegalStateException` when none is installed. Any TrueType or OpenType file works through `FreeTypeFont`:
 
 ```java
 --8<-- "vulkan/VulkanExamples.java:fonts"
 ```
+
+### Registered families and sizes
+
+An application, or a plugin it loads later, registers a family under the id its styles name, at any time on the render thread:
+
+```java
+--8<-- "vulkan/VulkanExamples.java:register"
+```
+
+`register` returns the family it replaced, and `unregister` the one it removed; the metrics never close a font, so close it when nothing draws with it any more. A registered family wins over `monospace`. A style that names an id nobody registered draws in the ordinary font, or the monospaced one for a monospaced style. Registering, replacing or removing a family changes `version()`, so open screens lay out again.
+
+Every font has its own size, the one it was built at. A style's size scales the chosen font from it, and size 0 is the default size, the ordinary font's (`defaultSize()`), so a registered family built at 12 units draws at 9 until a style asks for another size. The canvas draws a scaled span under a scale, so FreeType renders the glyphs at the size they land on screen, sharp, and the shadow offset and the lines grow with the text. A `BitmapFont`'s size is its line height.
+
+### Faces, widths and bitmap fonts
 
 A family has a regular face and optional bold, italic and bold italic faces; `collection(path)` takes them from a `.ttc` by their style flags. A missing style is made by thickening or slanting the nearest face, and a character no face has comes from the fallbacks in order, else draws as the regular face's missing glyph box. The size is the em square's height in UI units.
 
@@ -191,6 +205,13 @@ It returns the frame as a `PixelBuffer`. Any pixel the screen does not draw stay
 | `conventions` | Command for shortcuts on macOS, Control elsewhere; buttons act on release; mnemonics on |
 | `themes` | A `VulkanThemeSource` on the adapter's class loader |
 | `uiExecutor`, `uiThreadCheck` | None: tasks run at the start of the next frame, and the UI thread is the first one that renders |
+| `scheduler` | A `VulkanScheduler`, which runs screens' repeating tasks as the views render |
+
+## Repeating tasks
+
+Vulkan has no loop of its own, so by default a `VulkanScheduler` runs the tasks of `ScreenHandle.every`: `render` and `prepare` run the tasks that are due, by the platform's clock, before they draw. `strata.nextFrameNanos()` counts the next task's time, so an application that renders on demand wakes for it. When frames come further apart than a task's interval, the runs it missed are dropped and the next comes one interval after the one that ran.
+
+An application with a scheduler of its own, such as a game loop's, passes it to `VulkanPlatform.builder(metrics).scheduler(...)`. It must run tasks on the render thread and follow the SPI's `Scheduler` rules, and the view then leaves tasks to it.
 
 ## Testing
 

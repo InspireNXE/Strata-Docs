@@ -27,6 +27,7 @@ import org.inspirenxe.strata.spi.Clipboard;
 import org.inspirenxe.strata.spi.Clock;
 import org.inspirenxe.strata.spi.FileDialogSource;
 import org.inspirenxe.strata.spi.Platform;
+import org.inspirenxe.strata.spi.Scheduler;
 import org.inspirenxe.strata.spi.ScreenHost;
 import org.inspirenxe.strata.spi.TextInputSink;
 import org.inspirenxe.strata.spi.ThemeSource;
@@ -62,6 +63,11 @@ class FileExamplesTest {
         @Override
         public TextMetrics textMetrics() {
             return this.toy.textMetrics();
+        }
+
+        @Override
+        public Scheduler scheduler() {
+            return new ToyPlatform().scheduler();
         }
 
         @Override

@@ -115,11 +115,11 @@ When a rectangle is smaller than the borders, they shrink in proportion. The bor
 
 ## Text styles
 
-A `TextStyle` sets color, bold, italic, underline, strikethrough, a shadow and the monospaced font. Themes map text keys to styles; labels can also take one directly. See [Text](text.md).
+A `TextStyle` sets color, bold, italic, underline, strikethrough, a shadow, the monospaced font, a font family and a size. Themes map text keys to styles; labels can also take one directly. See [Text](text.md).
 
 ### Changing part of a text style
 
-A `TextStyle` in an override or a theme replaces the whole style for its key. To change one property and keep the rest of what the engine's theme gives that key, override with a `TextStylePatch` instead. A patch names only the properties it changes: `TextStylePatch.of()` changes nothing, and `color`, `bold`, `italic`, `underline`, `strikethrough`, `shadow` and `monospace` return a copy that also sets one property.
+A `TextStyle` in an override or a theme replaces the whole style for its key. To change one property and keep the rest of what the engine's theme gives that key, override with a `TextStylePatch` instead. A patch names only the properties it changes: `TextStylePatch.of()` changes nothing, and `color`, `bold`, `italic`, `underline`, `strikethrough`, `shadow`, `monospace`, `font` and `size` return a copy that also sets one property.
 
 ```java
 --8<-- "theming/ThemeAdditionsExamples.java:patch"
@@ -294,7 +294,7 @@ A theme file sets only the keys it changes. Where the files live depends on the 
 | Nine-slice | `{ "nine_slice": "ns:path", "border": ... }`, with an optional `"tint"`, `"size": [width, height]` and `"tiled": true`, which needs a size. The border is one number, `[horizontal, vertical]` or `[left, top, right, bottom]` |
 | Tiled sprite | `{ "tiled": "ns:path", "size": [width, height] }`, with an optional `"tint"` |
 | Gradient | `{ "gradient": [top, bottom] }` |
-| Text style | Any of `color`, `bold`, `italic`, `underline`, `strikethrough`, `shadow` and `monospace`. Fields you leave out keep the style a lower layer gave the key, or `TextStyle.DEFAULT` where none did |
+| Text style | Any of `color`, `bold`, `italic`, `underline`, `strikethrough`, `shadow`, `monospace`, `font` and `size`. `font` is a font id such as `"app:serif"`, or `null` for the platform's default font; `size` is a number of UI units, 0 for the default size, and never negative. Fields you leave out keep the style a lower layer gave the key, or `TextStyle.DEFAULT` where none did |
 | Insets | One number, `[horizontal, vertical]` or `[left, top, right, bottom]`, in UI units |
 | Metric | A number, in the unit its key states. A flag may be `true` or `false`, and a duration a string such as `"500ms"` or `"0.5s"`. |
 

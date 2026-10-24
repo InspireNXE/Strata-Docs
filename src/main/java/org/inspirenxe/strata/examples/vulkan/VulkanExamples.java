@@ -20,6 +20,7 @@ import org.inspirenxe.strata.api.component.Component;
 import org.inspirenxe.strata.api.component.CursorKind;
 import org.inspirenxe.strata.api.input.Modifiers;
 import org.inspirenxe.strata.api.screen.Screen;
+import org.inspirenxe.strata.api.text.FontId;
 import org.inspirenxe.strata.api.theme.Themes;
 import org.inspirenxe.strata.examples.quickstart.SettingsScreen;
 import org.inspirenxe.strata.vulkan.StrataVulkan;
@@ -28,6 +29,7 @@ import org.inspirenxe.strata.vulkan.BitmapFont;
 import org.inspirenxe.strata.vulkan.FreeTypeFont;
 import org.inspirenxe.strata.vulkan.VulkanSnapshot;
 import org.inspirenxe.strata.vulkan.VulkanVisuals;
+import org.inspirenxe.strata.vulkan.VulkanFont;
 import org.inspirenxe.strata.vulkan.VulkanFrame;
 import org.inspirenxe.strata.vulkan.VulkanImage;
 import org.inspirenxe.strata.vulkan.VulkanPlatform;
@@ -138,6 +140,17 @@ public final class VulkanExamples {
         final VulkanTextMetrics metrics = new VulkanTextMetrics(text, code);
         // --8<-- [end:fonts]
         return metrics;
+    }
+
+    static void register(final VulkanPlatform platform, final byte[] regular, final byte[] bold) throws IOException {
+        // --8<-- [start:register]
+        // A plugin's family, read from the bytes its assets hold, under the id its screens name
+        final FreeTypeFont serif = FreeTypeFont.builder(9f).regular(regular).bold(bold).build();
+        platform.textMetrics().register(FontId.of("plugin", "serif"), serif);
+
+        // Later, when the plugin unloads: styles that name it fall back to the default font
+        platform.textMetrics().unregister(FontId.of("plugin", "serif")).ifPresent(VulkanFont::close);
+        // --8<-- [end:register]
     }
 
     static VulkanTextMetrics bitmap(final byte[] sheetPng, final FreeTypeFont text) {

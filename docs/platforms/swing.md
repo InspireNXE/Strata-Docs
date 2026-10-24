@@ -57,6 +57,7 @@ Escape that no component uses does nothing in the panel. Handle it on the root a
 - Shortcuts use Command where the toolkit's menu shortcut key is Meta, as on macOS, and Control elsewhere. Meta is sent as `Modifier.SUPER`. In a headless JVM the operating system's name decides. Buttons act on release and mnemonics are on, so Alt with an underlined letter acts and Alt or F10 alone enters a menu bar. The context menu key is `Key.MENU`, and Shift+F10 opens a context menu too.
 - The panel consumes Alt and F10 after Strata sees them, so they do not put the window into its native menu mode, which on Windows would swallow wheel input until the key is pressed again.
 - AWT reports no touch or pen input, so every pointer is a mouse.
+- Screens' [repeating tasks](../guides/screens.md#repeating-tasks) run on the event thread, each from a `javax.swing.Timer` that coalesces the runs it falls behind on into one. A snapshot draws one frame on a thread of its own, so its tasks never run.
 
 ## Scale and density
 
@@ -101,7 +102,15 @@ Every `CursorKind` shows. `ARROW`, `TEXT`, `HAND`, `CROSSHAIR`, the resize kinds
 
 `SwingTextMetrics.defaults()` is the logical Dialog font at 9 units, with the logical Monospaced font at the same size for monospaced styles. Widths are the advances of a `TextLayout` with antialiasing and fractional metrics on, and the canvas draws that same layout, so text measures exactly as wide as it draws and spans side by side meet. The line height is the font's height. Underline, strikethrough and the shadow are drawn by the adapter and do not change widths. The ascent that panels line text up by is the font's real ascent, in UI units, and never more than the line height.
 
-Behind `SwingTextMetrics` are two `SwingFont`s, one for normal text and one for monospaced styles. `AwtFont` is the AWT font described above. `BitmapFont` draws glyphs cut from images, to preview an engine whose font is a bitmap:
+`register` adds a family under the id styles name, as an AWT `Font` or any `SwingFont`, and `unregister` removes it. Register on the event thread. A registered family wins over `monospace`, and an id nobody registered draws in the normal font. Registering, replacing or removing a family changes `version()`, so open panels lay out again:
+
+```java
+--8<-- "swing/SwingExamples.java:register"
+```
+
+A style's size scales the chosen font from its own size, `SwingFont.size()`, and size 0 is the normal font's size (`defaultSize()`). The canvas draws a scaled span under a Java2D scale, so the glyphs are drawn from the font's outlines at that size. A registered font's own size does not matter, so a font read at 1 point with `Font.createFont` is fine.
+
+Behind `SwingTextMetrics` are two `SwingFont`s, one for normal text and one for monospaced styles, and the registered ones. `AwtFont` is the AWT font described above. `BitmapFont` draws glyphs cut from images, to preview an engine whose font is a bitmap:
 
 ```java
 --8<-- "swing/SwingExamples.java:bitmap"

@@ -451,8 +451,9 @@ The host synthesizes repeats only for engines whose platform reports `sendsKeyRe
 | Setting | Value |
 |---|---|
 | `TesterOptions.DEFAULT` | 800 by 600 units, `Themes.flat()`, `Translator.NONE`, and the wall clock at noon UTC on 15 January 2026 |
-| Text | 6 units per code point, 7 in a monospaced style, 9 per line |
+| Text | 6 units per code point, 7 in a monospaced style, 9 per line, at a default size of 9; other sizes in proportion |
 | Clock | stands still until `advance` |
+| Repeating tasks | run as `advance` passes them, once for each interval, on the test's thread |
 | Key repeat | none: the platform reports that the engine sends its own |
 | Pointer modifiers | none, unless `press` names some |
 | `settle()` | gives up after a minute of animation |
@@ -469,7 +470,8 @@ The host synthesizes repeats only for engines whose platform reports `sendsKeyRe
 
 | Setting | Value |
 |---|---|
-| `TextStyle.DEFAULT` | opaque white, no decoration, no shadow, the normal font |
+| `TextStyle.DEFAULT` | opaque white, no decoration, no shadow, the platform's default font (`font` null) at its default size (`size` 0) |
+| A font the platform lacks | its default font, at the style's size |
 | A theme file's text entry | the fields it leaves out keep the style a lower layer gave the key, else `TextStyle.DEFAULT` |
 | `Text.sprite(id)` | a square as wide and tall as the line height of the style where it lands |
 | `Text.visual(visual)` | the visual's natural size |
@@ -485,6 +487,9 @@ The host synthesizes repeats only for engines whose platform reports `sendsKeyRe
 |---|---|
 | `StrataPanel` preferred size | what the top screen asks for, at the panel's scale plus the insets; 960 by 600 pixels while no screen is open; a size set with `setPreferredSize` wins |
 | `StrataPanel` background | `0xFF1E1F22` |
+| Swing repeating tasks | a `javax.swing.Timer` each, on the event thread, coalescing missed runs; none in a snapshot |
+| Vulkan repeating tasks | a `VulkanScheduler`, run as the view renders, dropping missed runs |
+| Minecraft repeating tasks | Sponge's client scheduler where Sponge is present, else the client tick; intervals round up to 50 ms ticks |
 | `StrataPanel` repainting | when its screens ask for a frame, and at the next timed change through a one-shot timer, so an idle panel with a blinking caret paints twice a second and one with nothing timed does not paint |
 | Swing missing sprite | solid magenta |
 | Swing visual from another adapter | solid magenta |

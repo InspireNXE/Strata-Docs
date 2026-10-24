@@ -13,6 +13,9 @@ Strata hides most engine differences, but the SPI leaves some decisions to each 
 | Line height | Whatever the font reports | The AWT font's height | The font's line spacing, or its ascent plus descent when larger | 9 for the default font |
 | Text ascent (`TextMetrics.ascent`) | The font's own, or the default of four fifths of the line height | The font's real ascent | The font's real ascent | 7, vanilla's baseline |
 | Monospaced text | A monospaced font, or the normal font when the engine has none (`Capabilities.monospaceFont`) | Monospaced | The system's monospaced font, or the normal font where none is found | The normal font |
+| Font families (`TextStyle.font`) | Any families, found by id; the default font for an id the engine lacks | Registered with `SwingTextMetrics.register` | Registered with `VulkanTextMetrics.register` | The game's font of the id, from resource packs |
+| Text sizes (`TextStyle.size`) | Any size, with 0 the platform's default | The normal font's size, 9 by default, scaled | The ordinary font's size, 9 by default, scaled | 9, vanilla's, scaled |
+| Repeating tasks (`ScreenHandle.every`) | Run on the UI thread on the engine's beat, never after closing | A Swing timer each | Run as the view renders, or the application's scheduler | Sponge's client scheduler, else the client tick, in whole ticks of 50 ms |
 | Modifiers with pointer moves and scrolls | `NONE` when the engine does not report them | Reported | Read from GLFW's key state | Shift, Control and Alt, read from the game |
 | Modifiers with typed characters | `NONE` when the engine does not report them | Reported | Read from GLFW's key state | Never reported (`NONE`) |
 | Modifiers with button presses and keys | Reported | Reported | Reported | Reported |

@@ -16,9 +16,14 @@
 package org.inspirenxe.strata.examples.text;
 
 import org.inspirenxe.strata.api.ComponentFactory;
+import org.inspirenxe.strata.api.component.Component;
 import org.inspirenxe.strata.api.component.Tooltip;
 import org.inspirenxe.strata.api.control.display.Label;
+import org.inspirenxe.strata.api.layout.StackPanel;
+import org.inspirenxe.strata.api.text.FontId;
 import org.inspirenxe.strata.api.text.Text;
+import org.inspirenxe.strata.api.text.TextStyle;
+import org.inspirenxe.strata.api.text.TextStylePatch;
 import org.inspirenxe.strata.api.theme.SpriteId;
 import org.inspirenxe.strata.api.visual.Visual;
 
@@ -54,6 +59,21 @@ public final class TextExamples {
                 .build();
         // --8<-- [end:styled]
         return ui.label(price).setTooltip(built);
+    }
+
+    static Component<?> sizes(final ComponentFactory ui) {
+        // --8<-- [start:sizes]
+        // A heading at 14 units, in the family the platform knows as app:serif
+        final Label heading = ui.label("Orders")
+                .setStyle(TextStyle.DEFAULT.withBold(true).withSize(14f).withFont(FontId.of("app", "serif")));
+
+        // A size for everything inside a panel, keeping the rest of each control's style
+        final StackPanel small = ui.stackPanel()
+                .setTextStyle(TextStylePatch.of().size(7f))
+                .add(ui.label("Prices include tax"))
+                .add(ui.checkBox("Remember me"));
+        // --8<-- [end:sizes]
+        return ui.stackPanel().add(heading).add(small);
     }
 
     static Label translated(final ComponentFactory ui, final boolean canAfford) {

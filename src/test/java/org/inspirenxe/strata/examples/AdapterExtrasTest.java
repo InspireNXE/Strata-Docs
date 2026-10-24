@@ -79,9 +79,19 @@ class AdapterExtrasTest {
 
     @Nested
     class MainThreadPlatform extends PlatformContract {
+        private ToyMainThread last;
+
         @Override
         protected org.inspirenxe.strata.spi.Platform platform() {
-            return new ToyMainThread(Thread.currentThread());
+            this.last = new ToyMainThread(Thread.currentThread());
+            return this.last;
+        }
+
+        @Override
+        protected void passTime(final long millis) throws InterruptedException {
+            // The engine's frame on the main thread, which this test thread stands for
+            Thread.sleep(millis);
+            this.last.runTasks();
         }
     }
 

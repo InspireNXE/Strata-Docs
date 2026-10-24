@@ -165,4 +165,6 @@ Tasks go on the game's own task queue, which the client runs between frames, in 
 
 `Strata.screens().open` may be called from any thread and moves to the client thread itself, as the [Screens](../../guides/screens.md) guide describes. The handle it returns works from the moment the screen shows. Vanilla's `setScreen`, which opens a `StrataScreen` subclass, must run on the client thread.
 
+Screens' [repeating tasks](../../guides/screens.md#repeating-tasks) run on the client thread. Where Sponge is present they run on Sponge's client scheduler, as tasks of the `strata` plugin, so they show in Sponge's task list. Without Sponge, on every loader, the Strata screen the game shows runs them from its client tick, twenty times a second, so an interval rounds up to whole ticks of 50 ms and tasks wait while a vanilla screen covers the Strata one. `StrataMinecraft.scheduler()` returns the one in use.
+
 The game draws every frame, so the adapter renders Strata screens every frame and ignores Strata's frame scheduling (`needsFrame`, `nextFrameNanos`, the frame requester and the frame rate), which adapters that draw on demand use. Motion still reads the clock, so it moves every frame the game draws.

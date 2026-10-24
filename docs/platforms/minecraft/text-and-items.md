@@ -13,8 +13,10 @@ Text draws in the hosting screen's font, which follows the player's resource pac
 | Underline, strikethrough | Vanilla's |
 | Shadow | Vanilla's text shadow |
 | Monospace | The normal font. Vanilla's default font has no monospaced form, so `Capabilities.monospaceFont` is false and monospaced text is measured and drawn in the default font. Columns of monospaced text do not line up. |
+| Font | The game's font of the same id, which a resource pack defines in `assets/<namespace>/font/<path>.json`, so `FontId.of("mymod", "runes")` draws with `assets/mymod/font/runes.json`. An id no pack defines draws in the default font, since vanilla would draw it as boxes. |
+| Size | Vanilla's 9-pixel text scaled, so 9 is the default size and 18 is twice as large, drawn under the pose's scale as vanilla scales its own titles |
 
-`MinecraftTextMetrics` measures with the font's `width` and `lineHeight`. Widths are whole GUI pixels and include vanilla's extra pixel for bold, and the line height is the font's, 9 for the default font. Color and shadow do not change widths. The ascent, which panels use to line text up on its baseline with `VerticalAlignment.BASELINE`, is 7: vanilla places every font's glyphs on a baseline 7 below the top of the line (`GlyphProvider.BASELINE`), each glyph by its own ascent, so a resource pack's font keeps the same baseline. Text that just fits on Swing may wrap or overflow in game, so let components measure their text and leave room in fixed widths around it. Text positions round to the nearest GUI pixel.
+`MinecraftTextMetrics` measures with the font's `width` and `lineHeight`. Widths are whole GUI pixels and include vanilla's extra pixel for bold, and the line height is the font's, 9 for the default font. Color and shadow do not change widths. The ascent, which panels use to line text up on its baseline with `VerticalAlignment.BASELINE`, is 7: vanilla places every font's glyphs on a baseline 7 below the top of the line (`GlyphProvider.BASELINE`), each glyph by its own ascent, so a resource pack's font keeps the same baseline. Text that just fits on Swing may wrap or overflow in game, so let components measure their text and leave room in fixed widths around it. Text positions round to the nearest GUI pixel. A size scales widths, the line height and the ascent alike. The fonts a pack defines are looked up once and kept until resources reload, and each reload changes `TextMetrics.version()`, so open screens lay out again with the new packs' fonts.
 
 Minecraft's font draws characters left to right one by one and does not join Arabic letters, so `Capabilities.shapesRightToLeft` is false. Strata's core puts each right-to-left run of a line in display order and mirrors its brackets before drawing, which reads correctly for Hebrew, and Arabic draws with its letters unjoined. Plural forms (`Text.plural`) follow core's rules for the player's language, since vanilla has no plural rules of its own. See [Internationalization](../../guides/internationalization.md).
 
@@ -41,9 +43,10 @@ The control resolves the text against its own style, its base, and each run of v
 | Color | Replaces the base's color and keeps the base's alpha, since vanilla colors have none |
 | Bold, italic, underline, strikethrough | Replace the base's where the vanilla style sets them, true or false; unset ones come from the base |
 | `§` codes | Applied as vanilla applies them when it draws. A color code clears bold, italic, underline and strikethrough. `§r` goes back to the style of the component the code is in, or to the base in a plain string. Unknown codes and a trailing `§` are dropped, and so are the codes themselves. |
-| Shadow and monospace | Always the base's |
+| Font | A font other than vanilla's default becomes the run's `FontId`; the default keeps the base's |
+| Shadow, monospace and size | Always the base's |
 | Obfuscated text | Plain text |
-| Fonts, shadow colors, click and hover events, insertions | Dropped |
+| Shadow colors, click and hover events, insertions | Dropped |
 
 Neighboring runs in the same style merge into one span. A `\n` stays in the text, where a label starts a new line. Broken surrogate pairs become `U+FFFD`, as vanilla draws them.
 

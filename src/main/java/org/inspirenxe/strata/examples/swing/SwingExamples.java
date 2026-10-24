@@ -16,6 +16,7 @@
 package org.inspirenxe.strata.examples.swing;
 
 import org.inspirenxe.strata.api.Strata;
+import org.inspirenxe.strata.api.text.FontId;
 import org.inspirenxe.strata.api.theme.SpriteId;
 import org.inspirenxe.strata.api.theme.Themes;
 import org.inspirenxe.strata.examples.quickstart.SettingsScreen;
@@ -29,9 +30,11 @@ import org.inspirenxe.strata.swing.SwingSprites;
 import org.inspirenxe.strata.swing.SwingTextMetrics;
 
 import java.awt.Font;
+import java.awt.FontFormatException;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -87,6 +90,15 @@ public final class SwingExamples {
         final StrataPanel panel = new StrataPanel(new SwingPlatform(metrics), Themes.flat(), 1.5f);
         // --8<-- [end:font]
         return panel;
+    }
+
+    static void registerFont(final SwingTextMetrics metrics, final InputStream ttf) throws IOException,
+            FontFormatException {
+        // --8<-- [start:register]
+        // A font file read at 1 point: its size does not matter, since styles choose the size
+        final Font serif = Font.createFont(Font.TRUETYPE_FONT, ttf);
+        metrics.register(FontId.of("app", "serif"), serif);
+        // --8<-- [end:register]
     }
 
     static StrataPanel bitmapFont() throws IOException {

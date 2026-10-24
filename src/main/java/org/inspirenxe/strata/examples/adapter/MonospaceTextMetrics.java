@@ -22,25 +22,31 @@ import org.inspirenxe.strata.api.text.TextStyle;
 
 /**
  * Text metrics for an engine with a fixed-width bitmap font: every code point is 6 units wide, one more when bold,
- * and lines are 9 units tall.
+ * and lines are 9 units tall, at the font's size of 9. The engine draws other sizes scaled, so they measure in
+ * proportion. It has one font, so a style's font changes nothing, as the SPI asks of a font the engine lacks.
  */
 public final class MonospaceTextMetrics implements TextMetrics {
 
     @Override
     public float width(final TextSpan span) {
         final int advance = span.style().bold() ? 7 : 6;
-        return span.text().codePointCount(0, span.text().length()) * (float) advance;
+        return span.text().codePointCount(0, span.text().length()) * (float) advance * scale(span.style());
     }
 
     @Override
     public float lineHeight(final TextStyle style) {
-        return 9f;
+        return 9f * scale(style);
     }
 
     @Override
     public float ascent(final TextStyle style) {
         // This font puts its baseline 7 units below the top of a line. Panels line text up by it.
-        return 7f;
+        return 7f * scale(style);
+    }
+
+    /** Size 0 is the font's own size of 9; size 18 draws twice as large. */
+    private static float scale(final TextStyle style) {
+        return style.size() > 0f ? style.size() / 9f : 1f;
     }
 }
 // --8<-- [end:metrics]

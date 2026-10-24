@@ -22,6 +22,7 @@ import org.inspirenxe.strata.spi.Clipboard;
 import org.inspirenxe.strata.spi.Clock;
 import org.inspirenxe.strata.spi.Conventions;
 import org.inspirenxe.strata.spi.Platform;
+import org.inspirenxe.strata.spi.Scheduler;
 import org.inspirenxe.strata.spi.TextInputSink;
 import org.inspirenxe.strata.spi.ThemeSource;
 
@@ -36,7 +37,7 @@ import java.util.function.BooleanSupplier;
  * thread is the UI thread and how to hand work to it.
  */
 public final class ToyMainThread implements Platform {
-    private final Platform toy = new ToyPlatform();
+    private final ToyPlatform toy = new ToyPlatform();
     private final Thread mainThread;
     private final Queue<Runnable> tasks = new ConcurrentLinkedQueue<>();
 
@@ -55,6 +56,8 @@ public final class ToyMainThread implements Platform {
         while ((task = this.tasks.poll()) != null) {
             task.run();
         }
+        // Screens' repeating tasks run on the same beat
+        this.toy.scheduler().runDue();
     }
 
     @Override
@@ -74,6 +77,11 @@ public final class ToyMainThread implements Platform {
     @Override
     public TextMetrics textMetrics() {
         return this.toy.textMetrics();
+    }
+
+    @Override
+    public Scheduler scheduler() {
+        return this.toy.scheduler();
     }
 
     @Override

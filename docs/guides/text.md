@@ -114,6 +114,8 @@ A record of how a span of text looks:
 | `bold`, `italic`, `underline`, `strikethrough` | off |
 | `shadow` | off. A darker copy one unit down and to the right. |
 | `monospace` | off. The engine's monospaced font, where every character has the same width, for code and columns. An engine without one uses its normal font; its platform reports `Capabilities.monospaceFont` false. |
+| `font` | null, the platform's default font. A `FontId`, `namespace:path`, names a font family the platform knows by that id. A named font wins over `monospace`. |
+| `size` | 0, the platform's default size. Otherwise the height of the font's em square in UI units, as a point size is. |
 
 `with` methods return modified copies:
 
@@ -130,6 +132,20 @@ TextStyle accent = themeStyle.merge(heading, TextStyle.Property.COLOR, TextStyle
 
 Merging every property gives the other style, and merging none gives a style equal to this one.
 
+### Fonts and sizes
+
+A style can name a font family and a size. Set them on one label's style, or for everything inside a panel with a `TextStylePatch`, which keeps the rest of each control's style:
+
+```java
+--8<-- "text/TextExamples.java:sizes"
+```
+
+Where a family comes from is the platform's business. On Swing and Vulkan the application registers families under ids; on Minecraft an id names a font that a resource pack defines. A platform that does not know a family draws and measures the text in its default font, at the size the style asks for, so a screen still lays out when a font is missing.
+
+A size scales the font, and the engine draws the glyphs at that size, so they stay sharp. It multiplies with a label's [text scale](controls.md#label), so a scale of 2 on 12-unit text draws 24 units. Use the size for text that is meant to be a certain size, such as a heading, and the scale to grow a whole control.
+
+When fonts change while a screen is open, such as when an application registers a family or the player changes resource packs, the platform's `TextMetrics.version()` changes and every open screen lays out again.
+
 Engines draw what they can:
 
 | Style | Swing |
@@ -139,6 +155,8 @@ Engines draw what they can:
 | Underline, strikethrough | Drawn by the adapter |
 | Shadow | Drawn by the adapter |
 | Monospace | The logical Monospaced font at the base font's size |
+| Font | A family registered under its id, else the base font |
+| Size | The chosen font scaled, drawn by Java2D from its outlines at that size |
 
 Other adapters use the engine's own text styles where it has them.
 

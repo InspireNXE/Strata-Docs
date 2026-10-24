@@ -42,9 +42,19 @@ class AdapterContractTests {
 
     @Nested
     class Platforms extends PlatformContract {
+        private ToyPlatform last;
+
         @Override
         protected Platform platform() {
-            return new ToyPlatform();
+            this.last = new ToyPlatform();
+            return this.last;
+        }
+
+        @Override
+        protected void passTime(final long millis) throws InterruptedException {
+            // The engine's main loop runs the scheduler each frame; a test runs it after waiting
+            Thread.sleep(millis);
+            this.last.scheduler().runDue();
         }
     }
 

@@ -42,7 +42,7 @@ Both return the screen's `ScreenHandle`, and both may be called from any thread;
 
 Called on the UI thread, `open` builds and shows the screen at once. Called from any other thread, such as a network handler, it hands the opening to the UI thread and returns the handle at once. That handle works before the screen exists:
 
-- `invalidate`, `close`, `setTitle` and `open` on it are handed over too, in the order they were called, and reach the screen once it has opened.
+- `invalidate`, `close`, `setTitle`, `every` and `open` on it are handed over too, in the order they were called, and reach the screen once it has opened. A task from `every` starts when the screen opens, and closing its subscription before then keeps it from starting.
 - `close()` or `requestClose()` before the screen has opened cancels the opening, so the screen never builds, and `requestClose()` returns true.
 - After the screen has opened, `requestClose()` from another thread hands the request over and returns false, since the answer is not known yet.
 - `isOpen()` is true while the opening waits.
@@ -78,6 +78,7 @@ Rebuilding is cheap for screens of ordinary size, but it resets focus, hover, te
 | `requestClose()` | Asks the screen's `closeRequested`, and closes the screen if it agrees. Returns whether it closed. |
 | `isOpen()` | True while this handle is the host's current opening |
 | `setTitle(title)` | Replaces the screen's title and returns the handle; see [Title](#title) |
+| `every(millis, task)` | Runs a task every interval while the screen is open; see [Repeating tasks](#repeating-tasks) |
 | `factory()` | The host's factory, the same one `build` receives |
 | `open(screen)`, `open(screen, theme)` | Opens another screen above this one. Closing it shows this one again. |
 
@@ -88,6 +89,20 @@ A handle belongs to one opening. Once that opening ends, because the screen clos
 ```
 
 What closing means depends on the host. A Swing screen stack pops the screen. An adapter that holds each Strata screen in an engine screen usually closes that engine screen, and the engine decides what shows next.
+
+## Repeating tasks
+
+A screen that polls, to refresh figures, check on a download or enable a button after a delay, asks its handle for a repeating task:
+
+```java
+--8<-- "screens/ScreenExamples.java:every"
+```
+
+The platform runs the task on the UI thread, so the task may change components. The first run comes about one interval after the call. The platform decides the timing: Swing uses a timer on the event thread, Vulkan runs due tasks as the view renders unless the application gives its own scheduler, and Minecraft uses Sponge's scheduler or the client tick, so an interval there rounds up to whole ticks of 50 ms. A busy or paused engine may drop runs it missed rather than run them one after another.
+
+The task stops when its `Subscription` closes or the screen closes, whichever comes first, and never runs after that. Closing the subscription twice, or after the screen closed, does nothing. A screen covered by another one it opened is still open, so its tasks keep running. A handle whose opening has ended starts nothing and returns a subscription that is already closed.
+
+For motion, use the [animator](animation.md) instead. An animation steps once for every frame drawn, while a task runs on the engine's own beat, which on Minecraft is slower than the frames.
 
 ## Closing
 

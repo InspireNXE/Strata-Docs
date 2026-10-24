@@ -19,6 +19,7 @@ import org.inspirenxe.strata.api.ComponentFactory;
 import org.inspirenxe.strata.api.Strata;
 import org.inspirenxe.strata.api.component.Component;
 import org.inspirenxe.strata.api.control.button.Button;
+import org.inspirenxe.strata.api.control.display.Label;
 import org.inspirenxe.strata.api.layout.Anchor;
 import org.inspirenxe.strata.api.layout.StackPanel;
 import org.inspirenxe.strata.api.screen.Screen;
@@ -79,6 +80,39 @@ public final class ScreenExamples {
         }
     }
     // --8<-- [end:rebuild]
+
+    // --8<-- [start:every]
+    /**
+     * A status screen that refreshes its figures every second while it is open.
+     */
+    public static final class StatusScreen implements Screen {
+        private Label online;
+
+        @Override
+        public Component<?> build(final ComponentFactory factory) {
+            this.online = factory.label("Checking...");
+            return factory.anchorPanel().add(this.online.setAnchor(Anchor.CENTER)).setAnchor(Anchor.FILL);
+        }
+
+        @Override
+        public void opened(final ScreenHandle handle) {
+            // The platform runs it on the UI thread; it stops when the screen closes
+            handle.every(1000, () -> this.online.setText(Text.of(Server.playersOnline() + " online")));
+        }
+    }
+    // --8<-- [end:every]
+
+    /**
+     * Stands in for the application's own data.
+     */
+    static final class Server {
+        private Server() {
+        }
+
+        static int playersOnline() {
+            return 3;
+        }
+    }
 
     static void open() {
         // --8<-- [start:open]

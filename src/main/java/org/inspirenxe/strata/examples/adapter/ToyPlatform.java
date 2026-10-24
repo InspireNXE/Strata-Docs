@@ -38,6 +38,7 @@ public final class ToyPlatform implements Platform {
     private static final Capabilities CAPABILITIES = new Capabilities(false, false);
 
     private final TextMetrics metrics = new MonospaceTextMetrics();
+    private final ToyScheduler scheduler = new ToyScheduler();
     private final Clipboard clipboard = new Clipboard() {
         private String text;
 
@@ -65,6 +66,12 @@ public final class ToyPlatform implements Platform {
     @Override
     public TextMetrics textMetrics() {
         return this.metrics;
+    }
+
+    @Override
+    public ToyScheduler scheduler() {
+        // The engine's main loop calls runDue every frame
+        return this.scheduler;
     }
 
     @Override
