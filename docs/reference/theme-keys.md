@@ -10,7 +10,7 @@ Every style key the built-in controls read. A theme lacking a required key canno
 | `button.hovered` | `Button.STYLE_HOVERED` | paint | yes | |
 | `button.pressed` | `Button.STYLE_PRESSED` | paint | yes | |
 | `button.disabled` | `Button.STYLE_DISABLED` | paint | yes | |
-| `button.focus` | `Button.STYLE_FOCUS` | paint | no | No focus ring |
+| `button.focus` | `Button.STYLE_FOCUS` | paint | no | No focus ring. Drawn while focus is [shown](../guides/input-focus.md#showing-focus). |
 | `button.default` | `Button.STYLE_DEFAULT` | paint | no | `button.normal` |
 | `button.text` | `Button.STYLE_TEXT` | text style | no | `TextStyle.DEFAULT` |
 | `button.text.disabled` | `Button.STYLE_TEXT_DISABLED` | text style | no | `button.text` |
@@ -203,7 +203,7 @@ The arrow keys style the buttons at the ends of a bar that shows arrows (`setArr
 | `list.edge.outer` | `ListView.STYLE_EDGE_OUTER` | paint | no | Nothing |
 | `list.padding` | `ListView.STYLE_PADDING` | insets | no | None |
 
-The ring is one unit wide, just inside the selected row; `list.row.ring` draws while the list has focus and `list.row.ring.unfocused` while it does not. `list.scroll.rows` is how many rows one wheel notch scrolls. `list.drop` is the two-unit line a list draws at the gap where dragged rows would land. `list.typeahead.timeout` is how long a typed prefix lasts without another key; tables, trees and combo boxes read it too. A list wider than `list.row.width` centers a column of rows that wide and puts its scroll bar `list.bar.gap` units right of it. `list.edge` is a one-unit line just outside the list's top and bottom edges, and `list.edge.outer` another beyond it. `list.padding` puts space above the first row and below the last, which scrolls with the rows; only its top and bottom are read. Row width, padding and edges apply only to lists the factory makes. The lists inside tables, trees, combo boxes, text box suggestions and time pickers keep full-width rows and draw no edges, and read the other list keys.
+The ring is one unit wide, just inside the selected row; `list.row.ring` draws while the list's focus is shown and `list.row.ring.unfocused` at other times. A list with `setRowBackgrounds(false)` draws none of the row paints or rings and leaves the rows' look to its cells, which have the `selected` and `row_hovered` style states; see [The rows' look](../guides/controls.md#the-rows-look). `list.scroll.rows` is how many rows one wheel notch scrolls. `list.drop` is the two-unit line a list draws at the gap where dragged rows would land. `list.typeahead.timeout` is how long a typed prefix lasts without another key; tables, trees and combo boxes read it too. A list wider than `list.row.width` centers a column of rows that wide and puts its scroll bar `list.bar.gap` units right of it. `list.edge` is a one-unit line just outside the list's top and bottom edges, and `list.edge.outer` another beyond it. `list.padding` puts space above the first row and below the last, which scrolls with the rows; only its top and bottom are read. Row width, padding and edges apply only to lists the factory makes. The lists inside tables, trees, combo boxes, text box suggestions and time pickers keep full-width rows and draw no edges, and read the other list keys.
 
 ## ComboBox
 
@@ -550,7 +550,9 @@ A color picker's hex field uses the `TextBox` keys.
 
 ## Image and panels
 
-`Image` and the four plain panels read no keys. Give a panel a background with `setBackground` and a border with `setBorder`, and put an image in a panel to frame it.
+`Image` and the four plain panels read no keys. Give a panel a background with `setBackground` and a border with `setBorder`, and put an image in a panel to frame it. A background can be [frosted glass](../guides/theming.md#frosted-glass), and so can any paint key.
+
+Every component's style lookups also try the states Strata keeps: `key.disabled`, the component's own states, then `key.pressed`, `key.hovered`, `key.focus_visible` and `key.focused`. See [Style states](../guides/extending.md#style-states).
 
 ## Values in the built-in themes
 

@@ -23,11 +23,15 @@ The adapter tells Strata the GUI scale as the density, so `Environment.pixelsPer
 | Shapes (lines, rounded rectangles, ovals, arcs, gradients at an angle, shadows) | Vanilla's GUI renderer draws only rectangles and sprites, so the platform reports `Capabilities.drawsShapes` as false and Strata's core draws each shape from fills, in rows one screen pixel high, without anti-aliasing. Round clips stay rectangular. |
 | Opacity, such as a fading card or toast | The alpha of every fill, gradient, text color, sprite tint and player face is multiplied by it. Item visuals do not fade: the game's item renderer takes no color, so an item stays opaque until its component stops drawing it. |
 | Cursors | `requestCursor` with vanilla's cursor types for the arrow, I-beam, hand, crosshair, the horizontal, vertical and four-way resize arrows and the "not allowed" sign, and SDL's own system cursors, which vanilla does not name, for the diagonal resize arrows, the busy cursor and the arrow with a busy sign. SDL has no grab, grabbing, copy, no-drop or help cursor, so `showsCursor` answers false for them and the host asks for their fallback: the hand for the grab cursors, the "not allowed" sign for no-drop, and the arrow for the rest. |
+| Frosted glass (`Paint.backdrop`) | The tint alone, as a rounded rectangle from core's fills. The platform does not report `Capabilities.blursBackdrop`. |
+| Linear sampling | Not supported: sprites and pixel buffers keep vanilla's nearest sampling. |
 | Pixel buffers (`Image.setPixels`) | A `DynamicTexture` per buffer, drawn with `blit` stretched over the rectangle, sampled nearest so pixel art stays sharp, and tinted. The pixels are copied to the texture again only when the buffer's version moved, after `changed()`. A texture is released once its buffer has gone undrawn for 600 frames or the screen closes. |
 | Item and player face visuals | Vanilla's GUI item rendering, and the face from the player's skin. See [Text and items](text-and-items.md). |
 | Other visuals | A magenta box, `MinecraftCanvas.MISSING_VISUAL_COLOR` (`0xFFFF00FF`) |
 
 A sprite the gui atlas does not have draws vanilla's missing-texture pattern.
+
+An [image](../../guides/controls.md#image) showing a sprite takes the sprite's size until one is set: a nine-sliced or tiled sprite's from its `.png.mcmeta`, so a resource pack with larger textures keeps it, and any other sprite's from its texture, one pixel to a GUI unit. The atlas is read on each layout, so the size follows a resource reload once the screen lays out again. While the game window is in the background, the screen's focus leaves the focused component and comes back with the window.
 
 Layout itself stays in floats, and only drawing snaps. A panel at x = 10.4 with width 20.2 has its edges at 10.4 and 30.6, which move down to 10 and 30, so it covers the 20 pixels from 10 to 29. In Swing the same panel covers its exact fractional span. Design with whole numbers and the two look alike. [Platform differences](../differences.md#units-and-rounding) has more on this.
 

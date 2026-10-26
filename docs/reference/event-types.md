@@ -34,7 +34,7 @@ Every event type in Strata's API, with the interface its handlers receive. Input
 | `FOCUS_ENTER` | `FocusEvent` | no | Each ancestor of the component that gained focus that is not an ancestor of the one that lost it, outermost first | After every `FOCUS_EXIT` and before `FOCUS_GAINED`. `other()` is the component that lost focus. |
 | `MODIFIERS_CHANGED` | `ModifiersEvent` | no | The screen's content and each open overlay's content | The held modifiers changed, by a modifier key or by input arriving with different modifiers |
 
-Both focus events fire on any component, panels included, and only on one with a handler for them. `Component.isFocusWithin()` tells whether the component or a descendant has focus.
+`FocusEvent.reason()` says why focus moved: `POINTER`, `KEYBOARD`, `CODE` or `ACTIVATION`, the same on every event of one move; see [Why focus moved](../guides/input-focus.md#why-focus-moved). Both focus events fire on any component, panels included, and only on one with a handler for them. `Component.isFocusWithin()` tells whether the component or a descendant has focus.
 
 ## Lifecycle
 

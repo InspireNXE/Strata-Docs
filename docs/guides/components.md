@@ -107,6 +107,7 @@ A [window](controls.md#window) raises itself in its parent when it is pressed, s
 | `setVisible(false)` | visible | Not drawn, cannot be hovered or focused, takes no space in layout, and its bounds become empty |
 | `setEnabled(false)` | enabled | Still drawn (built-in controls draw a disabled look) and still takes space, but acts on no pointer or keyboard input and cannot be focused |
 | `setOpacity(f)` | 1 | Drawn faded, from 0 (not drawn) to 1 (opaque). It changes drawing only. |
+| `setHitTestVisible(false)` | hit | Drawn and laid out as before, but the pointer passes through it and everything inside it to what lies below, usually its parent. `componentAt` and drop targets skip it too. |
 
 Hiding or disabling a component also hides or disables everything inside it, and clears focus if the focused component is inside.
 

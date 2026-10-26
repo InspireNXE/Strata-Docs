@@ -229,7 +229,13 @@ When it is true, the defaults throw `UnsupportedOperationException`, so implemen
 
 ### Pixel buffers
 
-`pixels(buffer, rect, tint)` draws a `PixelBuffer`, the pixels an `Image` shows after `setPixels`. Keep one engine copy of each buffer drawn, such as a texture, copy the pixels again only when the buffer's `version()` differs from the one copied, and drop copies of buffers no longer drawn. Draw with nearest sampling so pixel art stays sharp. Core calls it on every canvas; the default draws the placeholder of a visual the canvas did not make.
+`pixels(buffer, rect, tint)` draws a `PixelBuffer`, the pixels an `Image` shows after `setPixels`. Keep one engine copy of each buffer drawn, such as a texture, copy the pixels again only when the buffer's `version()` differs from the one copied, and drop copies of buffers no longer drawn. Draw with nearest sampling so pixel art stays sharp, unless `pushSampling(Sampling.LINEAR)` is in effect. Core calls it on every canvas; the default draws the placeholder of a visual the canvas did not make.
+
+### Sampling and frosted glass
+
+`pushSampling(sampling)` and `popSampling()` say how `sprite`, `spriteRegion`, `nineSlice` and `pixels` sample their images, `NEAREST` outside any push. Core balances them as it does clips. The defaults do nothing, for an engine that samples its own way.
+
+`backdrop(rect, radius, blur, tint)` draws frosted glass: what the engine has behind the rectangle blurred, the tint over it, cut to rounded corners, under the current clip and opacity. Core calls it only when the platform reports `Capabilities.blursBackdrop`, with the radius already limited; otherwise it fills a rounded rectangle with the tint. What is behind is yours to define. Swing and Vulkan blur an image the application gives them, since neither can read back what it drew in the frame; an engine that can read its target may blur that. A canvas with nothing to blur at the time fills the tint.
 
 ### Right-to-left text
 
@@ -248,6 +254,8 @@ Create a host with `StrataCore`:
 | `createScreenHost(platform, theme, closeRequested)` | The same, but you decide what closing means, such as closing the engine screen that holds the host. |
 | `createScreenStack(platform, theme)` | A stack of screens, for engines with no screen system |
 
+Give the host or the stack `setSpriteSizes(sizes)`, a `SpriteSizes` that returns each sprite's size in UI units, the size it is drawn at by default, or empty when the engine does not know it. Images showing a sprite take that size until one is set, and 16 by 16 without it. Give it again after the sprites reload, which lays the screens out again.
+
 `createScreenHost(platform, theme, closeRequested)` and `createScreenStack(platform, theme)` also take a `ThemeRef`. A host given a ref also compares the version of the overrides code adds with `Strata.themes()`, which core keeps for every engine, and resolves the ref again when it changes. `StrataCore.resolveTheme` resolves a ref once, without a host.
 
 ### Input
@@ -260,6 +268,7 @@ Create a host with `StrataCore`:
 | `pointerButton(x, y, button, pressed, modifiers)` | Each button's press and release | A component received the press, or the release ended a press that started on one |
 | `scroll(x, y, scrollX, scrollY, kind, modifiers)` | Wheel and trackpad scrolling, in notches | A component consumed the scroll |
 | `pointerLeft()` | The pointer leaving the host's area | |
+| `activeChanged(active)` | The window or area losing or regaining the keyboard. Focus leaves while inactive and comes back after. | |
 | `key(key, action, modifiers)` | Key presses, repeats and releases | A component consumed the key, or Tab moved focus |
 | `charTyped(codePoint, modifiers)` | Typed characters, never control characters | The focused component consumed it |
 

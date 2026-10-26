@@ -100,6 +100,8 @@ The gallery draws this way: on its progress bar page at 1750 by 1125 pixels, a f
 
 The bridge needs `org.lwjgl:lwjgl-glfw`, which the adapter does not bring.
 
+The bridge also installs a window focus callback: while the window is in the background its screens are inactive, so focus leaves the focused component and comes back with the window. See [When the host is inactive](../guides/input-focus.md#when-the-host-is-inactive).
+
 ## Other windows
 
 With another windowing library, send input to `strata.screens()` yourself and give the view a `VulkanWindow`, which shows cursors and the title:
@@ -116,7 +118,17 @@ The canvas draws every shape call itself, so `VulkanPlatform` reports `Capabilit
 
 Fills, gradients, sprites and pixel buffers snap their edges to the nearest device pixel, as clips do, so pieces that share an edge meet at any scale. Clips are scissor rectangles. Round clips are anti-aliased, and only the innermost one rounds its corners: inside another round clip, the outer one clips to its rectangle. Opacity multiplies into every draw, text and visuals included. Draws keep the order Strata asks for.
 
-A pixel buffer becomes a texture, copied again when its version moves and dropped when no view has drawn it for a while. It is sampled nearest, so pixel art stays sharp.
+A pixel buffer becomes a texture, copied again when its version moves and dropped when no view has drawn it for a while. It is sampled nearest, so pixel art stays sharp, and linearly inside `sampled(Sampling.LINEAR, ...)` or for an image set to `LINEAR`, through a second descriptor set the texture makes the first time.
+
+### Frosted glass
+
+`StrataVulkan.setBackdrop(image)` gives the view a `VulkanImage` of the application's, such as its scene rendered to a texture, stretched over the whole view, and `VulkanPlatform` reports `Capabilities.blursBackdrop`. A [backdrop](../guides/theming.md#frosted-glass) samples the image under its rectangle in the fragment shader, 13 by 13 taps of a Gaussian spread over the blur, cuts it to the rounded corners, fades it with the opacity and fills the tint over it as a rounded rectangle. The view records into the application's pass and never reads what it drew itself, so the glass blurs the image only, not Strata's own panels behind it. The image is sampled as it is when the frame executes, so a scene that moves shows through; frames damage the glass's area every time, as for any application image, and a new image keeps the view from repeating its last frame. Without an image, a backdrop draws its tint. Keep the image in `VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL` while frames that draw it run, and close it only after giving the view another or `null`.
+
+```java
+VulkanImage scene = renderer.image(sceneView, width, height);
+strata.setBackdrop(scene);
+panel.setBackground(Paint.backdrop(8, 0xA0181A1F, 6));
+```
 
 ## Fonts
 
@@ -160,7 +172,7 @@ The adapter does not shape text. Each character draws its own glyph, so there ar
 
 `VulkanSprites` loads images from the class path at `assets/<namespace>/sprites/<path>.png`, as the Swing adapter does, with denser images beside them as `@2x` and `@1.5x` files, chosen where one unit covers that many device pixels. A `SpriteResolver` names another layout, and a `SpriteSource` returns the bytes of an image file from anywhere. Files are decoded with stb_image, which reads PNG, JPEG, BMP, TGA and GIF. Images are read once and cached, a missing one included, until `clear()`, after which the renderer replaces their textures. A missing image draws as solid magenta. `StrataVulkan.setSprites` swaps an open view's images.
 
-Sprites are sampled nearest and tints multiply each channel. A nine-slice's borders are in the plain image's pixels and shrink in proportion when the rectangle is smaller than them. Strata draws sized nine-slices and tiled sprites itself, from parts of the image.
+Sprites are sampled nearest, or linearly when asked as pixel buffers are, and tints multiply each channel. A view gives its screens `VulkanSprites.size`, the plain image's size in pixels, so an [image](../guides/controls.md#image) showing a sprite takes that size until one is set, and gives it again after `clear()`. A nine-slice's borders are in the plain image's pixels and shrink in proportion when the rectangle is smaller than them. Strata draws sized nine-slices and tiled sprites itself, from parts of the image.
 
 `renderer.image(imageView, width, height)` makes a [visual](../guides/appearances.md#visuals-and-icons) of an image the application owns, such as a render target it draws a minimap or a preview into:
 

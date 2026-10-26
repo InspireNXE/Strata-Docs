@@ -243,6 +243,7 @@ The `Painter` a component draws with:
 | `tiled(id, rect, size, tint)` | An image repeated from the top left, one copy per `size` |
 | `visual(visual, rect, tint)` | An engine visual, such as an image the adapter made |
 | `text(span, x, y)` | One line of text, top-left at the point |
+| `text(span, rect, horizontal, vertical)` | One line of text measured and placed in a rectangle: `LEFT`, `CENTER` or `RIGHT` across, and `TOP`, `MIDDLE` or `BOTTOM` down. See [Text in a box](#text-in-a-box). |
 | `clipped(rect, draw)` | Runs `draw` with drawing limited to the rectangle, intersected with any clip in place |
 | `translated(dx, dy, draw)` | Runs `draw` with every coordinate shifted |
 | `scaled(scale, draw)` | Runs `draw` with every coordinate and size multiplied by `scale` |
@@ -268,7 +269,9 @@ A dashboard needs a line chart, a gauge, cards with rounded corners and soft sha
 | `shadow(rect, radius, blur, argb)` | The soft shadow of a rounded rectangle |
 | `clippedRound(rect, radius, draw)` | Runs `draw` limited to a rectangle with rounded corners |
 | `smoothed(smooth, draw)` | Runs `draw` with anti-aliasing on or off |
+| `sampled(sampling, draw)` | Runs `draw` with sprites, nine-slices, tiled sprites and pixel buffers sampled `NEAREST` or `LINEAR` |
 | `pixels(buffer, rect, tint)` | A `PixelBuffer` stretched over the rectangle |
+| `backdrop(rect, radius, blur, tint)` | Frosted glass: what lies behind the rectangle blurred, the tint over it, cut to rounded corners |
 
 Colors are ARGB, and a color with alpha 0 draws nothing. The values these calls take are plain objects you make once and keep in fields, so a frame allocates nothing for them:
 
@@ -314,6 +317,8 @@ The rules for all of them:
 - Angles are radians. Angle 0 is at the right of an oval and angles turn clockwise. A sweep of a full turn or more draws the whole outline.
 - A shadow is the color over the rectangle, fading to nothing over `blur` units outside its edges. A blur of 0 or less gives a hard edge. Draw it before what casts it, at an offset if the light comes from a side.
 - `smoothed(false, ...)` asks for hard edges. Shapes are anti-aliased where the engine can.
+- Sprites and pixel buffers are sampled `NEAREST` outside `sampled(Sampling.LINEAR, ...)`, which keeps pixel art sharp. Text, shapes and an engine's own visuals are not affected, and an engine that cannot choose samples its own way.
+- A backdrop blurs what the engine has behind the rectangle: the backdrop image the application gave its adapter on Swing and Vulkan. A blur reaches about `blur` units, three times the spread of its Gaussian. An engine that cannot blur, one with no backdrop image, and a blur of 0 draw the tint as a rounded rectangle. `Paint.backdrop(blur, tint, radius)` draws the same as a background or a theme key; see [Frosted glass](theming.md#frosted-glass).
 - A round clip limits drawing only. The component's hit area stays its rectangle.
 - A `polyline` array is read during the call and not kept. A count below 0 or larger than the array throws `IllegalArgumentException`, and fewer than two points draw nothing.
 - An engine that draws only rectangles still draws everything here, built from fills one device pixel high. Its shapes look stepped, its round clips are square, and its shadows are a few rings of falling alpha. An engine that cannot draw pixels shows a placeholder for a `PixelBuffer`. [Platform differences](../platforms/differences.md) lists which adapters draw shapes themselves.
@@ -366,12 +371,14 @@ A built-in control looks up a theme key for each of its states, such as `button.
 --8<-- "extending/HookExamples.java:states"
 ```
 
-Strata sets `disabled`, `pressed`, `hovered` and `focused` itself, from the component's own state, so those four names, and an empty one, throw `IllegalArgumentException` when you set them. A component can have up to 60 states of its own. A lookup tries the keys in this order, and the first one the theme has wins:
+Strata sets `disabled`, `pressed`, `hovered`, `focus_visible` and `focused` itself, from the component's own state, so those five names, and an empty one, throw `IllegalArgumentException` when you set them. `focus_visible` is on while the component's focus is [shown](input-focus.md#showing-focus). A component can have up to 59 states of its own. A lookup tries the keys in this order, and the first one the theme has wins:
 
 1. `key.disabled`, when the component or an ancestor is disabled.
 2. `key.<state>` for each of the component's own states that is on, in the order each was first set.
-3. `key.pressed`, `key.hovered` and `key.focused`, for those that are on.
+3. `key.pressed`, `key.hovered`, `key.focus_visible` and `key.focused`, for those that are on.
 4. `key`.
+
+`hasStyleState(state)` says whether one of the component's own states is on, for code that draws part of its look itself. A control that holds your component can set states on it too: a list turns `selected` and `row_hovered` on for its cells, as [The rows' look](controls.md#the-rows-look) shows.
 
 So with `warning` on, `examplemod.card.warning` wins over `examplemod.card`, and a disabled card shows `examplemod.card.disabled`. The fallback is returned when the theme has none of the keys, and when the component was never attached. The result for each combination of states is kept until the theme changes, so a lookup in `paint` allocates nothing after the first one with the same states.
 
@@ -385,6 +392,19 @@ A tile starts a drag that carries its name as text, and a bin takes text:
 
 ```java
 --8<-- "extending/HookExamples.java:drag"
+```
+
+### Text in a box
+
+`painter.text(span, rect, horizontal, vertical)` measures one line with the host's text metrics and puts it in a rectangle. Across, `LEFT` and `STRETCH` put it at the left edge, `CENTER` in the middle and `RIGHT` against the right edge. Down, `TOP`, `STRETCH` and `BASELINE` put the line's top at the top edge, `MIDDLE` centers its line height and `BOTTOM` puts its bottom at the bottom edge. Centering keeps whole numbers whole, so text stays sharp. The alignment does not mirror right to left, and text larger than the rectangle is not cut; draw inside `clipped` for that.
+
+The baseline is the ascent below the line's top: `environment().text().ascent(style)`. A row that draws a caption and underlines it at the baseline:
+
+```java
+painter.text(caption, bounds, HorizontalAlignment.LEFT, VerticalAlignment.MIDDLE);
+final TextMetrics metrics = this.environment().text();
+final float top = bounds.y() + (float) Math.floor((bounds.height() - metrics.lineHeight(style)) / 2);
+painter.fill(new Rect(bounds.x(), top + metrics.ascent(style) + 1, metrics.width(caption), 1), INK);
 ```
 
 ### Lining up text

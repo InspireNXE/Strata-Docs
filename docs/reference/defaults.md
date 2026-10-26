@@ -15,6 +15,8 @@ Every number Strata picks for you. Where a theme [metric](../guides/theming.md#m
 | Alignment | `LEFT`, `TOP`, except windows and message boxes (centered), separators (stretched along their line), info bars (stretched across, at the top), and spacers and navigation views (stretched both ways) |
 | Z index | 0 |
 | Opacity | 1 |
+| Hit testing | on: the pointer can hit the component unless `setHitTestVisible(false)` |
+| Focus shown | when focus came from the keyboard, or from code while the last press was a key's or nothing was pressed yet; a key pressed while focused shows it and a pointer press hides it |
 | Id | none; Strata never checks it |
 | Flow direction | the parent's; the top of a screen follows the translator's language, and overlays follow the screen |
 | Context menu | none; text boxes, text areas and password boxes start with one |
@@ -76,7 +78,8 @@ Every number Strata picks for you. Where a theme [metric](../guides/theming.md#m
 | | Caption too wide | cut at the theme's `button.clip`, else the padding's left and right; scrolls when the theme's `button.text.scroll` is above 0 |
 | | Acts on | the click, or the press when the platform's `Conventions.activateOnPress` is on |
 | | Cursor | `HAND` |
-| | Focus ring | one unit, inside the edge, if the theme has `button.focus` |
+| | Focus ring | one unit, inside the edge, if the theme has `button.focus`, while focus is shown |
+| | Caption alignment | `CENTER`; toggle and drop-down buttons too |
 | | Icon placement | `START`, before the caption |
 | | Default, cancel | no, no |
 | | Mnemonic | the letter after the first single underscore of the caption, with Alt |
@@ -88,8 +91,9 @@ Every number Strata picks for you. Where a theme [metric](../guides/theming.md#m
 | `DropDownButton` | Text padding, icon, minimum size, caption too wide, cursor, focus ring | as `Button` |
 | | Arrow | 7 by 4, 4 after the caption, at the right end of the space inside the padding |
 | | Popup | none |
-| `Image` | Image size and desired size | 16 by 16 |
+| `Image` | Image size and desired size | the pixel buffer's size, one pixel to a unit, or the sprite's size where the engine knows it, or a visual's natural size; 16 by 16 for an unknown sprite or nothing; a size set by hand stays until a visual is set |
 | | Made with `image()` | draws nothing until given a sprite or a visual |
+| | Sampling | `NEAREST` |
 | | Scaling | `STRETCH`; `FIT`, `COVER` and `NONE` are the others |
 | | Tint | `0xFFFFFFFF` |
 | | Pixels | none |
@@ -168,6 +172,7 @@ Every number Strata picks for you. Where a theme [metric](../guides/theming.md#m
 | | Drag transfer | none: rows are not dragged |
 | | Drag scrolling | on |
 | | Cell editor | none |
+| | Row backgrounds | drawn; the cells of selected rows and of the row under the pointer have the `selected` and `row_hovered` style states |
 | | Drop line | 2 units high, in the theme's `list.drop` |
 | `CycleButton` | Label, value label function | empty, the value's appearance name (`String.valueOf` for a value with no appearance) |
 | | Selection | the first item once there are items |

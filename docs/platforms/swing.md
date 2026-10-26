@@ -86,7 +86,15 @@ A denser image draws at the same size in UI units, so the sprite only gets sharp
 
 `SwingCanvas` draws every shape call with Java2D, so `SwingPlatform` reports `Capabilities.drawsShapes` and core never falls back to stepped rows. Lines, rounded rectangles, ovals, arcs, shapes, strokes with caps and joins, gradients at an angle, soft shadows and round clips are drawn by Java2D, anti-aliased unless a push of `smoothing(false)` turns it off. Strokes use pure stroke control, so they land where the contract puts them. A shadow is a rounded rectangle blurred three times with a box blur, and the 64 sizes and colors drawn last are cached. Round clips are hard-edged. Opacity is an `AlphaComposite`, so a fade covers fills, gradients, shapes, sprites, nine-slices, text, visuals and pixel buffers alike.
 
-A pixel buffer is drawn from an image that shares its array, so a new version needs no copy. It scales with nearest-neighbor sampling so pixel art stays sharp, and a tinted copy is made again when the version moves.
+A pixel buffer is drawn from an image that shares its array, so a new version needs no copy, and a tinted copy is made again when the version moves. Sprites, nine-slices, pixel buffers and visuals scale with nearest-neighbor interpolation, so pixel art stays sharp, and with bilinear interpolation inside `sampled(Sampling.LINEAR, ...)` or for an image set to `LINEAR`.
+
+### Frosted glass
+
+`StrataPanel.setBackdrop(image)` gives the panel the picture behind its screens, stretched over the whole panel, and `SwingPlatform` reports `Capabilities.blursBackdrop`. A [backdrop](../guides/theming.md#frosted-glass) blurs the part of the picture under its rectangle with a box blur run three times that repeats the image's edges, cuts it to the rounded corners and fills the tint over it. The blur runs on the event thread, once per image and blur, and the four blurs drawn last are kept. Call `setBackdrop` again with the same image after changing its pixels. A large picture that changes every frame costs a full blur each frame, so keep it small or still. Without a picture, a backdrop draws its tint. `SwingCanvas.setBackdrop(image, width, height)` does the same for code that drives the canvas itself.
+
+### Focus while the panel is in the background
+
+The screens are active while the panel has keyboard focus. When it loses focus, to another component or with its window, focus leaves the focused component, and it comes back when the panel has focus again; see [When the host is inactive](../guides/input-focus.md#when-the-host-is-inactive).
 
 ## Cursors
 
@@ -138,7 +146,7 @@ The adapter registers an [appearance](../guides/appearances.md) for `BufferedIma
 
 ## Sprites
 
-`SwingSprites` loads images from the classpath at `assets/<namespace>/sprites/<path>.png`. Pass a `SpriteResolver` to `SwingSprites`, and that to `StrataPanel` or `SwingSnapshot.render`, to read another layout. For images that are not on the class path at all, such as files in a folder or a zip, give `SwingSprites` a `SpriteSource`, which returns the image for an id. Images are loaded once and cached, including the fact that one is missing, until `SwingSprites.clear()`. Denser images sit beside the plain one as `@2x` and `@1.5x` files; see [Scale and density](#scale-and-density). A missing or unreadable image draws as solid magenta.
+`SwingSprites` loads images from the classpath at `assets/<namespace>/sprites/<path>.png`. Pass a `SpriteResolver` to `SwingSprites`, and that to `StrataPanel` or `SwingSnapshot.render`, to read another layout. For images that are not on the class path at all, such as files in a folder or a zip, give `SwingSprites` a `SpriteSource`, which returns the image for an id. Images are loaded once and cached, including the fact that one is missing, until `SwingSprites.clear()`. The panel and `SwingSnapshot` give their screens `SwingSprites.size`, the plain image's size in pixels, so an [image](../guides/controls.md#image) showing a sprite takes that size until one is set. Denser images sit beside the plain one as `@2x` and `@1.5x` files; see [Scale and density](#scale-and-density). A missing or unreadable image draws as solid magenta.
 
 `StrataPanel.setSprites` swaps an open panel's images. With `screens().setTheme(...)` it changes a panel's look without closing its screens:
 

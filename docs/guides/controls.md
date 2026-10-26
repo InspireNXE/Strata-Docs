@@ -192,16 +192,17 @@ A sprite drawn at a size you choose, such as an icon or a picture.
 | Method | Default | Notes |
 |---|---|---|
 | `setSprite(SpriteId)` | | The sprite, looked up as described in [Sprites](theming.md#sprites) |
-| `setImageSize(w, h)` | 16 by 16 | The size in UI units. It is the desired size and the aspect ratio `FIT` and `COVER` keep. Negative or infinite sizes throw. |
+| `setImageSize(w, h)` | the source's size | The size in UI units. It is the desired size and the aspect ratio `FIT` and `COVER` keep. Once set, it stays when the image shows another sprite or buffer. Negative or infinite sizes throw. |
 | `setScaling(Scaling)` | `STRETCH` | `STRETCH` covers the bounds and `FIT` draws as large as fits with the image size's aspect ratio, centered. `COVER` draws as small as covers the bounds with that aspect ratio, centered and cut to the bounds, as a banner in a square. `NONE` draws at the image size, centered and cut to the bounds. |
 | `setTint(argb)` | `0xFFFFFFFF` | Multiplied with the sprite. Lower alpha fades it. |
+| `setSampling(Sampling)` | `NEAREST` | How a sprite or pixel buffer drawn at another size picks its colors. `NEAREST` keeps pixel art sharp; `LINEAR` scales a photo or a blurred picture smoothly. A visual is drawn the engine's way. |
 | `setVisual(Visual)` | | Shows an engine visual instead of a sprite, and takes its natural size |
-| `setPixels(PixelBuffer)` | | Shows a [pixel buffer](#pixel-buffers) your code fills, at the image size |
+| `setPixels(PixelBuffer)` | | Shows a [pixel buffer](#pixel-buffers) your code fills, at its own size until you set one |
 | `setValue(value)` | none | Shows a value through its [appearance](appearances.md): its icon at the icon's natural size, or nothing, and its tooltip, asked anew each time the pointer arrives. A tooltip set afterwards replaces the value's until the next `setValue`, and a sprite or a visual set afterwards clears the value. |
 
 `factory.image()` makes an empty image, `factory.image(sprite)` and `factory.image(visual)` show one, and `factory.image(value)` shows a value as `setValue` does. An image shows a sprite, a visual, pixels or a value, one at a time: each setter replaces the others, and null shows nothing. `sprite()`, `visual()`, `pixels()` and `value()` return an `Optional`, empty for what the image is not showing.
 
-Strata cannot ask the engine how big an image file is, so set the image size yourself, usually to the size you want it drawn at. A missing sprite draws the engine's placeholder. An image reads no theme keys, is not focusable and has no input behavior, so clicks pass through to its ancestors. A disabled image looks the same as an enabled one; change its tint to show it. It fires no events.
+Until you call `setImageSize`, an image takes its size from what it shows: a pixel buffer's width and height, one pixel to a unit, and a sprite's size where the engine knows it, which it learns once the image is attached to a host. A sprite the engine cannot size, and an empty image, are 16 by 16. A visual brings its natural size whenever it is set, even over a size you set. So `ui.image().setPixels(photo).setScaling(Image.Scaling.FIT)` keeps the photo's shape in any slot without a size from you. Swing and Vulkan size a sprite by its plain image, and Minecraft by its GUI sprite. A missing sprite draws the engine's placeholder. An image reads no theme keys, is not focusable and has no input behavior, so clicks pass through to its ancestors. A disabled image looks the same as an enabled one; change its tint to show it. It fires no events.
 
 ### Engine visuals
 
@@ -216,7 +217,7 @@ A canvas draws a placeholder for a visual it did not make. Each adapter document
 
 ### Pixel buffers
 
-A `PixelBuffer` (in `org.inspirenxe.strata.api.visual`) is a width by height grid of ARGB colors that your code computes, such as a heat map or a minimap, and `Image.setPixels(buffer)` shows it as it would a sprite: at the image size, which the buffer's own size does not change, stretched or fitted by `setScaling`, and tinted. `PixelBuffer.of(width, height)` starts transparent black.
+A `PixelBuffer` (in `org.inspirenxe.strata.api.visual`) is a width by height grid of ARGB colors that your code computes, such as a heat map or a minimap, and `Image.setPixels(buffer)` shows it as it would a sprite: at the buffer's size, one pixel to a unit, unless you set an image size, stretched or fitted by `setScaling`, tinted, and sampled as `setSampling` says. `PixelBuffer.of(width, height)` starts transparent black.
 
 ```java
 --8<-- "controls/FieldExamples.java:pixels"
@@ -342,6 +343,7 @@ Button save = factory.button("Save").onEvent(Button.PRESSED, event -> this.save(
 | `setTextPadding(Insets)`, `setTextPadding(all)`, `setTextPadding(h, v)`, `setTextPadding(l, t, r, b)` | Space between the caption and the edges. By default the theme's `button.padding` (8 left and right, 5 top and bottom without it), `button.padding.icon` (2 on every side) for an icon with no caption, and none for a link. `clearTextPadding()` follows the theme again. |
 | `setIcon(SpriteId)`, `setIcon(Visual)`, `setIconSize(width, height)`, `clearIcon()` | The icon, from `HasIcon`: see [Icons](#icons). `iconSprite()` and `iconVisual()` return an `Optional`. |
 | `setIconPlacement(IconPlacement)` | Where the icon sits against the caption. `START` by default. |
+| `setCaptionAlignment(HorizontalAlignment)` | Where the caption and its icon sit across the button, inside the padding: `LEFT`, `CENTER` (the default) or `RIGHT`. `STRETCH` counts as `LEFT`, and right to left the sides swap. Toggle and drop-down buttons have it too. |
 | `setLink(boolean)` | Makes the button a link. See below. |
 | `setDefault(boolean)`, `setCancel(boolean)` | Makes it the screen's or window's default or cancel button. See [Default and cancel buttons](#default-and-cancel-buttons). |
 | `setCommand(Command.Action)` | Shows a [command](commands.md). See [Commands](#commands-on-buttons). |
@@ -350,16 +352,16 @@ A button presses on a left click, or on a press of Enter, keypad Enter or Space 
 
 Some engines' own buttons act as soon as the pointer button goes down. On a platform whose `Conventions.activateOnPress` is on, a button presses on the left pointer press instead of the click, and so do toggle buttons, cycle buttons, checkboxes, radio buttons, toggle switches and tabs. Keys work the same either way, and so do drop-down buttons, menus and menu bars, which always act on the click. Swing and the default conventions act on the click.
 
-It is focusable and tabbable, shows the hand cursor, and has a minimum width of 20. Its desired size is the caption plus the text padding, and at least 20 tall; a smaller height set on it applies. The caption is centered in whatever size the button ends up. A caption too wide for the button is cut at its padding, or at the theme's `button.clip`, and when the theme's `button.text.scroll` is above 0 it slides from one end to the other and back instead. See [Theme keys](../reference/theme-keys.md#button).
+It is focusable and tabbable, shows the hand cursor, and has a minimum width of 20. Its desired size is the caption plus the text padding, and at least 20 tall; a smaller height set on it applies. The caption is centered in whatever size the button ends up, unless `setCaptionAlignment` puts it at the left or the right, as a full-width menu button might. A caption too wide for the button is cut at its padding, or at the theme's `button.clip`, and when the theme's `button.text.scroll` is above 0 it slides from one end to the other and back instead. See [Theme keys](../reference/theme-keys.md#button).
 
 | Face | When |
 |---|---|
 | `button.normal` | Idle |
-| `button.hovered` | Hovered or focused |
+| `button.hovered` | Hovered, or focused with the focus [shown](input-focus.md#showing-focus) |
 | `button.pressed` | Pressed with the pointer still over it |
 | `button.disabled` | Disabled |
 | `button.default` (optional) | In place of the idle face on a default button. Falls back to `button.normal`. |
-| `button.focus` (optional) | A one-unit ring drawn inside the edge while focused |
+| `button.focus` (optional) | A one-unit ring drawn inside the edge while focus is shown |
 
 | Event | Kind | Fires |
 |---|---|---|
@@ -471,7 +473,7 @@ It reads the `button.*` keys of [`Button`](#button) and adds three faces for the
 | `button.pressed` | Held with the pointer still over it |
 | `button.disabled` | Disabled and off |
 | `button.selected.disabled` (optional) | Disabled and on. Falls back to `button.disabled`. |
-| `button.focus` (optional) | A one-unit ring drawn inside the edge while focused |
+| `button.focus` (optional) | A one-unit ring drawn inside the edge while focus is shown |
 
 | Event | Kind | Fires |
 |---|---|---|
@@ -1047,6 +1049,31 @@ Build each cell fresh from its item, and keep nothing in it that must survive sc
 `factory.listView()` with no cell factory shows each item through its [appearance](appearances.md), with `factory.cell(item)`: the item's icon, if it has one, and its name, in a cell label, with the item's tooltip. `setCellFactory` replaces it and builds the rows in view again.
 
 `ui.cellLabel(text)` makes the label the default cells use: the theme's `list.cell.padding` as its margin, or `ComponentFactory.CELL_PADDING` (4 units) at the sides without it, vertically centered, and cut short with an ellipsis. Its margin follows the theme until you set one. `ui.cellLabel()` makes one with no text, for a cell factory that sets the text later. Use it in your own cell factories so text rows line up with tables and the built-in lists. The `list.background` key paints the list's whole area behind its rows, so an empty list shows its placeholder on it.
+
+### The rows' look
+
+The list draws each row's background from the theme before the cells: `list.row` for a plain row, `list.row.hovered` for the row under the pointer, `list.row.selected` and `list.row.selected.unfocused` for selected rows while the list has focus and while it does not, and `list.row.ring` or `list.row.ring.unfocused` as a one-unit ring inside selected rows, the first while the list's focus is [shown](input-focus.md#showing-focus). [Theme keys](../reference/theme-keys.md#listview) lists every key. All of them can be replaced for one screen through the `ThemeRef` it opens with, and `Paint.NONE` turns any of them off, the required `list.row.selected` included:
+
+```java
+screens.open(menu, ThemeRef.platform()
+        .override(ListView.STYLE_ROW, Paint.NONE)
+        .override(ListView.STYLE_ROW_HOVERED, Paint.solid(0x22FFFFFF))
+        .override(ListView.STYLE_ROW_SELECTED, Paint.solid(0x44FFFFFF)));
+```
+
+A cell can draw the row's look itself. Before the cells are drawn, the list turns the `selected` [style state](extending.md#style-states) on for the cell of each selected row and `row_hovered` for the cell of the row under the pointer, and turns them off on the others. A cell written as a `CustomComponent` then picks theme keys such as `menu.row.selected` with `stylePaint`, or checks `hasStyleState(ListView.STATE_SELECTED)` to draw something of its own, such as an accent bar at the left of the selected row. `setRowBackgrounds(false)` stops one list drawing the row paints and rings, so its cells take the whole look while other lists keep the theme's. The background, the drop line and the scroll bar are drawn either way.
+
+```java
+ListView<String> menu = ui.<String>listView(name -> new MenuRow(ui, name)).setRowBackgrounds(false);
+
+// In MenuRow, a CustomComponent
+protected void paint(Painter painter, Rect bounds) {
+    if (this.hasStyleState(ListView.STATE_SELECTED)) {
+        painter.fill(new Rect(bounds.x(), bounds.y(), 3, bounds.height()), ACCENT);
+    }
+    painter.text(this.caption, bounds, HorizontalAlignment.LEFT, VerticalAlignment.MIDDLE);
+}
+```
 
 ### Type-ahead
 

@@ -119,7 +119,8 @@ Focus moves when:
 
 - a mouse button goes down: focus moves to the pressed component or its nearest focusable ancestor, or is cleared if there is none. This happens just before `POINTER_PRESS` fires, so a click on empty space clears focus. A press on a disabled component leaves focus where it is;
 - Tab or Shift+Tab is pressed or repeats, without Control or Alt, and nothing consumed it;
-- code calls `requestFocus()`, which returns false and changes nothing if the component cannot take focus.
+- code calls `requestFocus()`, which returns false and changes nothing if the component cannot take focus;
+- the host becomes inactive or active again; see [When the host is inactive](#when-the-host-is-inactive).
 
 Focus is cleared when the focused component, or an ancestor, is hidden, disabled or removed. A screen that is rebuilt starts with nothing focused.
 
@@ -142,6 +143,29 @@ Some controls keep focus on a part inside them, their focus delegate. A table an
 
 There is no public method to clear focus from a component. Requesting focus on another component moves it.
 
+### Why focus moved
+
+`FocusEvent.reason()` says why, on `FOCUS_GAINED`, `FOCUS_LOST`, `FOCUS_ENTER` and `FOCUS_EXIT` alike:
+
+| `FocusReason` | When |
+|---|---|
+| `POINTER` | A mouse button, a touch or a pen went down, or code moved focus while one was handled, such as from a `CLICK` handler |
+| `KEYBOARD` | Tab, a mnemonic, a control's arrow keys, a controller's buttons sent as keys, or code moved focus while a key was handled |
+| `CODE` | Code moved focus with no input being handled, such as a screen focusing its first field as it opens |
+| `ACTIVATION` | The host became inactive or active again |
+
+Strata works the reason out from the input being handled when focus moves, through the [cause](events.md#who-caused-it) every input runs in, so a radio group that calls `requestFocus()` on an arrow key reports `KEYBOARD`.
+
+### Showing focus
+
+`isFocusVisible()` is true while a component has focus that should be shown, as a ring or a lit face. Focus is shown when it came from the keyboard, or from code while the last press was a key's and not a pointer's, which includes code before anything was pressed. A key pressed while a component has focus shows it, and a pointer press anywhere in the host hides it, as browsers do for `:focus-visible`. Modifier keys alone change nothing. So a menu item clicked with the mouse keeps focus but does not look focused once the pointer leaves, and Tab shows where focus is.
+
+The built-in controls draw their focus rings, lit faces and keyboard cursors only while focus is shown: buttons, checkboxes, radio buttons, toggle switches, sliders, the color picker, combo boxes, the calendar, the grid, list rings, navigation views, tabs, expanders, split panes and info bars. Text boxes, text areas and pickers show their focused look whenever they have focus, since the caret is there to type at. A theme reaches the state through the `focus_visible` [style state](extending.md#style-states), tried before `focused`, so a component's `menu.item.focus_visible` key wins over `menu.item.focused` while focus is shown.
+
+### When the host is inactive
+
+When the window or area a host sits in stops being the one that gets the keyboard, focus leaves the focused component, which hears `FOCUS_LOST` with `ACTIVATION`. When it becomes active again, focus comes back to that component, if it can still take focus, with `FOCUS_GAINED` and `ACTIVATION`, shown or hidden as it was. Swing reports this when the panel loses and regains keyboard focus, the GLFW bridge when the window loses and regains focus, and Minecraft when the game window does. Another adapter calls `activeChanged(boolean)` on the host or the screen stack.
+
 ## Tab order
 
 Tab moves to the next component in tab order and Shift+Tab to the previous one, wrapping at both ends. With nothing focused, Tab goes to the first and Shift+Tab to the last.
@@ -160,7 +184,7 @@ skipMe.setTabbable(false);   // still focusable by clicking
 
 ## Pointer input
 
-Pointer positions are in UI units in host coordinates. `MouseButton` is `LEFT`, `RIGHT`, `MIDDLE`, `BACK` (button 4), `FORWARD` (button 5) or `UNKNOWN` for a button the adapter could not map. Scroll amounts are in wheel notches, and `ScrollEvent.kind()` says whether they came from a notched wheel (`ScrollKind.WHEEL`, 1 per notch) or a trackpad or smooth wheel (`ScrollKind.PRECISE`, fractions). Clicks, drags, hover and scrolling are covered in [Events](events.md#clicks).
+Pointer positions are in UI units in host coordinates. The pointer targets the deepest component under it. `setHitTestVisible(false)` takes a component and everything inside it out of that search, so the pointer targets what lies below, usually the parent: a label inside a custom button then leaves the hover and the presses to the button. The component is still drawn, takes space and can take focus from the keyboard or code. `MouseButton` is `LEFT`, `RIGHT`, `MIDDLE`, `BACK` (button 4), `FORWARD` (button 5) or `UNKNOWN` for a button the adapter could not map. Scroll amounts are in wheel notches, and `ScrollEvent.kind()` says whether they came from a notched wheel (`ScrollKind.WHEEL`, 1 per notch) or a trackpad or smooth wheel (`ScrollKind.PRECISE`, fractions). Clicks, drags, hover and scrolling are covered in [Events](events.md#clicks).
 
 ### Devices
 

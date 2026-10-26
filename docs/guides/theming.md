@@ -83,6 +83,22 @@ A color with alpha 0 draws nothing, so be careful with `0xRRGGBB` literals: `0xF
 
 The corners are drawn with the painter's shape calls, so on an engine that draws only rectangles they look stepped. See [Lines, shapes and pixels](extending.md#lines-shapes-and-pixels) and [Platform differences](../platforms/differences.md).
 
+### Frosted glass
+
+`Paint.backdrop(blur, tint, radius)` blurs what lies behind the area, puts the tint over it and rounds the corners, so a panel looks like glass over the scene behind the screens. The engine blurs a backdrop image the application gives it, on Swing with `StrataPanel.setBackdrop` and on Vulkan with `StrataVulkan.setBackdrop`. Without one, on an engine that cannot blur such as Minecraft, and with a blur of 0, the panel draws its tint as a rounded rectangle, so choose a tint that reads on its own too. In a theme file a backdrop is an object with a blur in UI units and an optional tint, transparent by default, and radius:
+
+```json
+{
+  "paints": {
+    "examplemod.panel": { "backdrop": 8, "tint": "#A0181A1F", "radius": 6 }
+  }
+}
+```
+
+```java
+panel.setBackground(Paint.backdrop(8, 0xA0181A1F, 6));
+```
+
 ### Sprites
 
 A `SpriteId` names an image as `namespace:path`:
