@@ -124,8 +124,10 @@ A pixel buffer becomes a texture, copied again when its version moves and droppe
 
 `StrataVulkan.setBackdrop(image)` gives the view a `VulkanImage` of the application's, such as its scene rendered to a texture, stretched over the whole view, and `VulkanPlatform` reports `Capabilities.blursBackdrop`. A [backdrop](../guides/theming.md#frosted-glass) samples the image under its rectangle in the fragment shader, 13 by 13 taps of a Gaussian spread over the blur, cuts it to the rounded corners, fades it with the opacity and fills the tint over it as a rounded rectangle. The view records into the application's pass and never reads what it drew itself, so the glass blurs the image only, not Strata's own panels behind it. The image is sampled as it is when the frame executes, so a scene that moves shows through; frames damage the glass's area every time, as for any application image, and a new image keeps the view from repeating its last frame. Without an image, a backdrop draws its tint. Keep the image in `VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL` while frames that draw it run, and close it only after giving the view another or `null`.
 
+The blur reads the image by its [encoding](#sprites-and-images), as a drawn image is read, so the glass is as bright as the scene under it. A scene tone-mapped into an image of the swapchain's `_SRGB` format is `ImageEncoding.LINEAR`; made without an encoding, its glass comes out far darker than its tint explains.
+
 ```java
-VulkanImage scene = renderer.image(sceneView, width, height);
+VulkanImage scene = renderer.image(sceneView, ImageEncoding.forFormat(sceneFormat), width, height);
 strata.setBackdrop(scene);
 panel.setBackground(Paint.backdrop(8, 0xA0181A1F, 6));
 ```
@@ -181,6 +183,8 @@ Sprites are sampled nearest, or linearly when asked as pixel buffers are, and ti
 ```
 
 The visual is live: each frame samples what the image holds when the frame executes. Keep the image in `VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL` whenever a frame that draws it runs. A second form takes a sampler of your own; the default samples linearly. The canvas draws a visual another renderer made as magenta.
+
+Strata needs to know what the shader reads when it samples the image, since it blends in linear light on an sRGB target and in encoded values on any other. A `_UNORM` image holding sRGB bytes gives back encoded values, `ImageEncoding.ENCODED`, which is what the forms of `renderer.image` without an encoding assume. The device decodes a `_SRGB` image as it samples it, so that image gives back linear values, `ImageEncoding.LINEAR`, and so does a floating-point image of linear light. Pass the encoding to `renderer.image(imageView, encoding, width, height)` or to the form that also takes a sampler; `ImageEncoding.forFormat(format)` gives the usual one for a view's format. Taken as encoded, a `_SRGB` image is decoded twice and shows too dark on an sRGB target, and a linear image taken as encoded shows too light on a `_UNORM` target. The textures Strata makes for sprites, pixel buffers and glyphs are `_UNORM` images of sRGB bytes, which Strata always reads as encoded.
 
 `VulkanVisuals.image(pixels)` makes a visual of a `PixelBuffer`, at one unit per pixel or at a size of its own, as `SwingVisuals.image` does for a `BufferedImage`. Any renderer draws it, as a pixel buffer:
 
